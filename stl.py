@@ -3,7 +3,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-04 22:41:42 rsmith>
+# Time-stamp: <2011-04-04 22:44:07 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -97,7 +97,6 @@ class File:
         except:
             return None
         del self.iterf[0:n]
-        self.currfacet += 1
         norm = Normal(self.iterf[1], self.iterf[2], self.iterf[3])
         v1 = Vertex(self.iterf[7], self.iterf[8], self.iterf[9])
         v2 = Vertex(self.iterf[11], self.iterf[12], self.iterf[13])
@@ -108,7 +107,6 @@ class File:
         f = open(filename)
         contents = f.read()
         f.close()
-        self.currfacet = 0
         if contents.find("solid") == -1:
             # Binary format.
             self.readfunc = self._readbinary
@@ -137,7 +135,6 @@ class File:
     def __next__(self):
         facet = self.readfunc()
         if facet == None:
-            self.currfacet = 0
             self.iterf = self.items[:]
             raise StopIteration
         return facet
