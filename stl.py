@@ -3,7 +3,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-04 22:44:07 rsmith>
+# Time-stamp: <2011-04-04 23:49:38 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,9 +28,10 @@
 
 import math
 import struct
+import string
 
 class Vertex:
-    '''Class for a 3D point.'''
+    '''Class for a 3D point in Cartesian space.'''
     err = 1e-7
     def __init__(self, x, y, z):
         self.x = float(x)
@@ -49,11 +50,14 @@ class Vertex:
             return False
 
 class Normal(Vertex):
-    '''Class for a 3D normal vector.'''
+    '''Class for a 3D normal vector in Cartesian space.'''
     def __init__(self, dx, dy, dz):
         dx = float(dx)
+        if math.fabs(dx) < 1e-7: dx = 0.0
         dy = float(dy)
+        if math.fabs(dy) < 1e-7: dy = 0.0
         dz = float(dz)
+        if math.fabs(dz) < 1e-7: dz = 0.0
         l = math.sqrt(dx*dx+dy*dy+dz*dz)
         if l == 0.0:
             raise ValueError
@@ -81,6 +85,7 @@ class Facet:
 class File:
     '''Class for reading STL files.'''
     def _readbinary(self):
+        '''Return the next facet from a binary file.'''
         if len(self.iterf) == 0:
             return None
         nx, ny, nz, f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
@@ -92,6 +97,7 @@ class File:
         v3 = Vertex(f3x,f3y,f3z)
         return Facet(v1, v2, v3, norm)
     def _readtext(self):
+        '''Return the next facet from a text file.'''
         try:
             n = self.iterf.index("facet")+1
         except:
@@ -103,14 +109,17 @@ class File:
         v3 = Vertex(self.iterf[15], self.iterf[16], self.iterf[17])
         del self.iterf[:17]
         return Facet(v1, v2, v3, norm)
-    def __init__(self, filename):
-        f = open(filename)
+    def __init__(self, fname):
+        '''Open the STL file fname.'''
+        f = open(fname)
         contents = f.read()
         f.close()
         if contents.find("solid") == -1:
             # Binary format.
             self.readfunc = self._readbinary
             self.name,self.nf = struct.unpack("=80sI",contents[0:84])
+            # Strip zero bytes and whitespace on both sides.
+            self.name = self.name.strip(string.whitespace+chr(0))
             contents = contents[84:]
             facetsz = len(contents)
             nf = facetsz/50
@@ -132,24 +141,28 @@ class File:
             self.iterf = self.items[:]
     def __len__(self): return self.nf
     def __iter__(self): return self
-    def __next__(self):
+    def next(self):
         facet = self.readfunc()
         if facet == None:
             self.iterf = self.items[:]
             raise StopIteration
         return facet
-    def next(self):
-        return self.__next__()
+    def __str__(self):
+        return "[stl.File; name: '{}', {} facets]".format(self.name, self.nf)
 
 # Built-in test.
 if __name__ == '__main__':
     print "===== begin of binary file ====="
-    binfile = File("test/salamanders.stl")
-    for f in binfile:
+    fname = "test/salamanders.stl"
+    binstl = File(fname)
+    print binstl
+    for f in binstl:
         print f
     print "===== end of binary file ====="
     print "===== begin of text file ====="
-    txtfile = File("test/microSD_connector.stl")
-    for f in txtfile:
+    fname = "test/microSD_connector.stl"
+    txtstl = File(fname)
+    print txtstl
+    for f in txtstl:
         print f
     print "===== end of text file ====="
