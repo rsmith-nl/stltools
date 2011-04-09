@@ -3,7 +3,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-09 13:30:43 rsmith>
+# Time-stamp: <2011-04-09 20:41:42 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -71,13 +71,12 @@ class Facet:
         self.v = [p1, p2, p3]
         self.n = n
     def __str__(self):
-        s = "[facet normal {} {} {}\n".format(self.n.x, self.n.y, self.n.z)
-        s += "   outer loop\n"
+        s = "[facet normal {} {} {}\n   outer loop\n"
+        s = s.format(self.n.x, self.n.y, self.n.z)
         for t in range(3):
             s += "     vertex {} {} {}\n".format(self.v[t].x, self.v[t].y, 
                                                  self.v[t].z)
-        s += "   endloop\n"
-        s += " endfacet]"
+        s += "   endloop\n endfacet]"
         return s
 
 class File:
@@ -142,12 +141,9 @@ class File:
     def extents(self):
         '''Returns the maximum and minimum x, y and z coordinates'''
         f = self.facet[0]
-        xmin = f.v[0].x
-        ymin = f.v[0].y
-        zmin = f.v[0].z
-        xmax = f.v[0].x
-        ymax = f.v[0].y
-        zmax = f.v[0].z
+        xmin = xmax = f.v[0].x
+        ymin = ymax = f.v[0].y
+        zmin = zmax = f.v[0].z
         for k in range(3):
             for f in self.facet:
                 if f.v[k].x < xmin: xmin = f.v[k].x
@@ -156,21 +152,16 @@ class File:
                 elif f.v[k].y > ymax: ymax = f.v[k].y
                 if f.v[k].z < zmin: zmin = f.v[k].z
                 elif f.v[k].z > zmax: zmax = f.v[k].z
-        if -limit < xmin <limit: xmin = 0.0
-        if -limit < xmax <limit: xmax = 0.0
-        if -limit < ymin <limit: ymin = 0.0
-        if -limit < ymax <limit: ymax = 0.0
-        if -limit < zmin <limit: zmin = 0.0
-        if -limit < zmax <limit: zmax = 0.0
-        return (xmin,xmax,ymin,ymax,zmin,zmax)
+        L = [xmin, xmax, ymin, ymax, zmin, zmax]
+        for n in range(len(L)):
+            if math.fabs(L[n]) < limit: L[n] = 0.0
+        return tuple(L)
 
 # Built-in test.
 if __name__ == '__main__':
     print "===== begin of binary file ====="
     fname = "test/salamanders.stl"
     binstl = File(fname)
-#    for n,f in enumerate(binstl):
-#        print n, f
     print binstl
     print "[bin] len(binstl) = {}".format(len(binstl))
     print "[bin] extents = ", binstl.extents()
@@ -181,8 +172,6 @@ if __name__ == '__main__':
     print "===== begin of text file ====="
     fname = "test/microSD_connector.stl"
     txtstl = File(fname)
-#    for n,f in enumerate(txtstl):
-#        print n, f
     print txtstl
     print "len(txtstl) = {}".format(len(txtstl))
     print "[txt] extents = ", txtstl.extents()
