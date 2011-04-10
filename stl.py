@@ -1,9 +1,8 @@
-#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-10 12:00:58 rsmith>
+# Time-stamp: <2011-04-10 18:26:56 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,15 +29,21 @@ import math
 import struct
 import string
 
+# Distances below 'limit' are set to 0.
 limit = 1e-7
 
 class Vertex:
     '''Class for a 3D point in Cartesian space.'''
     def __init__(self, x, y, z):
+        '''Creates a Vertex from the given x,y and z coordinates.'''
         self.x = float(x)
+        if math.fabs(self.x) < limit: self.x = 0.0
         self.y = float(y)
+        if math.fabs(self.y) < limit: self.y = 0.0
         self.z = float(z)
+        if math.fabs(self.z) < limit: self.z = 0.0
     def __add__(self, other):
+        '''Return the sum of 'self' and 'other' as a new vertex.'''
         return Vertex(self.x + other.x, self.y + other.y, self.z + other.z)
     def __str__(self):
         return "({}, {}, {})".format(self.x, self.y, self.z)
@@ -53,6 +58,8 @@ class Vertex:
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
     def set(self, dx, dy, dz):
+        '''Set the normal from normalized values of dx, dy and dz.
+           This will raise a ValueError if the length of the vector is 0.'''
         dx = float(dx)
         if math.fabs(dx) < limit: dx = 0.0
         dy = float(dy)
@@ -61,7 +68,7 @@ class Normal(Vertex):
         if math.fabs(dz) < limit: dz = 0.0
         l = math.sqrt(dx*dx+dy*dy+dz*dz)
         if l == 0.0:
-            raise ValueError
+            raise ValueError("Length of vector is 0!")
         Vertex.__init__(self, dx/l, dy/l, dz/l)
     def __init__(self, dx, dy, dz):
         self.set(dx, dy, dz)
@@ -69,7 +76,7 @@ class Normal(Vertex):
 class Facet:
     '''Class for a 3D triangle.'''
     def __init__(self, p1, p2, p3, n):
-        '''Initialize the Facet from the Vertices and a Normal.'''
+        '''Initialize the Facet from the Vertices p1, p2 and p3 and a Normal n.'''
         self.v = [p1, p2, p3]
         self.n = n
     def __str__(self):
@@ -81,12 +88,17 @@ class Facet:
         s += "   endloop\n endfacet]"
         return s
 
-class File:
-    '''Class for reading STL files.'''
+class Object:
+    '''Class for STL objects.'''
     def __init__(self, fname=None):
-        '''Open the STL file fname.'''
+        '''Read the STL file fname into an STL object. Create an empty STL
+        object if fname is None.'''
         self.facet = []
         self.name=""
+        self.xmin = self.xmax = None
+        self.ymin = self.ymax = None
+        self.zmin = self.zmax = None
+        self.mx = self.my = self.mz = 0.0
         if fname == None:
             return
         f = open(fname)
@@ -97,13 +109,15 @@ class File:
             self.name,nf1 = struct.unpack("=80sI",contents[0:84])
             # Strip zero bytes and whitespace on both sides.
             self.name = self.name.strip(string.whitespace+chr(0))
+            if len(self.name) == 0:
+                self.name = "unknown"
             contents = contents[84:]
             facetsz = len(contents)
             nf2 = facetsz/50
             if nf1 != nf2:
                 ds = "stl.File; from '{}': {} facets, from size {} facets"
                 print ds.format(self.name, nf1, nf2)
-                raise ValueError
+                raise ValueError("Number of facets doesn't match file size.")
             # Chop the string into a list of 50 byte strings.
             items = [contents[n:n+50] for n in range(0,facetsz,50)]
             # Process the items
@@ -115,14 +129,17 @@ class File:
                 v2 = Vertex(f2x,f2y,f2z)
                 v3 = Vertex(f3x,f3y,f3z)
                 f =  Facet(v1, v2, v3, norm)
-                self.facet.append(f)
+                self.addfacet(f)
         else:
             # Text format.
             items = contents.split()
             items = [s.strip() for s in items]
             sn = items.index("solid")+1
             en = items.index("facet")
-            self.name = ' '.join(items[sn:en])
+            if sn == en:
+                self.name = "unknown"
+            else:
+                self.name = ' '.join(items[sn:en])
             nf2 = items.count("endfacet")
             del items[0:en]
             # Items now begins with "facet"
@@ -132,40 +149,45 @@ class File:
                 v2 = Vertex(items[12], items[13], items[14])
                 v3 = Vertex(items[16], items[17], items[18])
                 f =  Facet(v1, v2, v3, norm)
-                self.facet.append(f)
+                self.addfacet(f)
                 del items[:21]
-        if nf2 != len(self.facet):
-            raise ValueError
     def __len__(self): return len(self.facet)
     def __iter__(self):
         for f in self.facet:
             yield f
     def __str__(self):
-        return "[stl.File; name: '{}', {} facets]".format(self.name, 
-                                                          len(self.facet))
+        s = "[stl.Object; name: '{}', {} facets]"
+        return s.format(self.name, len(self.facet))
     def extents(self):
-        '''Returns the maximum and minimum x, y and z coordinates'''
-        if len(self.facet) == 0:
-            return (0, 0, 0, 0, 0, 0)
-        f = self.facet[0]
-        xmin = xmax = f.v[0].x
-        ymin = ymax = f.v[0].y
-        zmin = zmax = f.v[0].z
-        for k in range(3):
-            for f in self.facet:
-                if f.v[k].x < xmin: xmin = f.v[k].x
-                elif f.v[k].x > xmax: xmax = f.v[k].x
-                if f.v[k].y < ymin: ymin = f.v[k].x
-                elif f.v[k].y > ymax: ymax = f.v[k].y
-                if f.v[k].z < zmin: zmin = f.v[k].z
-                elif f.v[k].z > zmax: zmax = f.v[k].z
-        L = [xmin, xmax, ymin, ymax, zmin, zmax]
-        for n in range(len(L)):
-            if math.fabs(L[n]) < limit: L[n] = 0.0
-        return tuple(L)
+        '''Returns the maximum and minimum x, y and z coordinates in the form
+           of a tuple (xmin, xmax, ymin, ymax, zmin, zmax).'''
+        return (self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+    def center(self):
+        '''Returns the midpoint of the extents in a tuple (x,y,z).'''
+        return ((self.xmin+self.xmax)/2, (self.ymin+self.ymax)/2, 
+                (self.zmin+self.zmax)/2)
+    def meanpoint(self):
+        '''Returns the average of all Vertexes of all Facets 
+           in a tuple (x,y,z).'''
+        c = 3*len(self.facet)
+        return (self.mx/c, self.my/c, self.mz/c)
     def addfacet(self, f):
-        if isinstance(f, Facet):
-            self.facet.append(f)
+        '''Add Facet f to the STL object.'''
+        if self.xmin == None:
+            self.xmin = self.xmax = f.v[0].x
+            self.ymin = self.ymax = f.v[0].y
+            self.zmin = self.zmax = f.v[0].z
+        self.mx += f.v[0].x + f.v[1].x + f.v[2].x
+        self.my += f.v[0].y + f.v[1].y + f.v[2].y
+        self.mz += f.v[0].z + f.v[1].z + f.v[2].z
+        for k in range(3):
+            if f.v[k].x < self.xmin: self.xmin = f.v[k].x
+            elif f.v[k].x > self.xmax: self.xmax = f.v[k].x
+            if f.v[k].y < self.ymin: self.ymin = f.v[k].y
+            elif f.v[k].y > self.ymax: self.ymax = f.v[k].y
+            if f.v[k].z < self.zmin: self.zmin = f.v[k].z
+            elif f.v[k].z > self.zmax: self.zmax = f.v[k].z
+        self.facet.append(f)
 
 # Built-in test.
 if __name__ == '__main__':
