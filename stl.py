@@ -3,7 +3,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-09 20:41:42 rsmith>
+# Time-stamp: <2011-04-10 12:00:58 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -52,7 +52,7 @@ class Vertex:
 
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
-    def __init__(self, dx, dy, dz):
+    def set(self, dx, dy, dz):
         dx = float(dx)
         if math.fabs(dx) < limit: dx = 0.0
         dy = float(dy)
@@ -63,6 +63,8 @@ class Normal(Vertex):
         if l == 0.0:
             raise ValueError
         Vertex.__init__(self, dx/l, dy/l, dz/l)
+    def __init__(self, dx, dy, dz):
+        self.set(dx, dy, dz)
 
 class Facet:
     '''Class for a 3D triangle.'''
@@ -81,12 +83,15 @@ class Facet:
 
 class File:
     '''Class for reading STL files.'''
-    def __init__(self, fname):
+    def __init__(self, fname=None):
         '''Open the STL file fname.'''
+        self.facet = []
+        self.name=""
+        if fname == None:
+            return
         f = open(fname)
         contents = f.read()
         f.close()
-        self.facet = []
         if contents.find("solid") == -1:
             # Binary format.
             self.name,nf1 = struct.unpack("=80sI",contents[0:84])
@@ -140,6 +145,8 @@ class File:
                                                           len(self.facet))
     def extents(self):
         '''Returns the maximum and minimum x, y and z coordinates'''
+        if len(self.facet) == 0:
+            return (0, 0, 0, 0, 0, 0)
         f = self.facet[0]
         xmin = xmax = f.v[0].x
         ymin = ymax = f.v[0].y
@@ -156,6 +163,9 @@ class File:
         for n in range(len(L)):
             if math.fabs(L[n]) < limit: L[n] = 0.0
         return tuple(L)
+    def addfacet(self, f):
+        if isinstance(f, Facet):
+            self.facet.append(f)
 
 # Built-in test.
 if __name__ == '__main__':
