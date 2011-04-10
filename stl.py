@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-10 18:26:56 rsmith>
+# Time-stamp: <2011-04-10 18:34:22 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -193,7 +193,7 @@ class Object:
 if __name__ == '__main__':
     print "===== begin of binary file ====="
     fname = "test/salamanders.stl"
-    binstl = File(fname)
+    binstl = Object(fname)
     print binstl
     print "[bin] len(binstl) = {}".format(len(binstl))
     print "[bin] extents = ", binstl.extents()
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     print "===== end of binary file ====="
     print "===== begin of text file ====="
     fname = "test/microSD_connector.stl"
-    txtstl = File(fname)
+    txtstl = Object(fname)
     print txtstl
     print "len(txtstl) = {}".format(len(txtstl))
     print "[txt] extents = ", txtstl.extents()
