@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-11 01:30:07 rsmith>
+# Time-stamp: <2011-04-11 02:31:28 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -39,22 +39,25 @@ def usage():
     print "Usage: stl2ps infile [outfile]"
 
 class Zpar:
-    '''Class for parallel projection along the Z-axis. 
-       Screen coordinates from left top.'''
+    '''Class for parallel projection along the Z-axis. Output
+       screen coordinates from left top, size 100×100 mm.'''
     def __init__(self, xmin, xmax, ymin, ymax):
         '''Initialize the projection for an object in the rectangle, 
-           xmin, xmax, ymin, ymax, to a target window of 100x100 mm.'''
+           xmin, xmax, ymin, ymax, to the target window.'''
         # 100 mm is 100/25.4*72 = 283.46457 PostScript points
         self.s = min(283.46457/(xmax-xmin), 283.46457/(ymax-ymin))
+        self.xmin = xmin
+        self.ymin = ymin
+        self.ymax = ymax
         self.w = math.ceil(self.s*(xmax-xmin))
         self.h = math.ceil(self.s*(ymax-ymin))
+        self.horg = ymax-ymin
         self.xo = self.w/2
         self.yo = self.h/2 
-        # FIXME!
     def xformv(self, v):
         '''Transforms a Vector. Returns an (x,y) tuple'''
-        x = self.s*v.x+self.xo
-        y = self.yo-self.s*v.y
+        x = (v.x-self.xmin)*self.s
+        y = (self.horg-(v.y-self.ymin))*self.s
         return (x,y)
     def visible(self, n):
         '''Checks a Normal Vector to see if it points toward or away from the
