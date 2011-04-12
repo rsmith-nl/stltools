@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-10 18:34:22 rsmith>
+# Time-stamp: <2011-04-13 00:11:27 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,6 +28,7 @@
 import math
 import struct
 import string
+import xform
 
 # Distances below 'limit' are set to 0.
 limit = 1e-7
@@ -54,6 +55,9 @@ class Vertex:
             return True
         else:
             return False
+    def xform(self, tr):
+        '''Apply the transformation tr to the vertex.'''
+        (self.x,self.y,self.z) = tr.apply(self.x, self.y, self.z)
 
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
@@ -79,6 +83,13 @@ class Facet:
         '''Initialize the Facet from the Vertices p1, p2 and p3 and a Normal n.'''
         self.v = [p1, p2, p3]
         self.n = n
+    def xform(self, tr):
+        '''Apply the transformation tr to the facet.'''
+        self.v[0].xform(tr)
+        self.v[1].xform(tr)
+        self.v[2].xform(tr)
+        self.n.xform(tr)
+        pass
     def __str__(self):
         s = "[facet normal {} {} {}\n   outer loop\n"
         s = s.format(self.n.x, self.n.y, self.n.z)
@@ -171,8 +182,8 @@ class Object:
            in a tuple (x,y,z).'''
         c = 3*len(self.facet)
         return (self.mx/c, self.my/c, self.mz/c)
-    def addfacet(self, f):
-        '''Add Facet f to the STL object.'''
+    def _updateextents(self, f):
+        '''Update the extents for Facet f.'''
         if self.xmin == None:
             self.xmin = self.xmax = f.v[0].x
             self.ymin = self.ymax = f.v[0].y
@@ -187,7 +198,15 @@ class Object:
             elif f.v[k].y > self.ymax: self.ymax = f.v[k].y
             if f.v[k].z < self.zmin: self.zmin = f.v[k].z
             elif f.v[k].z > self.zmax: self.zmax = f.v[k].z
+    def addfacet(self, f):
+        '''Add Facet f to the STL object.'''
         self.facet.append(f)
+        self._updateextents(f)
+    def xform(self, tr):
+        self.xmin = None
+        for n in range(len(self.facet)):
+            self.facet[n].xform(tr)
+            self._updateextents(self.facet[n])
 
 # Built-in test.
 if __name__ == '__main__':
