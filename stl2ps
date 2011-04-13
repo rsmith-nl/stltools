@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-13 00:09:45 rsmith>
+# Time-stamp: <2011-04-13 20:59:20 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -47,16 +47,13 @@ if len(sys.argv) == 1:
     usage()
     sys.exit(0)
 infile = sys.argv[1]
-print "[debug]: {} args left:".format(len(sys.argv)), sys.argv
 if len(sys.argv) < 3 or sys.argv[2] in validargs:
     print "[debug]: Using standard output."
     outfile = None
     del sys.argv[:2]
 else:
     outfile = sys.argv[2]
-    print "[debug]: Output to '{}'.".format(outfile)
     del sys.argv[:3]
-print "[debug]: {} args left:".format(len(sys.argv)), sys.argv
 tr = xform.Xform()
 while len(sys.argv) > 1:
     if not sys.argv[0] in validargs:
@@ -66,13 +63,10 @@ while len(sys.argv) > 1:
     try:
         ang = float(sys.argv[1])
         if sys.argv[0] in ['x','X']:
-            print "[debug]: applying {}° X rotation.".format(ang)
             tr.rotx(ang)
         elif sys.argv[0] in ['y','Y']:
-            print "[debug]: applying {}° Y rotation.".format(ang)
             tr.roty(ang)
         else:
-            print "[debug]: applying {}° Z rotation.".format(ang)
             tr.rotz(ang)
         del sys.argv[:2]
     except:
