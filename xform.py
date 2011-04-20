@@ -2,7 +2,7 @@
 # Classes for handling coordinate transforms and projections.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-13 00:07:41 rsmith>
+# Time-stamp: <2011-04-21 00:29:23 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,9 +27,11 @@
 
 import math
 
+
 class Zpar:
     '''Class for parallel projection along the Z-axis. Output
        screen coordinates from left top, size 100×100 mm.'''
+
     def __init__(self, xmin, xmax, ymin, ymax):
         '''Initialize the projection for an object in the rectangle, 
            xmin, xmax, ymin, ymax, to the target window.'''
@@ -43,21 +45,26 @@ class Zpar:
         self.horg = ymax-ymin
         self.xo = self.w/2
         self.yo = self.h/2 
+
     def project(self, x, y, z):
         '''Transforms a Vector. Returns an (x,y) tuple'''
         rx = (x-self.xmin)*self.s
         ry = (self.horg-(y-self.ymin))*self.s
         return (rx,ry)
+
     def visible(self, x, y, z):
         '''Checks a Normal Vector to see if it points toward or away from the
            viewer. Returns True in the first case.'''
         if (z > 0.0): return True
         return False
 
+
 _limit = 1e-7
+
 
 def _unity():
     return [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
 
 def _mmul(m1, m2):
     r = _unity()
@@ -67,12 +74,15 @@ def _mmul(m1, m2):
             if math.fabs(r[i][j]) < _limit: r[i][j] = 0.0
     return r
 
+
 class Xform:
     '''Class for coordinate transformations in the form of rotations around
        the axis.'''
+
     def __init__(self):
         '''Initialize the transformation to the unity transform.'''
         self.reset()
+
     def __eq__(self, other):
         '''Check if two transformations are equal'''
         for i in range(3):
@@ -80,10 +90,12 @@ class Xform:
                 if math.fabs(self.m[i][j] - other.m[i][j]) > _limit:
                     return False
         return True
+
     def reset(self):
         '''Reverts to the unity transformation.'''
         self.m = _unity()
         self.unity = True
+
     def rotx(self, deg):
         '''Adds a rotation around the x-axis to the transformation.'''
         self.unity = False
@@ -94,6 +106,7 @@ class Xform:
                [0.0,   c,  -s],
                [0.0,   s,   c]]
         self.m = _mmul(self.m, add)
+
     def roty(self, deg):
         '''Adds a rotation around the y-axis to the transformation.'''
         self.unity = False
@@ -104,6 +117,7 @@ class Xform:
                [0.0, 1.0, 0.0],
                [ -s, 0.0,   c]]
         self.m = _mmul(self.m, add)
+
     def rotz(self, deg):
         '''Adds a rotation around the z-axis to the transformation.'''
         self.unity = False
@@ -114,6 +128,7 @@ class Xform:
                [  s,   c, 0.0],
                [0.0, 0.0, 1.0]]
         self.m = _mmul(self.m, add)
+
     def apply(self, x, y, z):
         '''Apply the transformation to point x,y,z and return the transformed
            coordinates as a tuple.'''
@@ -121,6 +136,7 @@ class Xform:
         yr = self.m[1][0]*x + self.m[1][1]*y + self.m[1][2]*z
         zr = self.m[2][0]*x + self.m[2][1]*y + self.m[2][2]*z
         return (xr, yr, zr)
+
 
 # Built-in tests.
 if __name__ == '__main__':

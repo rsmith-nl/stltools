@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-13 20:59:20 rsmith>
+# Time-stamp: <2011-04-21 00:34:07 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,15 +30,19 @@ import sys
 import string
 import time
 import math
+
 import stl
 import xform
 
-ver = "stl2ps 1 beta1"
+_name = "stl2ps"
+_ver = "$Id:$"[5:-2]
+
 
 def usage():
     print ver
     print "Usage: stl2ps infile [outfile] [transform [transform ...]]"
     print "where [transform] is [x number|y number|z number]"
+
 
 ## This is the main program ##
 # Process the command-line arguments
@@ -48,7 +52,6 @@ if len(sys.argv) == 1:
     sys.exit(0)
 infile = sys.argv[1]
 if len(sys.argv) < 3 or sys.argv[2] in validargs:
-    print "[debug]: Using standard output."
     outfile = None
     del sys.argv[:2]
 else:
@@ -106,10 +109,7 @@ outs += "% {} ≤ z ≤ {}\n".format(zmin,zmax)
 s = "% 3D center (midpoint of extents, STL units):\n% <{0}, {1}, {2}>\n"
 outs += s.format(x, y, z)
 # Calculate the visible facets
-vizfacets = []
-for f in stlobj.facet:
-    if pr.visible(f.n.x, f.n.y, f.n.z) == True:
-        vizfacets.append(f)
+vizfacets = [f for f in stlobj.facet if pr.visible(f.n.x, f.n.y, f.n.z) == True]
 outs += "% {} of {} facets are visible.\n".format(len(vizfacets),len(stlobj))
 # Next, depth-sort the facets using average depth of the three vertices.
 vizfacets.sort(None,lambda f: math.fsum([f.v[0].z,f.v[1].z,f.v[2].z])/3)

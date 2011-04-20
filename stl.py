@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-13 00:11:27 rsmith>
+# Time-stamp: <2011-04-21 00:28:40 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,13 +28,16 @@
 import math
 import struct
 import string
+
 import xform
 
 # Distances below 'limit' are set to 0.
 limit = 1e-7
 
+
 class Vertex:
     '''Class for a 3D point in Cartesian space.'''
+
     def __init__(self, x, y, z):
         '''Creates a Vertex from the given x,y and z coordinates.'''
         self.x = float(x)
@@ -43,11 +46,14 @@ class Vertex:
         if math.fabs(self.y) < limit: self.y = 0.0
         self.z = float(z)
         if math.fabs(self.z) < limit: self.z = 0.0
+
     def __add__(self, other):
         '''Return the sum of 'self' and 'other' as a new vertex.'''
         return Vertex(self.x + other.x, self.y + other.y, self.z + other.z)
+
     def __str__(self):
         return "({}, {}, {})".format(self.x, self.y, self.z)
+
     def __eq__(self, other):
         if (math.fabs(self.x - other.x) < limit and 
             math.fabs(self.y - other.y) < limit and 
@@ -55,12 +61,15 @@ class Vertex:
             return True
         else:
             return False
+
     def xform(self, tr):
         '''Apply the transformation tr to the vertex.'''
         (self.x,self.y,self.z) = tr.apply(self.x, self.y, self.z)
 
+
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
+
     def set(self, dx, dy, dz):
         '''Set the normal from normalized values of dx, dy and dz.
            This will raise a ValueError if the length of the vector is 0.'''
@@ -74,15 +83,19 @@ class Normal(Vertex):
         if l == 0.0:
             raise ValueError("Length of vector is 0!")
         Vertex.__init__(self, dx/l, dy/l, dz/l)
+
     def __init__(self, dx, dy, dz):
         self.set(dx, dy, dz)
 
+
 class Facet:
     '''Class for a 3D triangle.'''
+
     def __init__(self, p1, p2, p3, n):
         '''Initialize the Facet from the Vertices p1, p2 and p3 and a Normal n.'''
         self.v = [p1, p2, p3]
         self.n = n
+
     def xform(self, tr):
         '''Apply the transformation tr to the facet.'''
         self.v[0].xform(tr)
@@ -90,6 +103,7 @@ class Facet:
         self.v[2].xform(tr)
         self.n.xform(tr)
         pass
+
     def __str__(self):
         s = "[facet normal {} {} {}\n   outer loop\n"
         s = s.format(self.n.x, self.n.y, self.n.z)
@@ -99,8 +113,10 @@ class Facet:
         s += "   endloop\n endfacet]"
         return s
 
+
 class Object:
     '''Class for STL objects.'''
+
     def __init__(self, fname=None):
         '''Read the STL file fname into an STL object. Create an empty STL
         object if fname is None.'''
@@ -162,26 +178,34 @@ class Object:
                 f =  Facet(v1, v2, v3, norm)
                 self.addfacet(f)
                 del items[:21]
-    def __len__(self): return len(self.facet)
+
+    def __len__(self): 
+        return len(self.facet)
+
     def __iter__(self):
         for f in self.facet:
             yield f
+
     def __str__(self):
         s = "[stl.Object; name: '{}', {} facets]"
         return s.format(self.name, len(self.facet))
+
     def extents(self):
         '''Returns the maximum and minimum x, y and z coordinates in the form
            of a tuple (xmin, xmax, ymin, ymax, zmin, zmax).'''
         return (self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+
     def center(self):
         '''Returns the midpoint of the extents in a tuple (x,y,z).'''
         return ((self.xmin+self.xmax)/2, (self.ymin+self.ymax)/2, 
                 (self.zmin+self.zmax)/2)
+
     def meanpoint(self):
         '''Returns the average of all Vertexes of all Facets 
            in a tuple (x,y,z).'''
         c = 3*len(self.facet)
         return (self.mx/c, self.my/c, self.mz/c)
+
     def _updateextents(self, f):
         '''Update the extents for Facet f.'''
         if self.xmin == None:
@@ -198,15 +222,18 @@ class Object:
             elif f.v[k].y > self.ymax: self.ymax = f.v[k].y
             if f.v[k].z < self.zmin: self.zmin = f.v[k].z
             elif f.v[k].z > self.zmax: self.zmax = f.v[k].z
+
     def addfacet(self, f):
         '''Add Facet f to the STL object.'''
         self.facet.append(f)
         self._updateextents(f)
+
     def xform(self, tr):
         self.xmin = None
         for n in range(len(self.facet)):
             self.facet[n].xform(tr)
             self._updateextents(self.facet[n])
+
 
 # Built-in test.
 if __name__ == '__main__':
