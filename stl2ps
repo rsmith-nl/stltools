@@ -35,7 +35,7 @@ import stl
 import xform
 
 _name = "stl2ps"
-_ver = "$Id: $"[5:-2]
+_ver = "$Id$"[5:-2]
 
 
 def usage():
