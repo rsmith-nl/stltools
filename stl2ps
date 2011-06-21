@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-21 00:55:15 rsmith>
+# Time-stamp: <2011-06-21 21:43:52 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -34,7 +34,7 @@ import math
 import stl
 import xform
 
-name = "stl2ps 1 beta1"
+name = "stl2ps 1 beta2"
 
 
 def usage():
@@ -78,7 +78,7 @@ while len(sys.argv) > 1:
 try:
     stlobj = stl.Object(infile)
 except:
-    print "Error: cannot process input file '{}'.".format(sys.argv[1])
+    print "Error: cannot process input file '{}'.".format(infile)
     print sys.exc_info()[0]
     usage()
     sys.exit(1)

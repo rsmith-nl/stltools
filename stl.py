@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-21 00:28:40 rsmith>
+# Time-stamp: <2011-06-21 21:45:47 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -51,6 +51,10 @@ class Vertex:
         '''Return the sum of 'self' and 'other' as a new vertex.'''
         return Vertex(self.x + other.x, self.y + other.y, self.z + other.z)
 
+    def __sub__(self, other):
+        '''Return the difference of 'self' and 'other' as a new vertex.'''
+        return Vertex(self.x - other.x, self.y - other.y, self.z - other.z)
+
     def __str__(self):
         return "({}, {}, {})".format(self.x, self.y, self.z)
 
@@ -66,6 +70,10 @@ class Vertex:
         '''Apply the transformation tr to the vertex.'''
         (self.x,self.y,self.z) = tr.apply(self.x, self.y, self.z)
 
+    def cross(self, b):
+        return Vertex(self.y*b.z-self.z*b.y, 
+                      self.z*b.x-self.x*b.z, 
+                      self.x*b.y-self.y*b.x)
 
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
@@ -94,6 +102,11 @@ class Facet:
     def __init__(self, p1, p2, p3, n):
         '''Initialize the Facet from the Vertices p1, p2 and p3 and a Normal n.'''
         self.v = [p1, p2, p3]
+        if n == None:
+            d1 = p2 - p1
+            d2 = p3 - p2
+            n = d1.cross(d2)
+            n = Normal(n.x,n.y,n.z)
         self.n = n
 
     def xform(self, tr):
@@ -142,7 +155,7 @@ class Object:
             facetsz = len(contents)
             nf2 = facetsz/50
             if nf1 != nf2:
-                ds = "stl.File; from '{}': {} facets, from size {} facets"
+                ds = "stl.Object; from '{}': {} facets, from size {} facets"
                 print ds.format(self.name, nf1, nf2)
                 raise ValueError("Number of facets doesn't match file size.")
             # Chop the string into a list of 50 byte strings.
@@ -151,10 +164,13 @@ class Object:
             for i in items:
                 nx, ny, nz, f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
                     struct.unpack("=ffffffffffffxx", i)
-                norm = Normal(nx, ny, nz)
                 v1 = Vertex(f1x,f1y,f1z)
                 v2 = Vertex(f2x,f2y,f2z)
                 v3 = Vertex(f3x,f3y,f3z)
+                try:
+                    norm = Normal(nx, ny, nz)
+                except ValueError:
+                    norm = None
                 f =  Facet(v1, v2, v3, norm)
                 self.addfacet(f)
         else:
@@ -171,10 +187,13 @@ class Object:
             del items[0:en]
             # Items now begins with "facet"
             while items[0] == "facet":
-                norm = Normal(items[2], items[3], items[4])
                 v1 = Vertex(items[8], items[9], items[10])
                 v2 = Vertex(items[12], items[13], items[14])
                 v3 = Vertex(items[16], items[17], items[18])
+                try:
+                    norm = Normal(items[2], items[3], items[4])
+                except ValueError:
+                    norm = None
                 f =  Facet(v1, v2, v3, norm)
                 self.addfacet(f)
                 del items[:21]
