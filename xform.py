@@ -2,7 +2,7 @@
 # Classes for handling coordinate transforms and projections.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-21 00:29:23 rsmith>
+# Time-stamp: <2011-09-03 15:23:19 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -105,7 +105,7 @@ class Xform:
         add = [[1.0, 0.0, 0.0],
                [0.0,   c,  -s],
                [0.0,   s,   c]]
-        self.m = _mmul(self.m, add)
+        self.m = _mmul(add, self.m)
 
     def roty(self, deg):
         '''Adds a rotation around the y-axis to the transformation.'''
@@ -116,7 +116,7 @@ class Xform:
         add = [[  c, 0.0,   s],
                [0.0, 1.0, 0.0],
                [ -s, 0.0,   c]]
-        self.m = _mmul(self.m, add)
+        self.m = _mmul(add, self.m)
 
     def rotz(self, deg):
         '''Adds a rotation around the z-axis to the transformation.'''
@@ -127,7 +127,7 @@ class Xform:
         add = [[  c,  -s, 0.0],
                [  s,   c, 0.0],
                [0.0, 0.0, 1.0]]
-        self.m = _mmul(self.m, add)
+        self.m = _mmul(add, self.m)
 
     def apply(self, x, y, z):
         '''Apply the transformation to point x,y,z and return the transformed

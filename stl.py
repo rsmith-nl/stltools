@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-06-21 21:45:47 rsmith>
+# Time-stamp: <2011-09-03 15:19:36 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -59,6 +59,8 @@ class Vertex:
         return "({}, {}, {})".format(self.x, self.y, self.z)
 
     def __eq__(self, other):
+        if other == None:
+            return False
         if (math.fabs(self.x - other.x) < limit and 
             math.fabs(self.y - other.y) < limit and 
             math.fabs(self.z - other.z) < limit):

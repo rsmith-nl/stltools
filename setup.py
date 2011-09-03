@@ -2,7 +2,7 @@
 # Installation script for stl2pov and friends
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Time-stamp: <2011-04-21 01:06:52 rsmith>
+# Time-stamp: <2011-09-03 15:26:22 rsmith>
 
 from distutils.core import setup
 
@@ -11,7 +11,7 @@ with open('README.txt') as file:
 
 
 setup(name='py-stl',
-      version='1.0',
+      version='1.1',
       license='BSD',
       description='Programs to read and convert STL files.',
       author='Roland Smith', author_email='rsmith@xs4all.nl',
