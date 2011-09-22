@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-09-03 15:26:56 rsmith>
+# Time-stamp: <2011-09-22 22:50:43 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -34,8 +34,7 @@ import math
 import stl
 import xform
 
-name = "stl2ps 1.1"
-
+name = "stl2ps [rev. VERSION] (DATE)"
 
 def usage():
     print name

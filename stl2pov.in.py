@@ -3,7 +3,7 @@
 # Program for converting an STL file into a POV-ray mesh
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-04-21 00:29:48 rsmith>
+# Time-stamp: <2011-09-22 22:51:08 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,8 +33,7 @@ import time
 import stl
 
 
-ver = "stl2pov 3 beta1"
-
+ver = "stl2pov [rev. VERSION] (DATE)"
 
 def usage():
     print ver

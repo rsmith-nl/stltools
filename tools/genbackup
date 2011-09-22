@@ -1,0 +1,7 @@
+# Shell script to generate a full backup.
+# -*- shell-script -*-
+NAME=py-stl
+NUM=$(git log -n 1 --oneline |cut -c 1-7)
+DF=py-stl-$NUM.tar.gz
+cd .. ; tar czf /tmp/$DF $NAME/
+mv /tmp/$DF $NAME/

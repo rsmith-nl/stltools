@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Updates the files lpver.py, lamprop.1.* and lamprop.5.* after a commit is
+# made.
+#
+# To enable this hook, copy this file to ".git/hooks/post-commit".
+
+VER=$(git --no-pager log -1 HEAD --pretty=format:"s|VERSION|%h|")
+DATE=$(git --no-pager log -1 HEAD --pretty=format:"s|DATE|%ci|"|sed -e 's/ .*/|/')
+sed -e $VER -e $DATE setup.in.py > setup.py
+sed -e $VER -e $DATE stl2pov.in.py > stl2pov
+sed -e $VER -e $DATE stl2ps.in.py > stl2ps
+chmod 755 stl2pov stl2ps

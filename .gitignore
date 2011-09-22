@@ -2,4 +2,7 @@
 *~
 build
 dist
+setup.py
+stl2pov
+stl2ps
 
