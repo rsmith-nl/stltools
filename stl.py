@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-09-23 00:01:18 rsmith>
+# Time-stamp: <2011-09-24 22:19:19 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -112,7 +112,7 @@ class Facet:
         self.n = n
 
     def xform(self, tr):
-        '''Apply the transformation tr to the facet.'''
+        '''Apply the Xform tr to the facet.'''
         self.v[0].xform(tr)
         self.v[1].xform(tr)
         self.v[2].xform(tr)
@@ -127,17 +127,6 @@ class Facet:
                                                  self.v[t].z)
         s += "   endloop\n endfacet]"
         return s
-
-class Facet2D:
-    '''Class for a 2D triangle (a projected facet).'''
-
-    def __init__(self, p1, p2, p3):
-        '''Initialize the Facet2D from the (x,y) tuples p1, p2 and p3.'''
-        self.v = [p1, p2, p3]
-
-    def inside(self, p):
-        '''Test if the (x,y) tuple p falls inside this facet.'''
-        return False
 
 class Object:
     '''Class for STL objects.'''

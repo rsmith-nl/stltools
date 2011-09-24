@@ -14,7 +14,7 @@ dist::
 	@python setup.py sdist
 
 clean::
-	@rm -rf dist build py-stl-*.tar.gz
+	@rm -rf dist build py-stl-*.tar.gz *.pyc
 
 backup::
 	@sh tools/genbackup

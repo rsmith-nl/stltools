@@ -2,7 +2,7 @@
 # Classes for handling coordinate transforms and projections.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-09-03 15:23:19 rsmith>
+# Time-stamp: <2011-09-24 21:38:30 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -47,14 +47,14 @@ class Zpar:
         self.yo = self.h/2 
 
     def project(self, x, y, z):
-        '''Transforms a Vector. Returns an (x,y) tuple'''
+        '''Transforms a vector x,y,z. Returns an (x,y) tuple'''
         rx = (x-self.xmin)*self.s
         ry = (self.horg-(y-self.ymin))*self.s
         return (rx,ry)
 
     def visible(self, x, y, z):
-        '''Checks a Normal Vector to see if it points toward or away from the
-           viewer. Returns True in the first case.'''
+        '''Checks a normal vector x,y,z to see if it points toward or away
+           from the viewer. Returns True in the first case.'''
         if (z > 0.0): return True
         return False
 
