@@ -1,7 +1,7 @@
 .\" -*- nroff -*-
 .\" stl2ps.1
 .\" By: R.F. Smith <rsmith@xs4all.nl>
-.\" Time-stamp: <2011-09-24 21:26:56 rsmith>
+.\" Time-stamp: <2011-09-29 22:32:48 rsmith>
 .\"
 .Dd DATE
 .Os 
@@ -13,28 +13,30 @@
 .Nm 
 infile
 .Op Ar outfile
-.Op Ar transform Op Ar transform
+.Op x Ar degrees | y Ar degrees | z Ar degrees ...
 .Sh DESCRIPTION
 This manual page documents version 
 .Ql VERSION
 of the 
 .Nm
 program. This program is able to render a globally illuminated projection of
-an STL file as PostScript output. 
-.Pp
-First, the STL file is parsed. Both binary and text STL file can be
-read. Next, all the triangles in the file are rotated around the axis of the
-global coordinate system, as specified by the transform options.
+an STL file as PostScript output. First, the STL file is parsed. Both binary
+and text STL file can be read. Next, all the triangles in the file are rotated
+around the axis of the global coordinate system, as specified by the sequence
+of rotation options. 
 .Sh EXIT STATUS
 .Ex -std
 .Sh DIAGNOSTICS
 .Sh COMPATIBILITY
 The 
 .Nm
-program requires the Python interpreter.
+program requires the Python interpreter. It was written for version 2.7, but
+should be able to work with 3.x after fixing with
+.Xr 2to3 .
 .Sh SEE ALSO
 .Xr python 1 ,
-.Xr stl2pov 1 .
+.Xr stl2pov 1 ,
+.Xr 2to3.
 .Rs
 .%B Python Programming Language - Official Website
 .%U http://www.python.org/
@@ -45,9 +47,9 @@ CAD models using the POV-ray raytracer. The first effort produced the
 .Xr stl2pov 1
 program, written in C. 
 .Pp
-Later the author converted that program to Python as a
-learning experience. This rendered a more re-usable version of the software to
-parse STL files as a python module. Adding a front-end for outputting a
+Later the author converted that program to Python as a learning
+experience. This rendered a more re-usable version of the software to parse
+STL files as a python module. Adding this front-end for outputting a
 PostScript rendering now became much easier.
 .Sh AUTHOR
 This manual and the 
