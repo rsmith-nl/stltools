@@ -1,1 +1,3 @@
-stl2ps.1.pdf
+include Makefile
+include stl2ps.1
+include stl2ps.1.pdf
