@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-09-22 22:50:43 rsmith>
+# Time-stamp: <2011-10-01 14:32:42 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -41,6 +41,18 @@ def usage():
     print "Usage: stl2ps infile [outfile] [transform [transform ...]]"
     print "where [transform] is [x number|y number|z number]"
 
+def flatten(f, tr):
+    '''Project and illuminate the facet f using the transform tr. Returns the
+    gray value and the coordinates of the corners as a tuple (color, x1, y1,
+    x2, y2, x3, y3)'''
+    # Coloring scale; 0 is black, 1 is white
+    ambient = 0.05
+    delta = 0.8
+    (x1,y1) = tr.project(f.v[0].x, f.v[0].y, f.v[0].z)
+    (x2,y2) = tr.project(f.v[1].x, f.v[1].y, f.v[1].z)
+    (x3,y3) = tr.project(f.v[2].x, f.v[2].y, f.v[2].z)
+    color = f.n.z*delta+ambient
+    return (color, x1, y1, x2, y2, x3, y3)
 
 ## This is the main program ##
 # Process the command-line arguments
@@ -111,24 +123,18 @@ vizfacets = [f for f in stlobj.facet if pr.visible(f.n.x, f.n.y, f.n.z) == True]
 outs += "% {} of {} facets are visible.\n".format(len(vizfacets),len(stlobj))
 # Next, depth-sort the facets using average depth of the three vertices.
 vizfacets.sort(None,lambda f: math.fsum([f.v[0].z,f.v[1].z,f.v[2].z])/3)
-# Coloring scale; 0 is black, 1 is white
-ambient = 0.05
-delta = 0.8
 # PostScript settings and macros.
 outs += ".5 setlinewidth\n"
-outs += "/s {setgray} def\n"
-outs += "/m {moveto} def\n"
-outs += "/l {lineto} def\n"
-outs += "/G {closepath gsave fill grestore stroke} def\n"
+outs += "/g {setgray} def\n"
+outs += "/f {moveto} def\n"
+outs += "/s {lineto} def\n"
+outs += "/t {lineto closepath gsave fill grestore stroke} def\n"
+# Project and illuminate the facets
+pf = [flatten(f, pr) for f in vizfacets]
 # Draw the triangles
-for f in vizfacets:
-    (x1,y1) = pr.project(f.v[0].x, f.v[0].y, f.v[0].z)
-    (x2,y2) = pr.project(f.v[1].x, f.v[1].y, f.v[1].z)
-    (x3,y3) = pr.project(f.v[2].x, f.v[2].y, f.v[2].z)
-    outs += "{:4.2f} s ".format(f.n.z*delta+ambient)
-    outs += "{} {} m\n".format(x1,y1)
-    outs += "{} {} l ".format(x2,y2)
-    outs += "{} {} l G\n".format(x3,y3)
+for f in pf:
+    s = "{:4.2f} g {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t\n"
+    outs += s.format(*f)
 # Showpage must be the last line in the PostScript output.
 outs += "showpage\n"
 # Send output.
