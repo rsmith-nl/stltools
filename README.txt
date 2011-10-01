@@ -8,17 +8,17 @@ The module xform.py handles coordinate transforms and projections.
 The scripts stl2pov and stl2ps use this library to convert STL files to
 POV-ray meshes and PostScript files respectively.
 
-stl2pov 3 beta1
----------------
+stl2pov
+-------
 This is a refactoring of the C version 2.x. Version 2 was too slow, basically
-because it tried to do too much. This version 3 is a straight translator. It
+because it tried to do too much. This version is a straight translator. It
 produces a POV-ray mesh declaration that you can use in your scenes. N.B.: you
 have to instantiate the mesh as an object, give it material properties, define
 a light and a camera &c.
 
 
-stl2ps 1 beta1
---------------
+stl2ps
+------
 This is a new script that produces a view of the STL object looking down
 parallel to the positive Z-axis on the centre of the object. Rotating the
 object is supported. Currently the output uses only grayscale and a very

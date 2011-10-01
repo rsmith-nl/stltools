@@ -5,14 +5,18 @@
 ALL = stl2ps.1 stl2ps.1.pdf setup.py stl2ps stl2pov
 all: ${ALL}
 #endskip
+MANBASE=/usr/local/man
 
 install: stl2ps.1 setup.py stl2ps stl2pov
 	@if [ `id -u` != 0 ]; then \
 		echo "You must be root to install the program!"; \
 		exit 1; \
 	fi
-	@python setup.py install
-	@rm -rf build
+	python setup.py install
+	rm -rf build
+	gzip -k stl2ps.1
+	install -m 644 stl2ps.1.gz $(MANBASE)/man1
+	rm -f stl2ps.1.gz
 
 #beginskip
 dist: ${ALL}
@@ -23,7 +27,7 @@ dist: ${ALL}
 	rm -f MANIFEST
 
 clean::
-	@rm -rf dist build py-stl-*.tar.gz *.pyc ${ALL}
+	@rm -rf dist build py-stl-*.tar.gz *.pyc ${ALL} MANIFEST
 
 backup::
 	@sh tools/genbackup
