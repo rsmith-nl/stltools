@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-09-24 22:19:19 rsmith>
+# Time-stamp: <2011-10-02 15:19:30 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -127,6 +127,30 @@ class Facet:
                                                  self.v[t].z)
         s += "   endloop\n endfacet]"
         return s
+
+class ProjectedFacet:
+    '''Class for a 3D triangle projected on 2 2D surface.'''
+    def __init__(self, f, pr):
+        '''Initialize the ProjectedFacet from the Facet f, and a Zpar pr.'''
+        ambient = 0.05
+        delta = 0.8
+        (self.x1,self.y1) = pr.project(f.v[0].x, f.v[0].y, f.v[0].z)
+        (self.x2,self.y2) = pr.project(f.v[1].x, f.v[1].y, f.v[1].z)
+        (self.x3,self.y3) = pr.project(f.v[2].x, f.v[2].y, f.v[2].z)
+        self.gray = f.n.z*delta+ambient
+        # Bounding box
+        self.xmin = min(self.x1,self.x2,self.x3)
+        self.ymin = min(self.y1,self.y2,self.y3)
+        self.xmax = max(self.x1,self.x2,self.x3)
+        self.ymax = max(self.y1,self.y2,self.y3)
+
+    def bbIsInside(self,other):
+        '''Check if the bounding box of ProjectedFacet other is inside the
+        bounding box for this ProjectedFacet.'''
+        if (other.xmin < self.xmin or other.xmax > self.xmax or 
+            other.ymin < self.ymin or other.ymax > self.ymax):
+            return False
+        return True
 
 class Object:
     '''Class for STL objects.'''

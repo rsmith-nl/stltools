@@ -5,9 +5,12 @@ dist
 setup.py
 stl2pov
 stl2ps
+stl2pdf
 stl2ps.1
+stl2pdf.1
 stl2pov.1
 stl2ps.1.pdf
+stl2pdf.1.pdf
 stl2pov.1.pdf
 tools/replace.sed
 MANIFEST

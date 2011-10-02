@@ -2,11 +2,11 @@
 STL file manipulation
 =====================
 
-The module stl.py reads both text and binary STL files and creates STL objects.
-The module xform.py handles coordinate transforms and projections.
+The module stl.py reads both text and binary STL files and creates STL
+objects. The module xform.py handles coordinate transforms and projections.
 
-The scripts stl2pov and stl2ps use this library to convert STL files to
-POV-ray meshes and PostScript files respectively.
+The scripts stl2pov, stl2ps and stl2pdf use this library to convert STL files
+to POV-ray meshes, PostScript and PDF files respectively.
 
 stl2pov
 -------
@@ -24,6 +24,11 @@ parallel to the positive Z-axis on the centre of the object. Rotating the
 object is supported. Currently the output uses only grayscale and a very
 simple shading algorithm. It does not draw facets that point away from the
 viewer. The remaining facets are sorted back to front by average depth of
-their vertices. Colors is a possible enhancement, as is the removal of
-completely occluded surfaces. Shadows and more sophisticated lighting effects
+their vertices. The removal of completely occluded surfaces has been tested
+and dropped as too expensive. Shadows and more sophisticated lighting effects
 are not planned, but patches are welcome.
+
+stl2pdf
+-------
+This is basically a variant of stl2ps using the ReportLab toolkit to generate
+PDF output directly.
