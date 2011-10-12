@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-02 17:56:07 rsmith>
+# Time-stamp: <2011-10-12 19:01:10 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -43,7 +43,7 @@ def usage():
 
 ## This is the main program ##
 # Process the command-line arguments
-validargs = ['x','y','z', 'X','Y','Z']
+validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
 if len(sys.argv) == 1:
     usage()
     sys.exit(0)
@@ -86,8 +86,8 @@ stlobj.name = stlobj.name.strip()
 if tr.unity == False:
     stlobj.xform(tr)
 # Calculate viewport and transformation
-xmin,xmax,ymin,ymax,zmin,zmax = stlobj.extents()
-pr = xform.Zpar(xmin,xmax,ymin,ymax)
+xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents()
+pr = xform.Zpar(xmin, xmax, ymin, ymax)
 # Prepare output string.
 outs = "%!PS-Adobe-1.0\n"
 outs += "%%BoundingBox: 0 0 {:.0f} {:.0f}\n".format(pr.w, pr.h)
@@ -99,17 +99,17 @@ s = "% This becomes a picture of {:.0f}×{:.0f} PostScript points;"\
     " {:.0f}×{:.0f} mm.\n"
 outs += s.format(pr.w, pr.h, pr.w/72*25.4, pr.h/72*25.4)
 outs += "% 3D Extents of the model (in STL coordinates):\n"
-outs += "% {} ≤ x ≤ {}\n".format(xmin,xmax)
-outs += "% {} ≤ y ≤ {}\n".format(ymin,ymax)
-outs += "% {} ≤ z ≤ {}\n".format(zmin,zmax)
-(x,y,z) = stlobj.center()
+outs += "% {} ≤ x ≤ {}\n".format(xmin, xmax)
+outs += "% {} ≤ y ≤ {}\n".format(ymin, ymax)
+outs += "% {} ≤ z ≤ {}\n".format(zmin, zmax)
+(x, y, z) = stlobj.center()
 s = "% 3D center (midpoint of extents, STL units):\n% <{0}, {1}, {2}>\n"
 outs += s.format(x, y, z)
 # Calculate the visible facets
 vizfacets = [f for f in stlobj.facet if pr.visible(f.n.x, f.n.y, f.n.z) == True]
-outs += "% {} of {} facets are visible.\n".format(len(vizfacets),len(stlobj))
+outs += "% {} of {} facets are visible.\n".format(len(vizfacets), len(stlobj))
 # Next, depth-sort the facets using average depth of the three vertices.
-vizfacets.sort(None,lambda f: math.fsum([f.v[0].z,f.v[1].z,f.v[2].z])/3)
+vizfacets.sort(None, lambda f: math.fsum([f.v[0].z, f.v[1].z, f.v[2].z])/3)
 # PostScript settings and macros.
 outs += ".5 setlinewidth\n"
 outs += "/g {setgray} def\n"

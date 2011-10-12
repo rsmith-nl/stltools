@@ -2,7 +2,7 @@
 # Classes for handling coordinate transforms and projections.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-09-24 21:38:30 rsmith>
+# Time-stamp: <2011-10-12 19:08:55 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -50,7 +50,7 @@ class Zpar:
         '''Transforms a vector x,y,z. Returns an (x,y) tuple'''
         rx = (x-self.xmin)*self.s
         ry = (self.horg-(y-self.ymin))*self.s
-        return (rx,ry)
+        return (rx, ry)
 
     def visible(self, x, y, z):
         '''Checks a normal vector x,y,z to see if it points toward or away
@@ -71,7 +71,8 @@ def _mmul(m1, m2):
     for i in range(3):
         for j in range(3):
             r[i][j] = m1[i][0]*m2[0][j] + m1[i][1]*m2[1][j] + m1[i][2]*m2[2][j]
-            if math.fabs(r[i][j]) < _limit: r[i][j] = 0.0
+            if math.fabs(r[i][j]) < _limit: 
+                r[i][j] = 0.0
     return r
 
 
@@ -142,24 +143,33 @@ class Xform:
 if __name__ == '__main__':
     tr = Xform()
     print "Original matrix:", tr.m
-    tr.rotx(45); tr.rotx(-45)
+    tr.rotx(45) 
+    tr.rotx(-45)
     print "rotation 45,-45° around X:", tr.m
-    tr.rotx(45); tr.rotx(315)
+    tr.rotx(45)
+    tr.rotx(315)
     print "rotation 45,315° around X:", tr.m
-    tr.roty(30); tr.roty(-30)
+    tr.roty(30)
+    tr.roty(-30)
     print "rotation 30,-30° around Y:", tr.m
-    tr.roty(30); tr.roty(330)
+    tr.roty(30)
+    tr.roty(330)
     print "rotation 30,330° around Y:", tr.m
-    tr.rotz(90); tr.rotz(-90)
+    tr.rotz(90)
+    tr.rotz(-90)
     print "rotation 90,-90° around Z:", tr.m
-    tr.rotz(90); tr.rotz(270)
+    tr.rotz(90)
+    tr.rotz(270)
     print "rotation 90,270° around Z:", tr.m
-    tr.reset(); tr.rotx(90)
-    res = tr.apply(0,1,0)
+    tr.reset()
+    tr.rotx(90)
+    res = tr.apply(0, 1, 0)
     print "(0,1,0) rotated 90° around X:", res
-    tr.reset(); tr.roty(90)
-    res = tr.apply(0,0,1)
+    tr.reset()
+    tr.roty(90)
+    res = tr.apply(0, 0, 1)
     print "(0,0,1) rotated 90° around Y:", res
-    tr.reset(); tr.rotz(90)
-    res = tr.apply(1,0,0)
+    tr.reset()
+    tr.rotz(90)
+    res = tr.apply(1, 0, 0)
     print "(1,0,0) rotated 90° around Z:", res

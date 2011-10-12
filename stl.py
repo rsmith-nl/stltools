@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-02 15:19:30 rsmith>
+# Time-stamp: <2011-10-12 18:54:29 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,14 +25,14 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
+#Check this code with 'pylint -d C0103 -d C0111 -i y stl.py|less'
+
 import math
 import struct
 import string
 
-import xform
-
-# Distances below 'limit' are set to 0.
-limit = 1e-7
+# Distances below 'LIMIT' are set to 0.
+LIMIT = 1e-7
 
 
 class Vertex:
@@ -41,11 +41,14 @@ class Vertex:
     def __init__(self, x, y, z):
         '''Creates a Vertex from the given x,y and z coordinates.'''
         self.x = float(x)
-        if math.fabs(self.x) < limit: self.x = 0.0
+        if math.fabs(self.x) < LIMIT: 
+            self.x = 0.0
         self.y = float(y)
-        if math.fabs(self.y) < limit: self.y = 0.0
+        if math.fabs(self.y) < LIMIT: 
+            self.y = 0.0
         self.z = float(z)
-        if math.fabs(self.z) < limit: self.z = 0.0
+        if math.fabs(self.z) < LIMIT: 
+            self.z = 0.0
 
     def __add__(self, other):
         '''Return the sum of 'self' and 'other' as a new vertex.'''
@@ -61,16 +64,16 @@ class Vertex:
     def __eq__(self, other):
         if other == None:
             return False
-        if (math.fabs(self.x - other.x) < limit and 
-            math.fabs(self.y - other.y) < limit and 
-            math.fabs(self.z - other.z) < limit):
+        if (math.fabs(self.x - other.x) < LIMIT and 
+            math.fabs(self.y - other.y) < LIMIT and 
+            math.fabs(self.z - other.z) < LIMIT):
             return True
         else:
             return False
 
     def xform(self, tr):
         '''Apply the transformation tr to the vertex.'''
-        (self.x,self.y,self.z) = tr.apply(self.x, self.y, self.z)
+        (self.x, self.y, self.z) = tr.apply(self.x, self.y, self.z)
 
     def cross(self, b):
         return Vertex(self.y*b.z-self.z*b.y, 
@@ -84,11 +87,14 @@ class Normal(Vertex):
         '''Set the normal from normalized values of dx, dy and dz.
            This will raise a ValueError if the length of the vector is 0.'''
         dx = float(dx)
-        if math.fabs(dx) < limit: dx = 0.0
+        if math.fabs(dx) < LIMIT: 
+            dx = 0.0
         dy = float(dy)
-        if math.fabs(dy) < limit: dy = 0.0
+        if math.fabs(dy) < LIMIT: 
+            dy = 0.0
         dz = float(dz)
-        if math.fabs(dz) < limit: dz = 0.0
+        if math.fabs(dz) < LIMIT: 
+            dz = 0.0
         l = math.sqrt(dx*dx+dy*dy+dz*dz)
         if l == 0.0:
             raise ValueError("Length of vector is 0!")
@@ -102,13 +108,14 @@ class Facet:
     '''Class for a 3D triangle.'''
 
     def __init__(self, p1, p2, p3, n):
-        '''Initialize the Facet from the Vertices p1, p2 and p3 and a Normal n.'''
+        '''Initialize the Facet from the Vertices p1, p2 and p3 
+        and a Normal n.'''
         self.v = [p1, p2, p3]
         if n == None:
             d1 = p2 - p1
             d2 = p3 - p2
             n = d1.cross(d2)
-            n = Normal(n.x,n.y,n.z)
+            n = Normal(n.x, n.y, n.z)
         self.n = n
 
     def xform(self, tr):
@@ -117,7 +124,6 @@ class Facet:
         self.v[1].xform(tr)
         self.v[2].xform(tr)
         self.n.xform(tr)
-        pass
 
     def __str__(self):
         s = "[facet normal {} {} {}\n   outer loop\n"
@@ -134,17 +140,17 @@ class ProjectedFacet:
         '''Initialize the ProjectedFacet from the Facet f, and a Zpar pr.'''
         ambient = 0.05
         delta = 0.8
-        (self.x1,self.y1) = pr.project(f.v[0].x, f.v[0].y, f.v[0].z)
-        (self.x2,self.y2) = pr.project(f.v[1].x, f.v[1].y, f.v[1].z)
-        (self.x3,self.y3) = pr.project(f.v[2].x, f.v[2].y, f.v[2].z)
+        (self.x1, self.y1) = pr.project(f.v[0].x, f.v[0].y, f.v[0].z)
+        (self.x2, self.y2) = pr.project(f.v[1].x, f.v[1].y, f.v[1].z)
+        (self.x3, self.y3) = pr.project(f.v[2].x, f.v[2].y, f.v[2].z)
         self.gray = f.n.z*delta+ambient
         # Bounding box
-        self.xmin = min(self.x1,self.x2,self.x3)
-        self.ymin = min(self.y1,self.y2,self.y3)
-        self.xmax = max(self.x1,self.x2,self.x3)
-        self.ymax = max(self.y1,self.y2,self.y3)
+        self.xmin = min(self.x1, self.x2, self.x3)
+        self.ymin = min(self.y1, self.y2, self.y3)
+        self.xmax = max(self.x1, self.x2, self.x3)
+        self.ymax = max(self.y1, self.y2, self.y3)
 
-    def bbIsInside(self,other):
+    def bbIsInside(self, other):
         '''Check if the bounding box of ProjectedFacet other is inside the
         bounding box for this ProjectedFacet.'''
         if (other.xmin < self.xmin or other.xmax > self.xmax or 
@@ -155,23 +161,23 @@ class ProjectedFacet:
 class Object:
     '''Class for STL objects.'''
 
-    def __init__(self, fname=None):
-        '''Read the STL file fname into an STL object. Create an empty STL
-        object if fname is None.'''
+    def __init__(self, fn=None):
+        '''Read the STL file fn into an STL object. Create an empty STL
+        object if fn is None.'''
         self.facet = []
-        self.name=""
+        self.name = ""
         self.xmin = self.xmax = None
         self.ymin = self.ymax = None
         self.zmin = self.zmax = None
         self.mx = self.my = self.mz = 0.0
-        if fname == None:
+        if fn == None:
             return
-        f = open(fname)
+        f = open(fn)
         contents = f.read()
         f.close()
         if contents.find("solid") == -1:
             # Binary format.
-            self.name,nf1 = struct.unpack("=80sI",contents[0:84])
+            self.name, nf1 = struct.unpack("=80sI", contents[0:84])
             # Strip zero bytes and whitespace on both sides.
             self.name = self.name.strip(string.whitespace+chr(0))
             if len(self.name) == 0:
@@ -184,14 +190,14 @@ class Object:
                 print ds.format(self.name, nf1, nf2)
                 raise ValueError("Number of facets doesn't match file size.")
             # Chop the string into a list of 50 byte strings.
-            items = [contents[n:n+50] for n in range(0,facetsz,50)]
+            items = [contents[n:n+50] for n in range(0, facetsz, 50)]
             # Process the items
             for i in items:
                 nx, ny, nz, f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
                     struct.unpack("=ffffffffffffxx", i)
-                v1 = Vertex(f1x,f1y,f1z)
-                v2 = Vertex(f2x,f2y,f2z)
-                v3 = Vertex(f3x,f3y,f3z)
+                v1 = Vertex(f1x, f1y, f1z)
+                v2 = Vertex(f2x, f2y, f2z)
+                v3 = Vertex(f3x, f3y, f3z)
                 try:
                     norm = Normal(nx, ny, nz)
                 except ValueError:
@@ -235,18 +241,19 @@ class Object:
         return s.format(self.name, len(self.facet))
 
     def extents(self):
-        '''Returns the maximum and minimum x, y and z coordinates in the form
-           of a tuple (xmin, xmax, ymin, ymax, zmin, zmax).'''
-        return (self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+        '''Returns the maximum and minimum x, y and z coordinates in the 
+           form of a tuple (xmin, xmax, ymin, ymax, zmin, zmax).'''
+        return (self.xmin, self.xmax, self.ymin, self.ymax, 
+                self.zmin, self.zmax)
 
     def center(self):
-        '''Returns the midpoint of the extents in a tuple (x,y,z).'''
+        '''Returns the midpoint of the extents in a tuple (x, y, z).'''
         return ((self.xmin+self.xmax)/2, (self.ymin+self.ymax)/2, 
                 (self.zmin+self.zmax)/2)
 
     def meanpoint(self):
         '''Returns the average of all Vertexes of all Facets 
-           in a tuple (x,y,z).'''
+           in a tuple (x, y, z).'''
         c = 3*len(self.facet)
         return (self.mx/c, self.my/c, self.mz/c)
 
@@ -260,12 +267,18 @@ class Object:
         self.my += f.v[0].y + f.v[1].y + f.v[2].y
         self.mz += f.v[0].z + f.v[1].z + f.v[2].z
         for k in range(3):
-            if f.v[k].x < self.xmin: self.xmin = f.v[k].x
-            elif f.v[k].x > self.xmax: self.xmax = f.v[k].x
-            if f.v[k].y < self.ymin: self.ymin = f.v[k].y
-            elif f.v[k].y > self.ymax: self.ymax = f.v[k].y
-            if f.v[k].z < self.zmin: self.zmin = f.v[k].z
-            elif f.v[k].z > self.zmax: self.zmax = f.v[k].z
+            if f.v[k].x < self.xmin: 
+                self.xmin = f.v[k].x
+            elif f.v[k].x > self.xmax: 
+                self.xmax = f.v[k].x
+            if f.v[k].y < self.ymin: 
+                self.ymin = f.v[k].y
+            elif f.v[k].y > self.ymax: 
+                self.ymax = f.v[k].y
+            if f.v[k].z < self.zmin: 
+                self.zmin = f.v[k].z
+            elif f.v[k].z > self.zmax: 
+                self.zmax = f.v[k].z
 
     def addfacet(self, f):
         '''Add Facet f to the STL object.'''

@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PDF file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-02 17:41:31 rsmith>
+# Time-stamp: <2011-10-12 18:58:23 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,8 +27,6 @@
 # SUCH DAMAGE.
 
 import sys
-import string
-import time
 import math
 import os
 
@@ -46,7 +44,7 @@ def usage():
 
 ## This is the main program ##
 # Process the command-line arguments
-validargs = ['x','y','z', 'X','Y','Z']
+validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
 if len(sys.argv) == 1:
     usage()
     sys.exit(0)
@@ -89,8 +87,8 @@ stlobj.name = stlobj.name.strip()
 if tr.unity == False:
     stlobj.xform(tr)
 # Calculate viewport and transformation
-xmin,xmax,ymin,ymax,zmin,zmax = stlobj.extents()
-pr = xform.Zpar(xmin,xmax,ymin,ymax)
+xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents()
+pr = xform.Zpar(xmin, xmax, ymin, ymax)
 # Prepare output.
 if outfile == None:
     outbase = os.path.basename(infile)
@@ -104,15 +102,15 @@ out.setLineJoin(2)
 # Calculate the visible facets
 vizfacets = [f for f in stlobj.facet if pr.visible(f.n.x, f.n.y, f.n.z) == True]
 # Next, depth-sort the facets using average depth of the three vertices.
-vizfacets.sort(None,lambda f: math.fsum([f.v[0].z,f.v[1].z,f.v[2].z])/3)
+vizfacets.sort(None, lambda f: math.fsum([f.v[0].z, f.v[1].z, f.v[2].z])/3)
 # Project and illuminate the facets
 pf = [stl.ProjectedFacet(f, pr) for f in vizfacets]
 # Draw the triangles
 for f in pf:
     path = out.beginPath()
-    path.moveTo(f.x1,f.y1)
-    path.lineTo(f.x2,f.y2)
-    path.lineTo(f.x3,f.y3)
+    path.moveTo(f.x1, f.y1)
+    path.lineTo(f.x2, f.y2)
+    path.lineTo(f.x3, f.y3)
     path.close()
     out.setFillGray(f.gray)
     out.setStrokeGray(f.gray)
