@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PDF file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-12 18:58:23 rsmith>
+# Time-stamp: <2011-10-13 23:39:07 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -74,13 +74,7 @@ while len(sys.argv) > 1:
         print "Argument '{}' is not a number, ignored.".format(sys.argv[1])
         continue
 # Open the file
-try:
-    stlobj = stl.Object(infile)
-except:
-    print "Error: cannot process input file '{}'.".format(infile)
-    print sys.exc_info()[0]
-    usage()
-    sys.exit(1)
+stlobj = stl.Object(infile)
 # Remove spaces from name
 stlobj.name = stlobj.name.strip()
 # Apply transformations
