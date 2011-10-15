@@ -2,12 +2,12 @@
 # Installation script for stl2pov and friends
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Time-stamp: <2011-10-02 17:09:51 rsmith>
+# Time-stamp: <2011-10-15 18:06:53 rsmith>
 
 from distutils.core import setup
 
-with open('README.txt') as file:
-    ld = file.read()
+with open('README.txt') as f:
+    ld = f.read()
 
 
 setup(name='py-stl',

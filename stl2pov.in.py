@@ -3,7 +3,7 @@
 # Program for converting an STL file into a POV-ray mesh
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-12 20:18:30 rsmith>
+# Time-stamp: <2011-10-15 18:11:38 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions

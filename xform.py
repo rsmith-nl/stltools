@@ -2,7 +2,7 @@
 # Classes for handling coordinate transforms and projections.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-12 19:08:55 rsmith>
+# Time-stamp: <2011-10-15 18:12:14 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -55,7 +55,8 @@ class Zpar:
     def visible(self, x, y, z):
         '''Checks a normal vector x,y,z to see if it points toward or away
            from the viewer. Returns True in the first case.'''
-        if (z > 0.0): return True
+        if (z > 0.0): 
+            return True
         return False
 
 
