@@ -2,6 +2,7 @@
 *~
 build
 dist
+backup-*.tar.gz
 setup.py
 stl2pov
 stl2ps

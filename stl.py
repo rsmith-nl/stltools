@@ -2,7 +2,7 @@
 # Classes for handling STL files and trianglulated models.
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-13 23:36:53 rsmith>
+# Time-stamp: <2011-10-17 21:58:10 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,7 +29,6 @@
 
 import math
 import struct
-import string
 
 # Distances below 'LIMIT' are set to 0.
 LIMIT = 1e-7
@@ -180,7 +179,7 @@ class Object:
             self.name, nf1 = struct.unpack("=80sI", contents[0:84])
             # Strip zero bytes, the prefix 'solid' and whitespace on both sides.
             self.name = self.name.replace("solid ", "")
-            self.name = self.name.strip(string.whitespace+chr(0))
+            self.name = self.name.strip()
             if len(self.name) == 0:
                 self.name = "unknown"
             contents = contents[84:]

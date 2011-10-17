@@ -22,12 +22,12 @@ install: stl2ps.1 setup.py stl2ps stl2pdf stl2pov
 dist: ${ALL}
 	mv Makefile Makefile.org
 	awk -f tools/makemakefile.awk Makefile.org >Makefile
-	python setup.py sdist
+	python setup.py sdist --format=zip
 	mv Makefile.org Makefile
 	rm -f MANIFEST
 
 clean::
-	rm -rf dist build py-stl-*.tar.gz *.pyc ${ALL} MANIFEST
+	rm -rf dist build backup-*.tar.gz *.pyc ${ALL} MANIFEST
 
 backup::
 	sh tools/genbackup
