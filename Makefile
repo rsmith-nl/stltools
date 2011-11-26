@@ -14,7 +14,8 @@ install: stl2ps.1 setup.py stl2ps stl2pdf stl2pov
 	fi
 	python setup.py install
 	rm -rf build
-	gzip -k stl2ps.1 stl2pdf.1
+	gzip -c stl2ps.1 >stl2ps.1.gz
+	gzip -c stl2pdf.1 >stl2pdf.1.gz
 	install -m 644 stl2ps.1.gz stl2pdf.1.gz $(MANBASE)/man1
 	rm -f stl2ps.1.gz stl2pdf.1.gz
 
