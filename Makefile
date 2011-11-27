@@ -2,21 +2,29 @@
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
-ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf setup.py stl2ps stl2pdf stl2pov
+ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py
 all: ${ALL}
 #endskip
-MANBASE=/usr/local/man
+BASE=/usr/local
+MANDIR=$(BASE)/man
+BINDIR=$(BASE)/bin
 
-install: stl2ps.1 setup.py stl2ps stl2pdf stl2pov
+install: ${ALL}
 	@if [ `id -u` != 0 ]; then \
 		echo "You must be root to install the program!"; \
 		exit 1; \
 	fi
+# Let Python do most of the install work.
 	python setup.py install
+# Lose the extension; this is UNIX. :-)
+	mv $(BINDIR)/stl2ps.py $(BINDIR)/stl2ps
+	mv $(BINDIR)/stl2pov.py $(BINDIR)/stl2pov
+	mv $(BINDIR)/stl2pdf.py $(BINDIR)/stl2pdf
 	rm -rf build
+#Install the manual pages.
 	gzip -c stl2ps.1 >stl2ps.1.gz
 	gzip -c stl2pdf.1 >stl2pdf.1.gz
-	install -m 644 stl2ps.1.gz stl2pdf.1.gz $(MANBASE)/man1
+	install -m 644 stl2ps.1.gz stl2pdf.1.gz $(MANDIR)/man1
 	rm -f stl2ps.1.gz stl2pdf.1.gz
 
 #beginskip
@@ -42,17 +50,17 @@ tools/replace.sed: .git/index
 setup.py: setup.in.py tools/replace.sed
 	sed -f tools/replace.sed setup.in.py >$@
 
-stl2ps: stl2ps.in.py tools/replace.sed
+stl2ps.py: stl2ps.in.py tools/replace.sed
 	sed -f tools/replace.sed stl2ps.in.py >$@
-	chmod 755 stl2ps
+	chmod 755 $@
 
-stl2pdf: stl2pdf.in.py tools/replace.sed
+stl2pdf.py: stl2pdf.in.py tools/replace.sed
 	sed -f tools/replace.sed stl2pdf.in.py >$@
-	chmod 755 stl2pdf
+	chmod 755 $@
 
-stl2pov: stl2pov.in.py tools/replace.sed
+stl2pov.py: stl2pov.in.py tools/replace.sed
 	sed -f tools/replace.sed stl2pov.in.py >$@
-	chmod 755 stl2pov
+	chmod 755 $@
 
 stl2ps.1: stl2ps.1.in tools/replace.sed
 	sed -f tools/replace.sed stl2ps.1.in >$@

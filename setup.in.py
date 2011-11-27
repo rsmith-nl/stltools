@@ -2,7 +2,7 @@
 # Installation script for stl2pov and friends
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Time-stamp: <2011-10-15 18:06:53 rsmith>
+# Time-stamp: <2011-11-27 15:53:25 rsmith>
 
 from distutils.core import setup
 
@@ -16,7 +16,7 @@ setup(name='py-stl',
       description='Programs to read and convert STL files.',
       author='Roland Smith', author_email='rsmith@xs4all.nl',
       url='http://www.xs4all.nl/~rsmith/software/',
-      scripts=['stl2pov', 'stl2ps', 'stl2pdf'],
+      scripts=['stl2pov.py', 'stl2ps.py', 'stl2pdf.py'],
       provides='pystl', py_modules=['stl','xform'],
       classifiers=['Development Status :: 5 - Production/Stable',
                    'Environment :: Console',
