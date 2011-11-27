@@ -3,7 +3,7 @@
 # Program for converting an STL file into a POV-ray mesh
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-15 18:11:38 rsmith>
+# Time-stamp: <2011-11-27 15:05:26 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -74,7 +74,7 @@ outs += s.format(x, y, z)
 s = "// Mean point (average of all vertices):\n// <{1}, {0}, {2}>\n"
 outs += s.format(x, y, z)
 outs += "# declare m_{} = mesh {{\n".format(stlobj.name)
-sot = "  triangle {{ // {}\n"
+sot = "  triangle {{ // #{}\n"
 fc = "    <{1}, {0}, {2}>,\n"
 fct = "    <{1}, {0}, {2}>\n"
 for n, f in enumerate(stlobj.facet):
