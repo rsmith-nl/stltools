@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# Classes for handling STL files and trianglulated models.
-#
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-17 21:58:10 rsmith>
+# Time-stamp: <2011-12-18 14:40:07 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,7 +23,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-#Check this code with 'pylint -d C0103 -d C0111 -i y stl.py|less'
+#Check this code with 'pylint -r n stl.py'
+
+"Classes for handling STL files and trianglulated models."
 
 import math
 import struct

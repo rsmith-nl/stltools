@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# Classes for handling coordinate transforms and projections.
-#
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-15 18:12:14 rsmith>
+# Time-stamp: <2011-12-18 14:44:18 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,8 +23,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-import math
+"Classes for handling coordinate transforms and projections."
 
+import math
 
 class Zpar:
     '''Class for parallel projection along the Z-axis. Output
@@ -83,7 +82,8 @@ class Xform:
 
     def __init__(self):
         '''Initialize the transformation to the unity transform.'''
-        self.reset()
+        self.m = _unity()
+        self.unity = True
 
     def __eq__(self, other):
         '''Check if two transformations are equal'''
@@ -95,8 +95,7 @@ class Xform:
 
     def reset(self):
         '''Reverts to the unity transformation.'''
-        self.m = _unity()
-        self.unity = True
+        self.__init__()
 
     def rotx(self, deg):
         '''Adds a rotation around the x-axis to the transformation.'''

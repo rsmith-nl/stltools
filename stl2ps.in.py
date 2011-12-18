@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PostScript file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-10-22 20:14:33 rsmith>
+# Time-stamp: <2011-12-18 14:35:42 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,7 +28,6 @@
 
 import sys
 import time
-import math
 
 import stl
 import xform
@@ -108,8 +107,9 @@ outs += s.format(x, y, z)
 # Calculate the visible facets
 vizfacets = [f for f in stlobj.facet if pr.visible(f.n.x, f.n.y, f.n.z)]
 outs += "% {} of {} facets are visible.\n".format(len(vizfacets), len(stlobj))
-# Next, depth-sort the facets using average depth of the three vertices.
-vizfacets.sort(None, lambda f: math.fsum([f.v[0].z, f.v[1].z, f.v[2].z])/3)
+# Next, depth-sort the facets using the smallest distance to the viewer
+# of the three vertices.
+vizfacets.sort(None, lambda f: max([f.v[0].z, f.v[1].z, f.v[2].z]))
 # PostScript settings and macros.
 outs += ".5 setlinewidth\n"
 outs += "/g {setgray} def\n"
