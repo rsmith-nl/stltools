@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-18 14:40:07 rsmith>
+# Time-stamp: <2011-12-19 11:01:57 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -79,10 +79,15 @@ class Vertex:
                       self.z*b.x-self.x*b.z, 
                       self.x*b.y-self.y*b.x)
 
+    def key(self):
+        '''Create a unique key for the vertex so we can put it in a hash
+        table.'''
+        return hash((self.x, self.y, self.z))
+
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
 
-    def set(self, dx, dy, dz):
+    def __init__(self, dx, dy, dz):
         '''Set the normal from normalized values of dx, dy and dz.
            This will raise a ValueError if the length of the vector is 0.'''
         dx = float(dx)
@@ -99,8 +104,8 @@ class Normal(Vertex):
             raise ValueError("Length of vector is 0!")
         Vertex.__init__(self, dx/l, dy/l, dz/l)
 
-    def __init__(self, dx, dy, dz):
-        self.set(dx, dy, dz)
+    def set(self, dx, dy, dz):
+        self.__init__(dx, dy, dz)
 
 
 class Facet:
