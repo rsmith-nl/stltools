@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-19 11:01:57 rsmith>
+# Time-stamp: <2011-12-19 21:22:55 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -40,14 +40,8 @@ class Vertex:
     def __init__(self, x, y, z):
         '''Creates a Vertex from the given x,y and z coordinates.'''
         self.x = float(x)
-        if math.fabs(self.x) < LIMIT: 
-            self.x = 0.0
         self.y = float(y)
-        if math.fabs(self.y) < LIMIT: 
-            self.y = 0.0
         self.z = float(z)
-        if math.fabs(self.z) < LIMIT: 
-            self.z = 0.0
 
     def __add__(self, other):
         '''Return the sum of 'self' and 'other' as a new vertex.'''
@@ -91,14 +85,8 @@ class Normal(Vertex):
         '''Set the normal from normalized values of dx, dy and dz.
            This will raise a ValueError if the length of the vector is 0.'''
         dx = float(dx)
-        if math.fabs(dx) < LIMIT: 
-            dx = 0.0
         dy = float(dy)
-        if math.fabs(dy) < LIMIT: 
-            dy = 0.0
         dz = float(dz)
-        if math.fabs(dz) < LIMIT: 
-            dz = 0.0
         l = math.sqrt(dx*dx+dy*dy+dz*dz)
         if l == 0.0:
             raise ValueError("Length of vector is 0!")
@@ -115,19 +103,13 @@ class Facet:
         '''Initialize the Facet from the Vertices p1, p2 and p3 
         and a Normal n.'''
         self.v = [p1, p2, p3]
-        if n == None:
+        if isinstance(n, Normal):
+            self.n = n
+        else:
             d1 = p2 - p1
             d2 = p3 - p2
-            n = d1.cross(d2)
-            n = Normal(n.x, n.y, n.z)
-        self.n = n
-
-    def xform(self, tr):
-        '''Apply the Xform tr to the facet.'''
-        self.v[0].xform(tr)
-        self.v[1].xform(tr)
-        self.v[2].xform(tr)
-        self.n.xform(tr)
+            xp = d1.cross(d2)
+            self.n = Normal(xp.x, xp.y, xp.z)
 
     def __str__(self):
         s = "[facet normal {} {} {}\n   outer loop\n"
@@ -147,7 +129,7 @@ class ProjectedFacet:
         (self.x1, self.y1) = pr.project(f.v[0].x, f.v[0].y, f.v[0].z)
         (self.x2, self.y2) = pr.project(f.v[1].x, f.v[1].y, f.v[1].z)
         (self.x3, self.y3) = pr.project(f.v[2].x, f.v[2].y, f.v[2].z)
-        self.gray = f.n.z*delta+ambient
+        self.gray = math.fabs(f.n.z)*delta+ambient
         # Bounding box
         self.xmin = min(self.x1, self.x2, self.x3)
         self.ymin = min(self.y1, self.y2, self.y3)
@@ -169,6 +151,8 @@ class Object:
         '''Read the STL file fn into an STL object. Create an empty STL
         object if fn is None.'''
         self.facet = []
+        self.vertices = {}
+        self.normals = {}
         self.name = ""
         self.xmin = self.xmax = None
         self.ymin = self.ymax = None
@@ -177,62 +161,90 @@ class Object:
         if fn == None:
             return
         f = open(fn)
-        contents = f.read()
+        con = f.read()
         f.close()
-        if contents.find("vertex", 80) == -1:
-            # Binary format.
-            self.name, nf1 = struct.unpack("=80sI", contents[0:84])
-            # Strip zero bytes, the prefix 'solid' and whitespace on both sides.
-            self.name = self.name.replace("solid ", "")
-            self.name = self.name.strip()
-            if len(self.name) == 0:
-                self.name = "unknown"
-            contents = contents[84:]
-            facetsz = len(contents)
-            nf2 = facetsz/50
-            if nf1 != nf2:
-                ds = "stl.Object; from '{}': {} facets, from size {} facets"
-                print ds.format(self.name, nf1, nf2)
-                raise ValueError("Number of facets doesn't match file size.")
-            # Chop the string into a list of 50 byte strings.
-            items = [contents[n:n+50] for n in range(0, facetsz, 50)]
-            # Process the items
-            for i in items:
-                nx, ny, nz, f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
-                    struct.unpack("=ffffffffffffxx", i)
-                v1 = Vertex(f1x, f1y, f1z)
-                v2 = Vertex(f2x, f2y, f2z)
-                v3 = Vertex(f3x, f3y, f3z)
-                try:
-                    norm = Normal(nx, ny, nz)
-                except ValueError:
-                    norm = None
-                f =  Facet(v1, v2, v3, norm)
-                self.addfacet(f)
+        if con.find("vertex", 80) == -1:
+            self._process_bin(con)
         else:
-            # Text format.
-            items = contents.split()
-            items = [s.strip() for s in items]
-            sn = items.index("solid")+1
-            en = items.index("facet")
-            if sn == en:
-                self.name = "unknown"
-            else:
-                self.name = ' '.join(items[sn:en])
-            nf2 = items.count("endfacet")
-            del items[0:en]
-            # Items now begins with "facet"
-            while items[0] == "facet":
-                v1 = Vertex(items[8], items[9], items[10])
-                v2 = Vertex(items[12], items[13], items[14])
-                v3 = Vertex(items[16], items[17], items[18])
-                try:
-                    norm = Normal(items[2], items[3], items[4])
-                except ValueError:
-                    norm = None
-                f =  Facet(v1, v2, v3, norm)
-                self.addfacet(f)
-                del items[:21]
+            self._process_txt(con)
+
+    def _process_bin(self, contents):
+        '''Process the contents of a binary file.'''
+        self.name, nf1 = struct.unpack("=80sI", contents[0:84])
+        # Strip zero bytes, the prefix 'solid' and whitespace on both sides.
+        self.name = self.name.replace("solid ", "")
+        self.name = self.name.strip('\x00 \t')
+        if len(self.name) == 0:
+            self.name = "unknown"
+        contents = contents[84:]
+        facetsz = len(contents)
+        nf2 = facetsz/50
+        if nf1 != nf2:
+            ds = "stl.Object; from '{}': {} facets, from size {} facets"
+            print ds.format(self.name, nf1, nf2)
+            raise ValueError("Number of facets doesn't match file size.")
+        # Chop the string into a list of 50 byte strings.
+        items = [contents[n:n+50] for n in range(0, facetsz, 50)]
+        # Process the items
+        for i in items:
+            nx, ny, nz, f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
+                struct.unpack("=ffffffffffffxx", i)
+            v1 = Vertex(f1x, f1y, f1z)
+            v2 = Vertex(f2x, f2y, f2z)
+            v3 = Vertex(f3x, f3y, f3z)
+#            try:
+#                norm = Normal(nx, ny, nz)
+#            except ValueError:
+#                norm = None
+#            self._addfacet(v1, v2, v3, norm)
+            self._addfacet(v1, v2, v3, None)
+
+    def _process_txt(self, contents):
+        '''Process the contents of a text file.'''
+        items = contents.split()
+        items = [s.strip() for s in items]
+        sn = items.index("solid")+1
+        en = items.index("facet")
+        if sn == en:
+            self.name = "unknown"
+        else:
+            self.name = ' '.join(items[sn:en])
+        nf2 = items.count("endfacet")
+        del items[0:en]
+        # Items now begins with "facet"
+        while items[0] == "facet":
+            v1 = Vertex(items[8], items[9], items[10])
+            v2 = Vertex(items[12], items[13], items[14])
+            v3 = Vertex(items[16], items[17], items[18])
+#            try:
+#                norm = Normal(items[2], items[3], items[4])
+#            except ValueError:
+#                norm = None
+#            self._addfacet(v1, v2, v3, norm)
+            self._addfacet(v1, v2, v3, None)
+            del items[:21]
+
+    def _addfacet(self, v1, v2, v3, norm):
+        '''Make vertices v1, v2, v3 and optionally normal vector norm into a
+        Facet and add it to the STL object.'''
+        k1 = v1.key()
+        if k1 not in self.vertices:
+            self.vertices[k1] = v1
+        k2 = v2.key()
+        if k2 not in self.vertices:
+            self.vertices[k2] = v2
+        k3 = v3.key()
+        if k3 not in self.vertices:
+            self.vertices[k3] = v3
+        f =  Facet(self.vertices[k1], self.vertices[k2], 
+                   self.vertices[k3], norm)
+        if not isinstance(norm, Normal):
+            norm = f.n
+        kn = norm.key()
+        if kn not in self.normals:
+            self.normals[kn] = norm
+        self.facet.append(f)
+        self._updateextents(f)
 
     def __len__(self): 
         return len(self.facet)
@@ -285,17 +297,25 @@ class Object:
             elif f.v[k].z > self.zmax: 
                 self.zmax = f.v[k].z
 
-    def addfacet(self, f):
-        '''Add Facet f to the STL object.'''
-        self.facet.append(f)
-        self._updateextents(f)
-
     def xform(self, tr):
+        '''Transform all points and normals.'''
+        vd = {}
+        for v in self.vertices.itervalues():
+            v.xform(tr)
+            k = v.key()
+            vd[k] = v
+        del self.vertices
+        self.vertices = vd
+        nd = {}
+        for n in self.normals.itervalues():
+            n.xform(tr)
+            k = n.key()
+            nd[k] = n
+        del self.normals
+        self.normals = nd
         self.xmin = None
-        for n in range(len(self.facet)):
-            self.facet[n].xform(tr)
-            self._updateextents(self.facet[n])
-
+        for f in self.facet:
+            self._updateextents(f)
 
 # Built-in test.
 if __name__ == '__main__':
@@ -303,7 +323,9 @@ if __name__ == '__main__':
     fname = "test/salamanders.stl"
     binstl = Object(fname)
     print binstl
-    print "[bin] len(binstl) = {}".format(len(binstl))
+    print "[bin] len(binstl) = {} facets".format(len(binstl))
+    print "[bin] number of unique vertices: {}".format(len(binstl.vertices))
+    print "[bin] number of unique normals: {}".format(len(binstl.normals))
     print "[bin] extents = ", binstl.extents()
     print "[bin] 0", binstl.facet[0]
     print "..."
@@ -313,7 +335,9 @@ if __name__ == '__main__':
     fname = "test/microSD_connector.stl"
     txtstl = Object(fname)
     print txtstl
-    print "len(txtstl) = {}".format(len(txtstl))
+    print "[txt] len(txtstl) = {} facets".format(len(txtstl))
+    print "[txt] number of unique vertices: {}".format(len(txtstl.vertices))
+    print "[txt] number of unique normals: {}".format(len(txtstl.normals))
     print "[txt] extents = ", txtstl.extents()
     print "[txt] 0", txtstl.facet[0]
     print "..."

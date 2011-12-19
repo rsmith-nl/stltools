@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PDF file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-06 01:01:09 rsmith>
+# Time-stamp: <2011-12-19 21:18:39 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -94,9 +94,10 @@ out.setCreator(name)
 out.setLineCap(1)
 out.setLineJoin(2)
 # Calculate the visible facets
-vizfacets = [f for f in stlobj.facet if pr.visible(f.n.x, f.n.y, f.n.z)]
+#vizfacets = [f for f in stlobj.facet if pr.visible(f.n.x, f.n.y, f.n.z)]
+vizfacets = stlobj.facet
 # Next, depth-sort the facets using the largest z-value of the three vertices.
-vizfacets.sort(None, lambda f: min([f.v[0].z, f.v[1].z, f.v[2].z]))
+vizfacets.sort(None, lambda f: max([f.v[0].z, f.v[1].z, f.v[2].z]))
 # Project and illuminate the facets
 pf = [stl.ProjectedFacet(f, pr) for f in vizfacets]
 # Draw the triangles

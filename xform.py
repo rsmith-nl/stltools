@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-18 14:44:18 rsmith>
+# Time-stamp: <2011-12-19 21:00:05 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,7 +29,7 @@ import math
 
 class Zpar:
     '''Class for parallel projection along the Z-axis. Output
-       screen coordinates from left top, size 100×100 mm.'''
+       screen coordinates from left bottom, size 100×100 mm.'''
 
     def __init__(self, xmin, xmax, ymin, ymax):
         '''Initialize the projection for an object in the rectangle, 
@@ -38,17 +38,13 @@ class Zpar:
         self.s = min(283.46457/(xmax-xmin), 283.46457/(ymax-ymin))
         self.xmin = xmin
         self.ymin = ymin
-        self.ymax = ymax
         self.w = math.ceil(self.s*(xmax-xmin))
         self.h = math.ceil(self.s*(ymax-ymin))
-        self.horg = ymax-ymin
-        self.xo = self.w/2
-        self.yo = self.h/2 
 
     def project(self, x, y, z):
         '''Transforms a vector x,y,z. Returns an (x,y) tuple'''
         rx = (x-self.xmin)*self.s
-        ry = (self.horg-(y-self.ymin))*self.s
+        ry = (y-self.ymin)*self.s
         return (rx, ry)
 
     def visible(self, x, y, z):
@@ -92,6 +88,14 @@ class Xform:
                 if math.fabs(self.m[i][j] - other.m[i][j]) > _limit:
                     return False
         return True
+
+    def __str__(self):
+        outs = ''
+        line = '| {: 6.3f}, {: 6.3f}, {: 6.3f} |\n'
+        for r in range(0,3):
+            outs += line.format(self.m[r][0], self.m[r][1], self.m[r][2])
+        outs = outs[0:-1]
+        return outs
 
     def reset(self):
         '''Reverts to the unity transformation.'''
@@ -142,25 +146,27 @@ class Xform:
 # Built-in tests.
 if __name__ == '__main__':
     tr = Xform()
-    print "Original matrix:", tr.m
+    print "Original matrix:\n", tr
     tr.rotx(45) 
+#    tr.rotx(-45)
+#    print "rotation 45,-45° around X:\n", tr
+    print "rotation 45° around X:\n", tr
     tr.rotx(-45)
-    print "rotation 45,-45° around X:", tr.m
     tr.rotx(45)
     tr.rotx(315)
-    print "rotation 45,315° around X:", tr.m
+    print "rotation 45,315° around X:\n", tr
     tr.roty(30)
     tr.roty(-30)
-    print "rotation 30,-30° around Y:", tr.m
+    print "rotation 30,-30° around Y:\n", tr
     tr.roty(30)
     tr.roty(330)
-    print "rotation 30,330° around Y:", tr.m
+    print "rotation 30,330° around Y:\n", tr
     tr.rotz(90)
     tr.rotz(-90)
-    print "rotation 90,-90° around Z:", tr.m
+    print "rotation 90,-90° around Z:\n", tr
     tr.rotz(90)
     tr.rotz(270)
-    print "rotation 90,270° around Z:", tr.m
+    print "rotation 90,270° around Z:\n", tr
     tr.reset()
     tr.rotx(90)
     res = tr.apply(0, 1, 0)
