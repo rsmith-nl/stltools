@@ -1,0 +1,567 @@
+
+slackbox:~/src/progs/py-stl> python
+Python 2.7.2 (default, Nov  5 2011, 16:21:09) 
+[GCC 4.2.1 20070719  [FreeBSD]] on freebsd8
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from stl import *
+>>> v1 = Vertex(0,0,1)
+>>> v2 = Vertex(1,0,1)
+>>> v3 = Vertex(1,0,0)
+>>> v4 = Vertex(0,0,0)
+>>> v5 = Vertex(0,1,1)
+>>> v6 = Vertex(1,1,1)
+>>> v7 = Vertex(1,1,0)
+>>> v8 = Vertex(0,1,0)
+>>> # Front facets (looking from Z+)
+... 
+>>> f1 = Facet(v1, v2, v5, None)
+>>> f2 = Facet(v2, v6, v5, None)
+>>> # Bottom facets
+... 
+>>> f3 = Facet(v1, v3, v2, None)
+>>> f3.n
+<stl.Normal instance at 0x80104c488>
+>>> print f3.n
+  facet normal 0.0 -1.0 0.0
+>>> f4 = Facet(v1, v4, v3, None)
+>>> print f4.n
+  facet normal 0.0 -1.0 0.0
+>>> # Top facets
+... 
+>>> f5 = Facet(v5, v6, v7, None)
+>>> print f5.n
+  facet normal -0.0 1.0 0.0
+>>> f6 = Facet(v5, v7, v8, None)
+>>> # Back facets
+... 
+>>> f7 = Facet(v4, v8, v3, None)
+>>> print f7.n
+  facet normal 0.0 0.0 -1.0
+>>> f8 = Facet(v8, v7, v3, None)
+>>> print f8.n
+  facet normal 0.0 0.0 -1.0
+>>> # Right facets
+... 
+>>> f9 = Facet(v2, v3, v6, None)
+>>> print f9.n
+  facet normal 1.0 -0.0 0.0
+>>> f10 = Facet(v6, v3, v7, None)
+>>> print f10.n
+  facet normal 1.0 -0.0 0.0
+>>> # Left facets
+... 
+>>> f11 = Facet(v1, v4, v5, None)
+>>> print f11.n
+  facet normal 1.0 -0.0 0.0
+>>> f11 = Facet(v1, v5, v4, None)
+>>> print f11.n
+  facet normal -1.0 0.0 -0.0
+>>> f12 = Facet(v4, v5, v8, None)
+>>> print f12.n
+  facet normal -1.0 0.0 0.0
+>>> cube = Object()
+>>> cube.name = 'cube'
+>>> cube._addfacet(v1, v2, v5, None)
+>>> cube._addfacet(v2, v6, v5, None)
+>>> cube._addfacet(v1, v3, v2, None)
+>>> cube._addfacet(v1, v4, v3, None)
+>>> cube._addfacet(v5, v6, v7, None)
+>>> cube._addfacet(v5, v7, v8, None)
+>>> cube._addfacet(v4, v8, v3, None)
+>>> cube._addfacet(v8, v7, v3, None)
+>>> cube._addfacet(v2, v3, v6, None)
+>>> cube._addfacet(v6, v3, v7, None)
+>>> cube._addfacet(v1, v5, v4, None)
+>>> cube._addfacet(v4, v5, v8, None)
+>>> print cube
+solid cube
+  facet normal 0.0 -0.0 1.0
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 1.0 0.0 1.0
+      vertex 0.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -0.0 1.0
+    outer loop
+      vertex 1.0 0.0 1.0
+      vertex 1.0 1.0 1.0
+      vertex 0.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 0.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 0.0 0.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal -0.0 1.0 0.0
+    outer loop
+      vertex 0.0 1.0 1.0
+      vertex 1.0 1.0 1.0
+      vertex 1.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 1.0 0.0
+    outer loop
+      vertex 0.0 1.0 1.0
+      vertex 1.0 1.0 0.0
+      vertex 0.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 -1.0
+    outer loop
+      vertex 0.0 0.0 0.0
+      vertex 0.0 1.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 -1.0
+    outer loop
+      vertex 0.0 1.0 0.0
+      vertex 1.0 1.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal 1.0 -0.0 0.0
+    outer loop
+      vertex 1.0 0.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 1.0 -0.0 0.0
+    outer loop
+      vertex 1.0 1.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 -0.0
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 0.0 1.0 1.0
+      vertex 0.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 0.0
+    outer loop
+      vertex 0.0 0.0 0.0
+      vertex 0.0 1.0 1.0
+      vertex 0.0 1.0 0.0
+    endloop
+  endfacet
+endsolid
+>>> for f in cube.facet:
+...   print f
+... 
+  facet normal 0.0 -0.0 1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 1.0 0.0 1.0
+      vertex 0.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -0.0 1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 1.0 0.0 1.0
+      vertex 1.0 1.0 1.0
+      vertex 0.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 0.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 0.0 0.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal -0.0 1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 1.0 1.0
+      vertex 1.0 1.0 1.0
+      vertex 1.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 1.0 1.0
+      vertex 1.0 1.0 0.0
+      vertex 0.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 -1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 0.0
+      vertex 0.0 1.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 -1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 1.0 0.0
+      vertex 1.0 1.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal 1.0 -0.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 1.0 0.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 1.0 -0.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 1.0 1.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 -0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 0.0 1.0 1.0
+      vertex 0.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 0.0
+      vertex 0.0 1.0 1.0
+      vertex 0.0 1.0 0.0
+    endloop
+  endfacet
+>>> print cube.vertices
+{1267305975156656513: <stl.Vertex instance at 0x80103ebd8>, 2528504235177820385: <stl.Vertex instance at 0x80103ec68>, 2528505496374819208: <stl.Vertex instance at 0x80103eb48>, 1267304713961987788: <stl.Vertex instance at 0x80103eab8>, 2528505496373654159: <stl.Vertex instance at 0x80103eb00>, 1267304713960822739: <stl.Vertex instance at 0x80103eb90>, 2528504235178985434: <stl.Vertex instance at 0x80103ec20>, 1267305975157821562: <stl.Vertex instance at 0x80103ecb0>}
+>>> print cube.vertices*
+  File "<stdin>", line 1
+    print cube.vertices*
+                       ^
+SyntaxError: invalid syntax
+print *cube.vertices
+  File "<stdin>", line 1
+    print *cube.vertices
+          ^
+SyntaxError: invalid syntax
+>>> for v in cube.vertices:
+...   print v
+... 
+1267305975156656513
+2528504235177820385
+2528505496374819208
+1267304713961987788
+2528505496373654159
+1267304713960822739
+2528504235178985434
+1267305975157821562
+>>> for v in cube.vertices.itervalues():
+...   print v
+... 
+      vertex 0.0 1.0 1.0
+      vertex 1.0 1.0 0.0
+      vertex 1.0 0.0 0.0
+      vertex 0.0 0.0 1.0
+      vertex 1.0 0.0 1.0
+      vertex 0.0 0.0 0.0
+      vertex 1.0 1.0 1.0
+      vertex 0.0 1.0 0.0
+>>> for n in cube.normals.itervalues():
+...  print n
+... 
+  facet normal 1.0 -0.0 0.0
+  facet normal 0.0 -0.0 1.0
+  facet normal 0.0 0.0 -1.0
+  facet normal 0.0 -1.0 0.0
+  facet normal -1.0 0.0 -0.0
+  facet normal -0.0 1.0 0.0
+>>> for f in cube:
+...   print f
+... 
+  facet normal 0.0 -0.0 1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 1.0 0.0 1.0
+      vertex 0.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -0.0 1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 1.0 0.0 1.0
+      vertex 1.0 1.0 1.0
+      vertex 0.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 0.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 0.0 0.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal -0.0 1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 1.0 1.0
+      vertex 1.0 1.0 1.0
+      vertex 1.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 1.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 1.0 1.0
+      vertex 1.0 1.0 0.0
+      vertex 0.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 -1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 0.0
+      vertex 0.0 1.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 -1.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 1.0 0.0
+      vertex 1.0 1.0 0.0
+      vertex 1.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal 1.0 -0.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 1.0 0.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 1.0 -0.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 1.0 1.0 1.0
+      vertex 1.0 0.0 0.0
+      vertex 1.0 1.0 0.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 -0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 1.0
+      vertex 0.0 1.0 1.0
+      vertex 0.0 0.0 0.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 0.0
+  [normal calculated from vertices]
+    outer loop
+      vertex 0.0 0.0 0.0
+      vertex 0.0 1.0 1.0
+      vertex 0.0 1.0 0.0
+    endloop
+  endfacet
+>>> print cube.center()
+(0.5, 0.5, 0.5)
+>>> print cube.meanpoint()
+(0.5, 0.5, 0.5)
+>>> import xform
+>>> tr = xform.Xform()
+>>> tr.roty(15)
+>> print tr
+  File "<stdin>", line 1
+    print tr
+    ^
+IndentationError: unexpected indent
+>>> print tr
+|  0.966,  0.000,  0.259 |
+|  0.000,  1.000,  0.000 |
+| -0.259,  0.000,  0.966 |
+>>> import math
+>>> math.sin(math.radians(15))
+0.25881904510252074
+>>> math.cos(math.radians(15))
+0.9659258262890683
+>>> tr.rotx(10)
+>>> print tr
+|  0.966,  0.000,  0.259 |
+|  0.045,  0.985, -0.168 |
+| -0.255,  0.174,  0.951 |
+>>> cube.xform(tr)
+>>> for n in cube.normals.itervalues():
+...   print n
+... 
+  facet normal 0.0 0.984807753012 0.173648177667
+  facet normal 0.0 -0.984807753012 -0.173648177667
+  facet normal -0.258819045103 0.167731259497 -0.951251242564
+  facet normal 0.965925826289 0.0449434555275 -0.254887002244
+  facet normal 0.258819045103 -0.167731259497 0.951251242564
+  facet normal -0.965925826289 -0.0449434555275 0.254887002
+>>> xmin, xmax, ymin, ymax, zmin, zmax = cube.extents()
+>>> pr = xform.Zpar(xmin, xmax, ymin, ymax)
+>>> vizfacets = [f for f in cube.facet if pr.visible(f.n)]
+>>> len(vizfacets)
+4
+>>> for f in cube.facet:
+...   print f.n
+...   print pr.visible(f.n)
+... 
+  facet normal 0.258819045103 -0.167731259497 0.951251242564
+True
+  facet normal 0.0 -0.0 1.0
+True
+  facet normal 0.0 -0.984807753012 -0.173648177667
+False
+  facet normal 0.0 -1.0 0.0
+False
+  facet normal 0.0 0.984807753012 0.173648177667
+True
+  facet normal 0.0 1.0 0.0
+False
+  facet normal -0.258819045103 0.167731259497 -0.951251242564
+False
+  facet normal 0.0 0.0 -1.0
+False
+  facet normal 0.965925826289 0.0449434555275 -0.254887002244
+False
+  facet normal 1.0 -0.0 0.0
+False
+  facet normal -0.965925826289 -0.0449434555275 0.254887002244
+True
+  facet normal -1.0 0.0 0.0
+False
+>>> 
+slackbox:~/src/progs/py-stl> python
+Python 2.7.2 (default, Nov  5 2011, 16:21:09) 
+[GCC 4.2.1 20070719  [FreeBSD]] on freebsd8
+Type "help", "copyright", "credits" or "license" for more information.
+>>> # Fix the normal referencing.
+... 
+>>> 
+slackbox:~/src/progs/py-stl> python -i test/makecube.py
+Traceback (most recent call last):
+  File "test/makecube.py", line 17, in <module>
+    cube._addfacet(v1, v2, v5, None)
+AttributeError: Object instance has no attribute '_addfacet'
+>>> 
+slackbox:~/src/progs/py-stl> python
+Python 2.7.2 (default, Nov  5 2011, 16:21:09) 
+[GCC 4.2.1 20070719  [FreeBSD]] on freebsd8
+Type "help", "copyright", "credits" or "license" for more information.
+>>> execfile('test/makecube.py)
+  File "<stdin>", line 1
+    execfile('test/makecube.py)
+                              ^
+SyntaxError: EOL while scanning string literal
+>>> execfile('test/makecube.py')
+>>> for f in cube.facet:
+...   print f.n
+... 
+  facet normal 0.0 -0.0 1.0
+  facet normal 0.0 -0.0 1.0
+  facet normal 0.0 -1.0 0.0
+  facet normal 0.0 -1.0 0.0
+  facet normal -0.0 1.0 0.0
+  facet normal -0.0 1.0 0.0
+  facet normal 0.0 0.0 -1.0
+  facet normal 0.0 0.0 -1.0
+  facet normal 1.0 -0.0 0.0
+  facet normal 1.0 -0.0 0.0
+  facet normal -1.0 0.0 -0.0
+  facet normal -1.0 0.0 -0.0
+>>> for f in cube.facet:
+...   print f.n
+... 
+  facet normal 0.0 -0.0 1.0
+  facet normal 0.0 -0.0 1.0
+  facet normal 0.0 -1.0 0.0
+  facet normal 0.0 -1.0 0.0
+  facet normal -0.0 1.0 0.0
+  facet normal -0.0 1.0 0.0
+  facet normal 0.0 0.0 -1.0
+  facet normal 0.0 0.0 -1.0
+  facet normal 1.0 -0.0 0.0
+  facet normal 1.0 -0.0 0.0
+  facet normal -1.0 0.0 -0.0
+  facet normal -1.0 0.0 -0.0
+>>> 
+slackbox:~/src/progs/py-stl> python
+Python 2.7.2 (default, Nov  5 2011, 16:21:09) 
+[GCC 4.2.1 20070719  [FreeBSD]] on freebsd8
+Type "help", "copyright", "credits" or "license" for more information.
+>>> execfile('test/makecube.py')
+>>> for f in cube.facet:
+...   print f.n
+... 
+  facet normal 0.0 -0.0 1.0
+  facet normal 0.0 -0.0 1.0
+  facet normal 0.0 -1.0 0.0
+  facet normal 0.0 -1.0 0.0
+  facet normal -0.0 1.0 0.0
+  facet normal -0.0 1.0 0.0
+  facet normal 0.0 0.0 -1.0
+  facet normal 0.0 0.0 -1.0
+  facet normal 1.0 -0.0 0.0
+  facet normal 1.0 -0.0 0.0
+  facet normal -1.0 0.0 -0.0
+  facet normal -1.0 0.0 -0.0
+>>> cube.xform(tr)
+>>> for f in cube.facet:
+...   print f.n
+... 
+  facet normal 0.258819045103 -0.167731259497 0.951251242564
+  facet normal 0.258819045103 -0.167731259497 0.951251242564
+  facet normal 0.0 -0.984807753012 -0.173648177667
+  facet normal 0.0 -0.984807753012 -0.173648177667
+  facet normal 0.0 0.984807753012 0.173648177667
+  facet normal 0.0 0.984807753012 0.173648177667
+  facet normal -0.258819045103 0.167731259497 -0.951251242564
+  facet normal -0.258819045103 0.167731259497 -0.951251242564
+  facet normal 0.965925826289 0.0449434555275 -0.254887002244
+  facet normal 0.965925826289 0.0449434555275 -0.254887002244
+  facet normal -0.965925826289 -0.0449434555275 0.254887002244
+  facet normal -0.965925826289 -0.0449434555275 0.254887002244
+>>> 
+slackbox:~/src/progs/py-stl> exit
+
+Process shell finished

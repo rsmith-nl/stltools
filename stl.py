@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-20 18:34:03 rsmith>
+# Time-stamp: <2011-12-20 22:40:59 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -263,6 +263,9 @@ class Object:
         kn = norm.key()
         if kn not in self.normals:
             self.normals[kn] = norm
+        else:
+            # Make sure the facet references the normal in the dict!
+            f.n = self.normals[kn]
         self.facet.append(f)
         self._updateextents(f)
 
