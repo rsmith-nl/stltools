@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-19 21:22:55 rsmith>
+# Time-stamp: <2011-12-20 18:34:03 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,9 +30,8 @@
 import math
 import struct
 
-# Distances below 'LIMIT' are set to 0.
+# Points less than 'LIMIT' apart are considered equal.
 LIMIT = 1e-7
-
 
 class Vertex:
     '''Class for a 3D point in Cartesian space.'''
@@ -52,7 +51,8 @@ class Vertex:
         return Vertex(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __str__(self):
-        return "({}, {}, {})".format(self.x, self.y, self.z)
+        vs = '      vertex {} {} {}'
+        return vs.format(self.x, self.y, self.z)
 
     def __eq__(self, other):
         if other == None:
@@ -72,6 +72,9 @@ class Vertex:
         return Vertex(self.y*b.z-self.z*b.y, 
                       self.z*b.x-self.x*b.z, 
                       self.x*b.y-self.y*b.x)
+
+    def length(self):
+        return math.sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
 
     def key(self):
         '''Create a unique key for the vertex so we can put it in a hash
@@ -95,6 +98,10 @@ class Normal(Vertex):
     def set(self, dx, dy, dz):
         self.__init__(dx, dy, dz)
 
+    def __str__(self):
+        ns = '  facet normal {} {} {}'
+        return ns.format(self.x, self.y, self.z)
+
 
 class Facet:
     '''Class for a 3D triangle.'''
@@ -105,19 +112,23 @@ class Facet:
         self.v = [p1, p2, p3]
         if isinstance(n, Normal):
             self.n = n
+            self.nfv = False
         else:
+            self.nfv = True
             d1 = p2 - p1
             d2 = p3 - p2
             xp = d1.cross(d2)
             self.n = Normal(xp.x, xp.y, xp.z)
 
     def __str__(self):
-        s = "[facet normal {} {} {}\n   outer loop\n"
-        s = s.format(self.n.x, self.n.y, self.n.z)
-        for t in range(3):
-            s += "     vertex {} {} {}\n".format(self.v[t].x, self.v[t].y, 
-                                                 self.v[t].z)
-        s += "   endloop\n endfacet]"
+        s = str(self.n)+'\n'
+        if self.nfv:
+            s += '  [normal calculated from vertices]\n'
+        s += '    outer loop\n'
+        s += str(self.v[0])+'\n'
+        s += str(self.v[1])+'\n'
+        s += str(self.v[2])+'\n'
+        s += '    endloop\n  endfacet'
         return s
 
 class ProjectedFacet:
@@ -129,7 +140,11 @@ class ProjectedFacet:
         (self.x1, self.y1) = pr.project(f.v[0].x, f.v[0].y, f.v[0].z)
         (self.x2, self.y2) = pr.project(f.v[1].x, f.v[1].y, f.v[1].z)
         (self.x3, self.y3) = pr.project(f.v[2].x, f.v[2].y, f.v[2].z)
-        self.gray = math.fabs(f.n.z)*delta+ambient
+        self.gray = f.n.z*delta+ambient
+        if self.gray < ambient:
+            self.gray = ambient
+        elif self.gray > (ambient+delta):
+            self.gray = ambient+delta
         # Bounding box
         self.xmin = min(self.x1, self.x2, self.x3)
         self.ymin = min(self.y1, self.y2, self.y3)
@@ -168,6 +183,13 @@ class Object:
         else:
             self._process_txt(con)
 
+    def __str__(self):
+        s = "solid {}\n".format(self.name)
+        for f in self.facet:
+            s += str(f)+'\n'
+        s += 'endsolid'
+        return s
+
     def _process_bin(self, contents):
         '''Process the contents of a binary file.'''
         self.name, nf1 = struct.unpack("=80sI", contents[0:84])
@@ -192,12 +214,11 @@ class Object:
             v1 = Vertex(f1x, f1y, f1z)
             v2 = Vertex(f2x, f2y, f2z)
             v3 = Vertex(f3x, f3y, f3z)
-#            try:
-#                norm = Normal(nx, ny, nz)
-#            except ValueError:
-#                norm = None
-#            self._addfacet(v1, v2, v3, norm)
-            self._addfacet(v1, v2, v3, None)
+            try:
+                norm = Normal(nx, ny, nz)
+            except ValueError:
+                norm = None
+            self._addfacet(v1, v2, v3, norm)
 
     def _process_txt(self, contents):
         '''Process the contents of a text file.'''
@@ -216,12 +237,11 @@ class Object:
             v1 = Vertex(items[8], items[9], items[10])
             v2 = Vertex(items[12], items[13], items[14])
             v3 = Vertex(items[16], items[17], items[18])
-#            try:
-#                norm = Normal(items[2], items[3], items[4])
-#            except ValueError:
-#                norm = None
-#            self._addfacet(v1, v2, v3, norm)
-            self._addfacet(v1, v2, v3, None)
+            try:
+                norm = Normal(items[2], items[3], items[4])
+            except ValueError:
+                norm = None
+            self._addfacet(v1, v2, v3, norm)
             del items[:21]
 
     def _addfacet(self, v1, v2, v3, norm):
@@ -253,10 +273,6 @@ class Object:
         for f in self.facet:
             yield f
 
-    def __str__(self):
-        s = "[stl.Object; name: '{}', {} facets]"
-        return s.format(self.name, len(self.facet))
-
     def extents(self):
         '''Returns the maximum and minimum x, y and z coordinates in the 
            form of a tuple (xmin, xmax, ymin, ymax, zmin, zmax).'''
@@ -280,6 +296,9 @@ class Object:
             self.xmin = self.xmax = f.v[0].x
             self.ymin = self.ymax = f.v[0].y
             self.zmin = self.zmax = f.v[0].z
+            self.mx = 0.0
+            self.my = 0.0
+            self.mz = 0.0
         self.mx += f.v[0].x + f.v[1].x + f.v[2].x
         self.my += f.v[0].y + f.v[1].y + f.v[2].y
         self.mz += f.v[0].z + f.v[1].z + f.v[2].z

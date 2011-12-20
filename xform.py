@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-19 21:00:05 rsmith>
+# Time-stamp: <2011-12-20 18:27:54 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -47,10 +47,10 @@ class Zpar:
         ry = (y-self.ymin)*self.s
         return (rx, ry)
 
-    def visible(self, x, y, z):
-        '''Checks a normal vector x,y,z to see if it points toward or away
+    def visible(self, n):
+        '''Checks a normal vector n to see if it points toward or away
            from the viewer. Returns True in the first case.'''
-        if (z > 0.0): 
+        if (n.z > 0.0): 
             return True
         return False
 

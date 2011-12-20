@@ -2,7 +2,7 @@
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
-ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py
+ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stl2txt.py
 all: ${ALL}
 #endskip
 BASE=/usr/local
@@ -20,6 +20,7 @@ install: ${ALL}
 	mv $(BINDIR)/stl2ps.py $(BINDIR)/stl2ps
 	mv $(BINDIR)/stl2pov.py $(BINDIR)/stl2pov
 	mv $(BINDIR)/stl2pdf.py $(BINDIR)/stl2pdf
+	mv $(BINDIR)/stl2txt.py $(BINDIR)/stl2txt
 	rm -rf build
 #Install the manual pages.
 	gzip -c stl2ps.1 >stl2ps.1.gz
@@ -60,6 +61,10 @@ stl2pdf.py: stl2pdf.in.py tools/replace.sed
 
 stl2pov.py: stl2pov.in.py tools/replace.sed
 	sed -f tools/replace.sed stl2pov.in.py >$@
+	chmod 755 $@
+
+stl2txt.py: stl2txt.in.py tools/replace.sed
+	sed -f tools/replace.sed stl2txt.in.py >$@
 	chmod 755 $@
 
 stl2ps.1: stl2ps.1.in tools/replace.sed

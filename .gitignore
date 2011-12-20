@@ -8,6 +8,7 @@ setup.py
 stl2pov.py
 stl2ps.py
 stl2pdf.py
+stl2txt.py
 stl2ps.1
 stl2pdf.1
 stl2pov.1
