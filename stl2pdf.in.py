@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PDF file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-20 18:39:08 rsmith>
+# Time-stamp: <2011-12-20 18:52:09 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -93,6 +93,7 @@ out = canvas.Canvas(outfile, (pr.w, pr.h), pageCompression=1)
 out.setCreator(name)
 out.setLineCap(1)
 out.setLineJoin(2)
+out.setLineWidth(0.25)
 # Calculate the visible facets
 vizfacets = [f for f in stlobj.facet if pr.visible(f.n)]
 # Next, depth-sort the facets using the largest z-value of the three vertices.
