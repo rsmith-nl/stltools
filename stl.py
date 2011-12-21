@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-20 22:40:59 rsmith>
+# Time-stamp: <2011-12-21 20:50:59 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -195,7 +195,7 @@ class Object:
         self.name, nf1 = struct.unpack("=80sI", contents[0:84])
         # Strip zero bytes, the prefix 'solid' and whitespace on both sides.
         self.name = self.name.replace("solid ", "")
-        self.name = self.name.strip('\x00 \t')
+        self.name = self.name.strip('\x00 \t\n\r')
         if len(self.name) == 0:
             self.name = "unknown"
         contents = contents[84:]
@@ -218,7 +218,7 @@ class Object:
                 norm = Normal(nx, ny, nz)
             except ValueError:
                 norm = None
-            self._addfacet(v1, v2, v3, norm)
+            self.addfacet(v1, v2, v3, norm)
 
     def _process_txt(self, contents):
         '''Process the contents of a text file.'''
@@ -241,10 +241,10 @@ class Object:
                 norm = Normal(items[2], items[3], items[4])
             except ValueError:
                 norm = None
-            self._addfacet(v1, v2, v3, norm)
+            self.addfacet(v1, v2, v3, norm)
             del items[:21]
 
-    def _addfacet(self, v1, v2, v3, norm):
+    def addfacet(self, v1, v2, v3, norm):
         '''Make vertices v1, v2, v3 and optionally normal vector norm into a
         Facet and add it to the STL object.'''
         k1 = v1.key()
@@ -292,6 +292,23 @@ class Object:
            in a tuple (x, y, z).'''
         c = 3*len(self.facet)
         return (self.mx/c, self.my/c, self.mz/c)
+
+    def stats(self):
+        '''Returns a string with various information about the object.'''
+        outs = "Name of the solid: '{}'.\n".format(self.name)
+        s = "{} facets, {} unique vertices, {} unique normal vectors.\n"
+        outs += s.format(len(self.facet), len(self.vertices), len(self.normals))
+        outs += "3D Extents of the model (in STL units):\n"
+        outs += "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
+        outs += "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
+        outs += "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
+        s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
+        x,y,z = self.center()
+        outs += s.format(x,y,z)
+        s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>.\n"
+        x,y,z = self.meanpoint()
+        outs += s.format(x,y,z)
+        return outs
 
     def _updateextents(self, f):
         '''Update the extents for Facet f.'''
