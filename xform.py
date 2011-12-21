@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-21 21:19:31 rsmith>
+# Time-stamp: <2011-12-21 21:22:59 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -98,7 +98,7 @@ class Xform:
     def __str__(self):
         outs = ''
         line = '| {: 6.3f}, {: 6.3f}, {: 6.3f}, {: 6.3f} |\n'
-        for r in range(0,4):
+        for r in range(0, 4):
             outs += line.format(self.m[r][0], self.m[r][1], 
                                 self.m[r][2], self.m[r][3])
         outs = outs[0:-1]

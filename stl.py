@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-21 20:50:59 rsmith>
+# Time-stamp: <2011-12-21 21:25:31 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -230,7 +230,6 @@ class Object:
             self.name = "unknown"
         else:
             self.name = ' '.join(items[sn:en])
-        nf2 = items.count("endfacet")
         del items[0:en]
         # Items now begins with "facet"
         while items[0] == "facet":
@@ -303,11 +302,11 @@ class Object:
         outs += "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
         outs += "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
         s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
-        x,y,z = self.center()
-        outs += s.format(x,y,z)
+        x, y, z = self.center()
+        outs += s.format(x, y, z)
         s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>.\n"
-        x,y,z = self.meanpoint()
-        outs += s.format(x,y,z)
+        x, y, z = self.meanpoint()
+        outs += s.format(x, y, z)
         return outs
 
     def _updateextents(self, f):

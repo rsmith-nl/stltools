@@ -3,7 +3,7 @@
 # Program for converting a view of an STL file into a PDF file
 #
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-20 18:52:09 rsmith>
+# Time-stamp: <2011-12-21 21:25:49 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,7 +27,6 @@
 # SUCH DAMAGE.
 
 import sys
-import math
 import os
 
 import stl
