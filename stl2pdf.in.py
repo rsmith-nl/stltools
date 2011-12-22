@@ -1,9 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
-# Program for converting a view of an STL file into a PDF file
-#
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-21 21:25:49 rsmith>
+# Time-stamp: <2011-12-22 14:42:51 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,6 +23,8 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+
+'''Program for converting a view of an STL file into a PDF file.'''
 
 import sys
 import os
@@ -73,7 +73,11 @@ while len(sys.argv) > 1:
         print "Argument '{}' is not a number, ignored.".format(sys.argv[1])
         continue
 # Open the file
-stlobj = stl.Object(infile)
+try:
+    stlobj = stl.Object(infile)
+except:
+    print "The file '{}' cannot be read or parsed. Exiting.".format(sys.argv[1])
+    sys.exit(1)
 # Remove spaces from name
 stlobj.name = stlobj.name.strip()
 # Apply transformations

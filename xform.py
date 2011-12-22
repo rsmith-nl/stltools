@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-21 21:22:59 rsmith>
+# Time-stamp: <2011-12-22 15:05:36 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -152,12 +152,21 @@ class Xform:
         add[2][3] = float(z)
         self.m = _mmul(add, self.m)
 
+    def applyrot(self, x, y, z):
+        '''Apply the rotation part of transformation to point x,y,z and return
+           the transformed coordinates as a tuple.'''
+        xr = self.m[0][0]*x + self.m[0][1]*y + self.m[0][2]*z
+        yr = self.m[1][0]*x + self.m[1][1]*y + self.m[1][2]*z
+        zr = self.m[2][0]*x + self.m[2][1]*y + self.m[2][2]*z
+        return (xr, yr, zr)
+
     def apply(self, x, y, z):
         '''Apply the transformation to point x,y,z and return the transformed
            coordinates as a tuple.'''
-        xr = self.m[0][0]*x + self.m[0][1]*y + self.m[0][2]*z + self.m[0][3]
-        yr = self.m[1][0]*x + self.m[1][1]*y + self.m[1][2]*z + self.m[1][3]
-        zr = self.m[2][0]*x + self.m[2][1]*y + self.m[2][2]*z + self.m[2][3]
+        xr, yr, zr = self.applyrot(x, y, z)
+        xr += self.m[0][3]
+        yr += self.m[1][3]
+        zr += self.m[2][3]
         return (xr, yr, zr)
 
 # Built-in tests.

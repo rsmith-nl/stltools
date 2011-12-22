@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-21 21:25:31 rsmith>
+# Time-stamp: <2011-12-22 15:44:42 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -102,6 +102,10 @@ class Normal(Vertex):
         ns = '  facet normal {} {} {}'
         return ns.format(self.x, self.y, self.z)
 
+    def xform(self, tr):
+        '''Apply the transformation (without the translation part) tr to the
+        normal.'''
+        (self.x, self.y, self.z) = tr.applyrot(self.x, self.y, self.z)
 
 class Facet:
     '''Class for a 3D triangle.'''
@@ -202,8 +206,6 @@ class Object:
         facetsz = len(contents)
         nf2 = facetsz/50
         if nf1 != nf2:
-            ds = "stl.Object; from '{}': {} facets, from size {} facets"
-            print ds.format(self.name, nf1, nf2)
             raise ValueError("Number of facets doesn't match file size.")
         # Chop the string into a list of 50 byte strings.
         items = [contents[n:n+50] for n in range(0, facetsz, 50)]
@@ -224,8 +226,11 @@ class Object:
         '''Process the contents of a text file.'''
         items = contents.split()
         items = [s.strip() for s in items]
-        sn = items.index("solid")+1
-        en = items.index("facet")
+        try:
+            sn = items.index("solid")+1
+            en = items.index("facet")
+        except:
+            raise ValueError("Not an STL file.")
         if sn == en:
             self.name = "unknown"
         else:
@@ -292,21 +297,21 @@ class Object:
         c = 3*len(self.facet)
         return (self.mx/c, self.my/c, self.mz/c)
 
-    def stats(self):
+    def stats(self, prefix=''):
         '''Returns a string with various information about the object.'''
-        outs = "Name of the solid: '{}'.\n".format(self.name)
-        s = "{} facets, {} unique vertices, {} unique normal vectors.\n"
+        outs = prefix + "Name of the solid: '{}'.\n".format(self.name)
+        s = prefix + "{} facets, {} unique vertices, {} unique normal vectors.\n"
         outs += s.format(len(self.facet), len(self.vertices), len(self.normals))
-        outs += "3D Extents of the model (in STL units):\n"
-        outs += "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
-        outs += "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
-        outs += "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
+        outs += prefix + "3D Extents of the model (in STL units):\n"
+        outs += prefix + "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
+        outs += prefix + "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
+        outs += prefix + "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
         s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
         x, y, z = self.center()
-        outs += s.format(x, y, z)
-        s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>.\n"
+        outs += prefix + s.format(x, y, z)
+        s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
         x, y, z = self.meanpoint()
-        outs += s.format(x, y, z)
+        outs += prefix + s.format(x, y, z)
         return outs
 
     def _updateextents(self, f):

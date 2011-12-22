@@ -1,7 +1,7 @@
 .\" -*- nroff -*-
 .\" stl2ps.1
 .\" By: R.F. Smith <rsmith@xs4all.nl>
-.\" Time-stamp: <2011-10-02 15:44:40 rsmith>
+.\" Time-stamp: <2011-12-22 15:11:30 rsmith>
 .\"
 .Dd DATE
 .Os 
@@ -42,6 +42,14 @@ operator. The grayscale tint of the triangle is also determined by the
 orientation of the triangle; running from almost black for triangles turned 90
 degrees to the line of sight to near white for triangles parallel to the x,y
 plane.
+
+If no output filename is given, the path and the
+.Ql .stl 
+extension are stripped from the input filename. The extension is replaced by the
+.Ql .ps
+extension. So if no output filename is specified, the output file is written
+in the current working directory. The PostScript data is written to the output
+filename.
 .Sh EXIT STATUS
 .Ex -std
 .Sh DIAGNOSTICS
@@ -59,7 +67,7 @@ number of degrees is expected as part of a rotation command. It will be ignored.
 There are some errors which the program cannot ignore, and which will
 terminate the program.
 .Bl -tag -width "foo"
-.It Error: cannot process input file '...'.  
+.It The file '...' cannot be read or parsed. Exiting.
 If a given input file cannot be read, or if the file is not recognized as an
 STL file, this error is produced, and the program is terminated with exit code
 1.

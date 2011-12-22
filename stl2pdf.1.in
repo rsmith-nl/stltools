@@ -1,7 +1,7 @@
 .\" -*- nroff -*-
 .\" stl2ps.1
 .\" By: R.F. Smith <rsmith@xs4all.nl>
-.\" Time-stamp: <2011-10-02 17:37:45 rsmith>
+.\" Time-stamp: <2011-12-22 13:37:23 rsmith>
 .\"
 .Dd DATE
 .Os 
@@ -66,7 +66,7 @@ number of degrees is expected as part of a rotation command. It will be ignored.
 There are some errors which the program cannot ignore, and which will
 terminate the program.
 .Bl -tag -width "foo"
-.It Error: cannot process input file '...'.  
+.It The file '...' cannot be read or parsed. Exiting.
 If a given input file cannot be read, or if the file is not recognized as an
 STL file, this error is produced, and the program is terminated with exit code
 1.
