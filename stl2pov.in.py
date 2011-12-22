@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-22 15:50:43 rsmith>
+# Time-stamp: <2011-12-22 22:40:18 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,7 +33,7 @@ import time
 
 import stl
 
-ver = "stl2pov [rev. VERSION] (DATE)"
+ver = "stl2pov [rev. UkZTVkVS] (UkZTREFU)"
 
 def usage():
     print ver

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-22 13:19:17 rsmith>
+# Time-stamp: <2011-12-22 22:42:49 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,7 +30,7 @@ representation of the object in the file.'''
 import sys
 import stl
 
-name = "stlinfo [rev. VERSION] (DATE)"
+name = "stlinfo [rev. UkZTVkVS] (UkZTREFU)"
 
 def usage():
     print name

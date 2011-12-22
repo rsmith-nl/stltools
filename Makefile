@@ -2,7 +2,7 @@
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
-ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py
+ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py .git/hooks/post-commit
 all: ${ALL}
 #endskip
 BASE=/usr/local
@@ -25,8 +25,9 @@ install: ${ALL}
 #Install the manual pages.
 	gzip -c stl2ps.1 >stl2ps.1.gz
 	gzip -c stl2pdf.1 >stl2pdf.1.gz
-	install -m 644 stl2ps.1.gz stl2pdf.1.gz $(MANDIR)/man1
-	rm -f stl2ps.1.gz stl2pdf.1.gz
+	gzip -c stlinfo.1 >stlinfo.1.gz
+	install -m 644 stl2ps.1.gz stl2pdf.1.gz stlinfo.1.gz $(MANDIR)/man1
+	rm -f stl2ps.1.gz stl2pdf.1.gz stlinfo.1.gz
 
 #beginskip
 dist: ${ALL}
@@ -35,9 +36,13 @@ dist: ${ALL}
 	python setup.py sdist --format=zip
 	mv Makefile.org Makefile
 	rm -f MANIFEST
+#	sed -f tools/replace.sed port/Makefile.in >port/Makefile
+	cd dist ; sha256 py-stl-* >../port/distinfo ; cd ..
+	cd dist ; ls -l py-stl-* | awk '{printf "SIZE (%s) = %d\n", $$9, $$5};' >>../port/distinfo ; cd ..
 
 clean::
 	rm -rf dist build backup-*.tar.gz *.pyc ${ALL} MANIFEST
+	rm -f port/Makefile port/distinfo
 
 backup::
 	sh tools/genbackup

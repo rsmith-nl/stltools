@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-22 14:42:51 rsmith>
+# Time-stamp: <2011-12-22 22:39:33 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -34,7 +34,7 @@ import xform
 
 from reportlab.pdfgen import canvas
 
-name = "stl2pdf [rev. VERSION] (DATE)"
+name = "stl2pdf [rev. UkZTVkVS] (UkZTREFU)"
 
 def usage():
     print name

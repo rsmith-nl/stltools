@@ -1,0 +1,14 @@
+Op till now I've been using VERSION and DATE in replace.sed, but that
+sometimes doesn't work well, e.g. if you're trying to process port
+Makefiles. :-)
+
+So after some experimenting with Python I came up with new identifiers;
+
+   >>> print 'RFSVER'.encode('base64')
+   UkZTVkVS
+
+   >>> print 'RFSDAT'.encode('base64')
+   UkZTREFU
+
+These are very unlikely to be found in a text, and only contain upper- and
+lowercase letters.

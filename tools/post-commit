@@ -1,4 +1,4 @@
 #!/bin/sh
 
-git --no-pager log -1 HEAD --pretty=format:"s|VERSION|%h|%n" >tools/replace.sed
-git --no-pager log -1 HEAD --pretty=format:"s|DATE|%ci|'"|sed -e "s/ .*/|/" >>tools/replace.sed
+git --no-pager log -1 HEAD --pretty=format:"s|UkZTVkVS|%h|%n" >tools/replace.sed
+git --no-pager log -1 HEAD --pretty=format:"s|UkZTREFU|%ci|'"|sed -e "s/ .*/|/" >>tools/replace.sed

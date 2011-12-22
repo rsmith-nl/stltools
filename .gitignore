@@ -13,5 +13,7 @@ stl2ps.1*
 stl2pdf.1*
 stl2pov.1*
 stlinfo.1*
-tools/replace.sed
 MANIFEST
+tools/replace.sed
+port/Makefile
+port/distinfo
