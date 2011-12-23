@@ -15,5 +15,6 @@ stl2pov.1*
 stlinfo.1*
 MANIFEST
 tools/replace.sed
+port/work
 port/Makefile
 port/distinfo

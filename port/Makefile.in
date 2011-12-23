@@ -12,9 +12,10 @@ MASTER_SITES=		http://rsmith.home.xs4all.nl/software/
 
 MAINTAINER=			rsmith@xs4all.nl
 COMMENT=			Converts STL models to POV-Ray meshes or PostScript/PDF images.
+PKGNAMEPREFIX=		${PYTHON_PKGNAMEPREFIX}
 
-#for stl2pdf
-RUN_DEPENDS=		${PYTHON_PKGNAMEPREFIX}reportlab2:${PORTSDIR}/print/py-reportlab2
+#for stl2pdf only
+RUN_DEPENDS=		${PYTHON_PKGNAMEPREFIX}reportlab2>2:${PORTSDIR}/print/py-reportlab2
 
 CONFLICTS=			stl2pov*
 MAN1=				stl2pdf.1 stl2ps.1 stlinfo.1
@@ -23,13 +24,13 @@ NO_BUILD=			YES
 USE_PYTHON=			2.5+
 USE_PYDISTUTILS=	YES
 
-
-.include <bsd.port.pre.mk>
-
-post_install:
+post-install:
+	@${INSTALL_MAN} ${WRKSRC}/stl2pdf.1 ${MANPREFIX}/man/man1
+	@${INSTALL_MAN} ${WRKSRC}/stl2ps.1 ${MANPREFIX}/man/man1
+	@${INSTALL_MAN} ${WRKSRC}/stlinfo.1 ${MANPREFIX}/man/man1
 	@${MV} ${PREFIX}/bin/stl2pdf.py ${PREFIX}/bin/stl2pdf
 	@${MV} ${PREFIX}/bin/stl2pov.py ${PREFIX}/bin/stl2pov
 	@${MV} ${PREFIX}/bin/stl2ps.py  ${PREFIX}/bin/stl2ps
 	@${MV} ${PREFIX}/bin/stlinfo.py ${PREFIX}/bin/stlinfo
 
-.include <bsd.port.post.mk>
+.include <bsd.port.mk>

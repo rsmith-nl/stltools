@@ -1,4 +1,4 @@
-.PHONY: all install dist clean backup
+.PHONY: all install dist clean backup deinstall
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
@@ -8,6 +8,7 @@ all: ${ALL}
 BASE=/usr/local
 MANDIR=$(BASE)/man
 BINDIR=$(BASE)/bin
+PYSITE!=python -c 'import site; print site.getsitepackages()[0]'
 
 install: ${ALL}
 	@if [ `id -u` != 0 ]; then \
@@ -29,6 +30,17 @@ install: ${ALL}
 	install -m 644 stl2ps.1.gz stl2pdf.1.gz stlinfo.1.gz $(MANDIR)/man1
 	rm -f stl2ps.1.gz stl2pdf.1.gz stlinfo.1.gz
 
+deinstall::
+	@if [ `id -u` != 0 ]; then \
+		echo "You must be root to deinstall the program!"; \
+		exit 1; \
+	fi
+	rm -f ${PYSITE}/stl.py*
+	rm -f ${PYSITE}/xform.py*
+	rm -f $(BINDIR)/stl2ps $(BINDIR)/stl2pov $(BINDIR)/stl2pdf $(BINDIR)/stlinfo
+	rm -f $(MANDIR)/man1/stl2ps.1.gz $(MANDIR)/man1/stl2pdf.1.gz
+	rm -f $(MANDIR)/man1/stlinfo.1.gz
+
 #beginskip
 dist: ${ALL}
 	mv Makefile Makefile.org
@@ -36,7 +48,7 @@ dist: ${ALL}
 	python setup.py sdist --format=zip
 	mv Makefile.org Makefile
 	rm -f MANIFEST
-#	sed -f tools/replace.sed port/Makefile.in >port/Makefile
+	sed -f tools/replace.sed port/Makefile.in >port/Makefile
 	cd dist ; sha256 py-stl-* >../port/distinfo ; cd ..
 	cd dist ; ls -l py-stl-* | awk '{printf "SIZE (%s) = %d\n", $$9, $$5};' >>../port/distinfo ; cd ..
 
