@@ -1,8 +1,9 @@
-.PHONY: all install dist clean backup deinstall
+.PHONY: all install dist clean backup deinstall check
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
 ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py .git/hooks/post-commit
+SRCS=setup.in.py stl2pdf.in.py stl2ps.in.py xform.py stl.py stl2pov.in.py stlinfo.in.py
 all: ${ALL}
 #endskip
 BASE=/usr/local
@@ -58,6 +59,9 @@ clean::
 
 backup::
 	sh tools/genbackup
+
+check: .IGNORE
+	pylint --rcfile=tools/pylintrc ${SRCS}
 
 .git/hooks/post-commit: tools/post-commit
 	install -m 755 $> $@

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-22 15:44:42 rsmith>
+# Time-stamp: <2011-12-24 13:51:45 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -300,7 +300,8 @@ class Object:
     def stats(self, prefix=''):
         '''Returns a string with various information about the object.'''
         outs = prefix + "Name of the solid: '{}'.\n".format(self.name)
-        s = prefix + "{} facets, {} unique vertices, {} unique normal vectors.\n"
+        s = prefix 
+        s += "{} facets, {} unique vertices, {} unique normal vectors.\n"
         outs += s.format(len(self.facet), len(self.vertices), len(self.normals))
         outs += prefix + "3D Extents of the model (in STL units):\n"
         outs += prefix + "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
