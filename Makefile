@@ -2,9 +2,9 @@
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
-ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py .git/hooks/post-commit
+ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py
 SRCS=setup.in.py stl2pdf.in.py stl2ps.in.py xform.py stl.py stl2pov.in.py stlinfo.in.py
-all: ${ALL}
+all: ${ALL} .git/hooks/post-commit
 #endskip
 BASE=/usr/local
 MANDIR=$(BASE)/man
