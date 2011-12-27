@@ -44,7 +44,7 @@ if len(sys.argv) == 1:
     usage()
     sys.exit(0)
 try:
-    stlobj = stl.Object(sys.argv[1])
+    stlobj = stl.Surface(sys.argv[1])
 except:
     print "The file '{}' cannot be read or parsed. Exiting.".format(sys.argv[1])
     sys.exit(1)

@@ -73,7 +73,7 @@ while len(sys.argv) > 1:
         continue
 # Open the file
 try:
-    stlobj = stl.Object(infile)
+    stlobj = stl.Surface(infile)
 except:
     print "The file '{}' cannot be read or parsed. Exiting.".format(infile)
     sys.exit(1)

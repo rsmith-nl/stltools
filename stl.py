@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-24 13:51:45 rsmith>
+# Time-stamp: <2011-12-27 18:12:44 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -107,6 +107,50 @@ class Normal(Vertex):
         normal.'''
         (self.x, self.y, self.z) = tr.applyrot(self.x, self.y, self.z)
 
+class Edge:
+    '''Class representing the edge of a Facet, a line segment between two
+    vertices.'''
+
+    def __init__(self, s, e, f=None):
+    '''Create the edge of a Facet.
+
+    s,e -- points of the laine segment
+    f   -- facet that the line segment belongs to.'''
+        assert isinstance(s, Vertex), "Start point of edge is not a Vertex"
+        assert isinstance(e, Vertex), "End point of edge is not a Vertex"
+        self.p = [s,e]
+        self.refs = []
+        if f:
+            assert isInstance(f, Facet), "Reference is not a Facet."
+            self.refs.append(f)
+
+    def __eq__(self, other):
+        '''If both self and other contain the same endpoints, they're equal,
+        irrespective of the direction of the edge.'''
+        return sorted(self.p) == sorted(other.p)
+
+    def fits(self, index, other):
+        '''Checks if another Edge fits onto this one.
+
+        index -- end of the Edge to test, either 1 (start) or 2 (end).
+        other -- Edge to test.
+
+        Returns a tuple of the new end edge and its free point.'''
+        index = int(index)
+        assert index < 0 or index > 2, "Index out of bounds"
+        assert isInstance(Edge, other), "Trying to fit a non-Edge."
+        if self.p[index-1] == other.p[0]:
+            return (other,1)
+        if self.p[index-1] == other.p[1]:
+            return (other,2)
+        return (self, index) # Doesn't fit
+
+    def addref(self, f):
+        '''Add another Facet to the list of references.'''
+        assert len(self.refs) < 2, "Already too many references."
+        assert isInstance(f, Facet), "Reference is not a Facet."
+        self.refs.append(f)
+
 class Facet:
     '''Class for a 3D triangle.'''
 
@@ -163,11 +207,11 @@ class ProjectedFacet:
             return False
         return True
 
-class Object:
+class Surface:
     '''Class for STL objects.'''
 
     def __init__(self, fn=None):
-        '''Read the STL file fn into an STL object. Create an empty STL
+        '''Read the STL file fn into an STL Surface. Create an empty STL
         object if fn is None.'''
         self.facet = []
         self.vertices = {}
@@ -365,7 +409,7 @@ class Object:
 if __name__ == '__main__':
     print "===== begin of binary file ====="
     fname = "test/salamanders.stl"
-    binstl = Object(fname)
+    binstl = Surface(fname)
     print binstl
     print "[bin] len(binstl) = {} facets".format(len(binstl))
     print "[bin] number of unique vertices: {}".format(len(binstl.vertices))
@@ -377,7 +421,7 @@ if __name__ == '__main__':
     print "===== end of binary file ====="
     print "===== begin of text file ====="
     fname = "test/microSD_connector.stl"
-    txtstl = Object(fname)
+    txtstl = Surface(fname)
     print txtstl
     print "[txt] len(txtstl) = {} facets".format(len(txtstl))
     print "[txt] number of unique vertices: {}".format(len(txtstl.vertices))

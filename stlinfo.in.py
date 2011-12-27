@@ -46,7 +46,7 @@ if sys.argv[1] == '-t':
     del sys.argv[1]
 # Open the file
 try:
-    stlobj = stl.Object(sys.argv[1])
+    stlobj = stl.Surface(sys.argv[1])
 except:
     print "The file '{}' cannot be read or parsed. Exiting.".format(sys.argv[1])
     exit(1)
