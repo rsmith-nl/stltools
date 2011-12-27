@@ -62,7 +62,7 @@ outs += "# declare m_{} = mesh {{\n".format(stlobj.name)
 sot = "  triangle {{ // #{}\n"
 fc = "    <{1}, {0}, {2}>,\n"
 fct = "    <{1}, {0}, {2}>\n"
-for n, f in enumerate(stlobj.facet):
+for n, f in enumerate(stlobj.facets):
     outs += sot.format(n+1)
     outs += fc.format(f.v[0].x, f.v[0].y, f.v[0].z)
     outs += fc.format(f.v[1].x, f.v[1].y, f.v[1].z)

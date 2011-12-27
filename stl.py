@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-27 18:40:58 rsmith>
+# Time-stamp: <2011-12-27 19:20:09 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -120,10 +120,10 @@ class Edge(object):
         f   -- facet that the line segment belongs to.'''
         assert isinstance(s, Vertex), "Start point of edge is not a Vertex"
         assert isinstance(e, Vertex), "End point of edge is not a Vertex"
-        self.p = [s,e]
+        self.p = [s, e]
         self.refs = []
         if f:
-            assert isInstance(f, Facet), "Reference is not a Facet."
+            assert isinstance(f, Facet), "Reference is not a Facet."
             self.refs.append(f)
 
     def __eq__(self, other):
@@ -140,17 +140,17 @@ class Edge(object):
         Returns a tuple of the new end edge and its free point.'''
         index = int(index)
         assert index < 0 or index > 2, "Index out of bounds"
-        assert isInstance(Edge, other), "Trying to fit a non-Edge."
+        assert isinstance(Edge, other), "Trying to fit a non-Edge."
         if self.p[index-1] == other.p[0]:
-            return (other,1)
+            return (other, 1)
         if self.p[index-1] == other.p[1]:
-            return (other,2)
+            return (other, 2)
         return (self, index) # Doesn't fit
 
     def addref(self, f):
         '''Add another Facet to the list of references.'''
         assert len(self.refs) < 2, "Already too many references."
-        assert isInstance(f, Facet), "Reference is not a Facet."
+        assert isinstance(f, Facet), "Reference is not a Facet."
         self.refs.append(f)
 
 class Facet(object):
@@ -208,7 +208,7 @@ class Surface(object):
     def __init__(self, fn=None):
         '''Read the STL file fn into an STL surface. Create an empty STL
         object if fn is None.'''
-        self.facet = []
+        self.facets = []
         self.vertices = {}
         self.normals = {}
         self.name = ""
@@ -228,7 +228,7 @@ class Surface(object):
 
     def __str__(self):
         s = "solid {}\n".format(self.name)
-        for f in self.facet:
+        for f in self.facets:
             s += str(f)+'\n'
         s += 'endsolid'
         return s
@@ -309,14 +309,14 @@ class Surface(object):
         else:
             # Make sure the facet references the normal in the dict!
             f.n = self.normals[kn]
-        self.facet.append(f)
+        self.facets.append(f)
         self._updateextents(f)
 
     def __len__(self): 
-        return len(self.facet)
+        return len(self.facets)
 
     def __iter__(self):
-        for f in self.facet:
+        for f in self.facets:
             yield f
 
     def extents(self):
@@ -333,7 +333,7 @@ class Surface(object):
     def meanpoint(self):
         '''Returns the average of all Vertexes of all Facets 
            in a tuple (x, y, z).'''
-        c = 3*len(self.facet)
+        c = 3*len(self.facets)
         return (self.mx/c, self.my/c, self.mz/c)
 
     def stats(self, prefix=''):
@@ -341,7 +341,8 @@ class Surface(object):
         outs = prefix + "Name of the solid: '{}'.\n".format(self.name)
         s = prefix 
         s += "{} facets, {} unique vertices, {} unique normal vectors.\n"
-        outs += s.format(len(self.facet), len(self.vertices), len(self.normals))
+        outs += s.format(len(self.facets), len(self.vertices), 
+                         len(self.normals))
         outs += prefix + "3D Extents of the model (in STL units):\n"
         outs += prefix + "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
         outs += prefix + "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
@@ -397,7 +398,7 @@ class Surface(object):
         del self.normals
         self.normals = nd
         self.xmin = None
-        for f in self.facet:
+        for f in self.facets:
             self._updateextents(f)
 
 # Built-in test.
@@ -410,9 +411,9 @@ if __name__ == '__main__':
     print "[bin] number of unique vertices: {}".format(len(binstl.vertices))
     print "[bin] number of unique normals: {}".format(len(binstl.normals))
     print "[bin] extents = ", binstl.extents()
-    print "[bin] 0", binstl.facet[0]
+    print "[bin] 0", binstl.facets[0]
     print "..."
-    print "[bin] {}".format(len(binstl)-1), binstl.facet[-1]
+    print "[bin] {}".format(len(binstl)-1), binstl.facets[-1]
     print "===== end of binary file ====="
     print "===== begin of text file ====="
     fname = "test/microSD_connector.stl"
@@ -422,7 +423,7 @@ if __name__ == '__main__':
     print "[txt] number of unique vertices: {}".format(len(txtstl.vertices))
     print "[txt] number of unique normals: {}".format(len(txtstl.normals))
     print "[txt] extents = ", txtstl.extents()
-    print "[txt] 0", txtstl.facet[0]
+    print "[txt] 0", txtstl.facets[0]
     print "..."
-    print "[txt] {}".format(len(txtstl)-1), txtstl.facet[-1]
+    print "[txt] {}".format(len(txtstl)-1), txtstl.facets[-1]
     print "===== end of text file ====="

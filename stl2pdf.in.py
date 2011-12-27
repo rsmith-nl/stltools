@@ -98,7 +98,7 @@ out.setLineCap(1)
 out.setLineJoin(2)
 out.setLineWidth(0.25)
 # Calculate the visible facets
-vizfacets = [f for f in stlobj.facet if pr.visible(f.n)]
+vizfacets = [f for f in stlobj.facets if pr.visible(f.n)]
 # Next, depth-sort the facets using the largest z-value of the three vertices.
 vizfacets.sort(None, lambda f: max([f.v[0].z, f.v[1].z, f.v[2].z]))
 # Project and illuminate the facets

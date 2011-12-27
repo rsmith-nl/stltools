@@ -96,7 +96,7 @@ s = "% This becomes a picture of {:.0f}×{:.0f} PostScript points;"\
     " {:.0f}×{:.0f} mm.\n"
 outs += s.format(pr.w, pr.h, pr.w/72*25.4, pr.h/72*25.4)
 # Calculate the visible facets
-vizfacets = [f for f in stlobj.facet if pr.visible(f.n)]
+vizfacets = [f for f in stlobj.facets if pr.visible(f.n)]
 outs += "% {} of {} facets are visible.\n".format(len(vizfacets), len(stlobj))
 # Next, depth-sort the facets using the smallest distance to the viewer
 # of the three vertices.
