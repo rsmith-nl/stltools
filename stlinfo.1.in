@@ -1,0 +1,117 @@
+.\" -*- nroff -*-
+.\" stlinfo.1
+.\" By: R.F. Smith <rsmith@xs4all.nl>
+.\" Time-stamp: <2011-12-27 22:07:45 rsmith>
+.\"
+.Dd UkZTREFU
+.Os 
+.Dt STLINFO 1 CON
+.Sh NAME
+.Nm stlinfo
+.Nd Reads an STL file and prints information about the object or a text
+representation of the object in the file.
+.Sh SYNOPSIS
+.Nm 
+.Op -t | -e
+infile
+.Sh DESCRIPTION
+This manual page documents version 
+.Ql UkZTVkVS
+of the 
+.Nm
+program. Its purpose is to print human readable information about the STL file
+or a human readable version of the STL file.
+
+First, the STL file is parsed. Both binary and text STL file can be read, but
+any color information in binary STL files is discarded since this is not
+standardized. 
+
+By default the program prints information about the STL file. This includes
+the name of the solid, the number of facets, unique vertices and normal
+vectors, the object's extents and the center and mean points of the object.
+If the '-e' option is used, all the edges of the facets are checked for edges
+that are only used in one facet, indicating an open surface. For large models
+this is a long operation.
+
+If the '-t' option is used, however, a listing of the STL file in text format
+is produced instead.
+.Sh EXIT STATUS
+.Ex -std
+.Sh DIAGNOSTICS
+.Pp
+There is an error which the program cannot ignore, and which will terminate
+the program.
+.Bl -tag -width "foo"
+.It The file '...' cannot be read or parsed. Exiting.
+If a given input file cannot be read, or if the file is not recognized as an
+STL file, this error is produced, and the program is terminated with exit code
+1.
+.El
+.Sh COMPATIBILITY
+The 
+.Nm
+program requires the Python interpreter. It was written for version 2.7, but
+should be able to work with 3.x after fixing with
+.Xr 2to3 .
+.Sh SEE ALSO
+.Xr python 1 ,
+.Xr stl2pov 1 ,
+.Xr 2to3.
+.Rs
+.%B Python Programming Language - Official Website
+.%U http://www.python.org/
+.Re
+.Sh HISTORY
+The origin of this software was found in the desire of the author to render 3D
+CAD models using the POV-ray raytracer. The first effort produced the
+.Xr stl2pov 1
+program, written in C. 
+.Pp
+Later the author converted that program to Python as a learning
+experience. This resulted in a more re-usable version of the software to parse
+STL files as a Python module. Adding this front-end for outputting a summary
+or text representation then became trivial.
+.Sh AUTHOR
+This manual and the 
+.Nm
+software were written by 
+.An Roland Smith Aq rsmith@xs4all.nl .
+.Pp
+The latest version of this program is available at:
+.Lk http://rsmith.home.xs4all.nl/software/ 
+.Sh LICENSE
+To the extent possible under law, Roland Smith has waived all copyright and
+related or neighboring rights to this manual. This work is published from the
+Netherlands. See 
+.Lk http://creativecommons.org/publicdomain/zero/1.0/
+.Pp
+The
+.Nm
+program itself is released under the two-clause BSD license given below;
+.Pp
+Copyright \(co 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+.Pp
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+.Bl -tag -width "foo" -compact
+.It 1.
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+.It 2.
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+.El
+.Pp
+THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\" EOF

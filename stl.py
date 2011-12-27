@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-27 20:06:17 rsmith>
+# Time-stamp: <2011-12-27 21:45:41 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -129,7 +129,11 @@ class Edge(object):
     def __eq__(self, other):
         '''If both self and other contain the same endpoints, they're equal,
         irrespective of the direction of the edge.'''
-        return sorted(self.p) == sorted(other.p)
+        if self.p[0] == other.p[0] and self.p[1] == other.p[1]:
+            return True
+        if self.p[0] == other.p[1] and self.p[1] == other.p[0]:
+            return True
+        return False
 
     def __str__(self):
         s = 'Edge from ({}, {}, {}) to ({}, {}, {}) ({} refs)'
@@ -155,16 +159,8 @@ class Edge(object):
 
     def addref(self, f):
         '''Add another Facet to the list of references.'''
-        assert len(self.refs) < 2, "Already too many references."
         assert isinstance(f, Facet), "Reference is not a Facet."
         self.refs.append(f)
-
-    def key(self):
-        '''Create a unique key for the Edge so we can put it in a dictionary.'''
-        q = sorted(self.p)
-        return hash((q[0].x, q[0].y, q[0].z, 
-                     q[1].x, q[1].y, q[1].z))
-
 
 class Facet(object):
     '''Class for a 3D triangle.'''
@@ -419,19 +415,19 @@ class Surface(object):
 
     def edges(self):
         '''Returns a list of all edges in the Surface.'''
-        ed = {}
+        el = []
         for f in self.facets:
             for j in range(0,3):
                 k = j +1
                 if k > 2:
                     k = 0
-                e1 = Edge(f.v[j], f.v[k], f)
-                k1 = e1.key()
-                if k1 not in ed:
-                    ed[k1] = e1
-                else:
-                    ed[k1].addref(f)
-        return ed.values()
+                e = Edge(f.v[j], f.v[k], f)
+                try:
+                    k = el.index(e)
+                    el[k].addref(f)
+                except ValueError:
+                    el.append(e)
+        return el
 
 # Built-in test.
 if __name__ == '__main__':
