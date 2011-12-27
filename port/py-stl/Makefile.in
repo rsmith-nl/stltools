@@ -7,22 +7,23 @@
 PORTNAME=			py-stl
 PORTVERSION=		UkZTVkVS
 CATEGORIES=			graphics
-USE_ZIP=			YES
 MASTER_SITES=		http://rsmith.home.xs4all.nl/software/
 
 MAINTAINER=			rsmith@xs4all.nl
-COMMENT=			Converts STL models to POV-Ray meshes or PostScript/PDF images.
-PKGNAMEPREFIX=		${PYTHON_PKGNAMEPREFIX}
+COMMENT=			Converts STL models to POV-Ray meshes or PostScript/PDF images
 
 #for stl2pdf only
 RUN_DEPENDS=		${PYTHON_PKGNAMEPREFIX}reportlab2>2:${PORTSDIR}/print/py-reportlab2
 
-CONFLICTS=			stl2pov*
-MAN1=				stl2pdf.1 stl2ps.1 stlinfo.1
+PKGNAMEPREFIX=		${PYTHON_PKGNAMEPREFIX}
+CONFLICTS=			stl2pov-[0-9]*
 NO_BUILD=			YES
 
+USE_ZIP=			YES
 USE_PYTHON=			2.5+
 USE_PYDISTUTILS=	YES
+
+MAN1=				stl2pdf.1 stl2ps.1 stlinfo.1
 
 post-install:
 	@${INSTALL_MAN} ${WRKSRC}/stl2pdf.1 ${MANPREFIX}/man/man1
