@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-27 19:20:09 rsmith>
+# Time-stamp: <2011-12-27 20:06:17 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -116,7 +116,7 @@ class Edge(object):
     def __init__(self, s, e, f=None):
         '''Create the edge of a Facet.
         
-        s,e -- points of the laine segment
+        s,e -- points of the line segment
         f   -- facet that the line segment belongs to.'''
         assert isinstance(s, Vertex), "Start point of edge is not a Vertex"
         assert isinstance(e, Vertex), "End point of edge is not a Vertex"
@@ -130,6 +130,12 @@ class Edge(object):
         '''If both self and other contain the same endpoints, they're equal,
         irrespective of the direction of the edge.'''
         return sorted(self.p) == sorted(other.p)
+
+    def __str__(self):
+        s = 'Edge from ({}, {}, {}) to ({}, {}, {}) ({} refs)'
+        return s.format(self.p[0].x, self.p[0].y, self.p[0].z, 
+                        self.p[1].x, self.p[1].y, self.p[1].z,
+                        len(self.refs))
 
     def fits(self, index, other):
         '''Checks if another Edge fits onto this one.
@@ -153,12 +159,22 @@ class Edge(object):
         assert isinstance(f, Facet), "Reference is not a Facet."
         self.refs.append(f)
 
+    def key(self):
+        '''Create a unique key for the Edge so we can put it in a dictionary.'''
+        q = sorted(self.p)
+        return hash((q[0].x, q[0].y, q[0].z, 
+                     q[1].x, q[1].y, q[1].z))
+
+
 class Facet(object):
     '''Class for a 3D triangle.'''
 
     def __init__(self, p1, p2, p3, n):
         '''Initialize the Facet from the Vertices p1, p2 and p3 
         and a Normal n.'''
+        assert isinstance(p1, Vertex)
+        assert isinstance(p2, Vertex)
+        assert isinstance(p3, Vertex)
         self.v = [p1, p2, p3]
         if isinstance(n, Normal):
             self.n = n
@@ -401,16 +417,28 @@ class Surface(object):
         for f in self.facets:
             self._updateextents(f)
 
+    def edges(self):
+        '''Returns a list of all edges in the Surface.'''
+        ed = {}
+        for f in self.facets:
+            for j in range(0,3):
+                k = j +1
+                if k > 2:
+                    k = 0
+                e1 = Edge(f.v[j], f.v[k], f)
+                k1 = e1.key()
+                if k1 not in ed:
+                    ed[k1] = e1
+                else:
+                    ed[k1].addref(f)
+        return ed.values()
+
 # Built-in test.
 if __name__ == '__main__':
     print "===== begin of binary file ====="
     fname = "test/salamanders.stl"
     binstl = Surface(fname)
-    print binstl
-    print "[bin] len(binstl) = {} facets".format(len(binstl))
-    print "[bin] number of unique vertices: {}".format(len(binstl.vertices))
-    print "[bin] number of unique normals: {}".format(len(binstl.normals))
-    print "[bin] extents = ", binstl.extents()
+    print binstl.stats("[bin] ")
     print "[bin] 0", binstl.facets[0]
     print "..."
     print "[bin] {}".format(len(binstl)-1), binstl.facets[-1]
@@ -418,12 +446,14 @@ if __name__ == '__main__':
     print "===== begin of text file ====="
     fname = "test/microSD_connector.stl"
     txtstl = Surface(fname)
-    print txtstl
-    print "[txt] len(txtstl) = {} facets".format(len(txtstl))
-    print "[txt] number of unique vertices: {}".format(len(txtstl.vertices))
-    print "[txt] number of unique normals: {}".format(len(txtstl.normals))
-    print "[txt] extents = ", txtstl.extents()
+    print txtstl.stats('[txt] ')
     print "[txt] 0", txtstl.facets[0]
     print "..."
     print "[txt] {}".format(len(txtstl)-1), txtstl.facets[-1]
     print "===== end of text file ====="
+    cube = Surface('test/cube.stl')
+    print cube.stats('[cube] ')
+    el = cube.edges()
+    print '[cube] {} unique edges'.format(len(el))
+    for e in el:
+        print '[cube]', e
