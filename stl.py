@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-27 21:45:41 rsmith>
+# Time-stamp: <2011-12-28 00:29:03 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -109,6 +109,7 @@ class Normal(Vertex):
         normal.'''
         (self.x, self.y, self.z) = tr.applyrot(self.x, self.y, self.z)
 
+
 class Edge(object):
     '''Class representing the edge of a Facet, a line segment between two
     vertices.'''
@@ -162,6 +163,7 @@ class Edge(object):
         assert isinstance(f, Facet), "Reference is not a Facet."
         self.refs.append(f)
 
+
 class Facet(object):
     '''Class for a 3D triangle.'''
 
@@ -174,9 +176,7 @@ class Facet(object):
         self.v = [p1, p2, p3]
         if isinstance(n, Normal):
             self.n = n
-            self.nfv = False
         else:
-            self.nfv = True
             d1 = p2 - p1
             d2 = p3 - p2
             xp = d1.cross(d2)
@@ -184,8 +184,6 @@ class Facet(object):
 
     def __str__(self):
         s = str(self.n)+'\n'
-        if self.nfv:
-            s += '  [normal calculated from vertices]\n'
         s += '    outer loop\n'
         s += str(self.v[0])+'\n'
         s += str(self.v[1])+'\n'
