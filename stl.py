@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-27 18:12:44 rsmith>
+# Time-stamp: <2011-12-27 18:40:58 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,7 +33,7 @@ import struct
 # Points less than 'LIMIT' apart are considered equal.
 LIMIT = 1e-7
 
-class Vertex:
+class Vertex(object):
     '''Class for a 3D point in Cartesian space.'''
 
     def __init__(self, x, y, z):
@@ -64,21 +64,23 @@ class Vertex:
         else:
             return False
 
+    def __len__(self):
+        '''Distance of a Vertex to the origin.'''
+        return math.sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
+
     def xform(self, tr):
         '''Apply the transformation tr to the vertex.'''
         (self.x, self.y, self.z) = tr.apply(self.x, self.y, self.z)
 
     def cross(self, b):
+        '''Returns the cross product of self and b.'''
         return Vertex(self.y*b.z-self.z*b.y, 
                       self.z*b.x-self.x*b.z, 
                       self.x*b.y-self.y*b.x)
 
-    def length(self):
-        return math.sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
-
     def key(self):
-        '''Create a unique key for the vertex so we can put it in a hash
-        table.'''
+        '''Create a unique key for the vertex so we can put it in a
+        dictionary.'''
         return hash((self.x, self.y, self.z))
 
 class Normal(Vertex):
@@ -107,15 +109,15 @@ class Normal(Vertex):
         normal.'''
         (self.x, self.y, self.z) = tr.applyrot(self.x, self.y, self.z)
 
-class Edge:
+class Edge(object):
     '''Class representing the edge of a Facet, a line segment between two
     vertices.'''
 
     def __init__(self, s, e, f=None):
-    '''Create the edge of a Facet.
-
-    s,e -- points of the laine segment
-    f   -- facet that the line segment belongs to.'''
+        '''Create the edge of a Facet.
+        
+        s,e -- points of the laine segment
+        f   -- facet that the line segment belongs to.'''
         assert isinstance(s, Vertex), "Start point of edge is not a Vertex"
         assert isinstance(e, Vertex), "End point of edge is not a Vertex"
         self.p = [s,e]
@@ -151,7 +153,7 @@ class Edge:
         assert isInstance(f, Facet), "Reference is not a Facet."
         self.refs.append(f)
 
-class Facet:
+class Facet(object):
     '''Class for a 3D triangle.'''
 
     def __init__(self, p1, p2, p3, n):
@@ -179,7 +181,7 @@ class Facet:
         s += '    endloop\n  endfacet'
         return s
 
-class ProjectedFacet:
+class ProjectedFacet(object):
     '''Class for a 3D triangle projected on 2 2D surface.'''
     def __init__(self, f, pr):
         '''Initialize the ProjectedFacet from the Facet f, and a Zpar pr.'''
@@ -199,19 +201,12 @@ class ProjectedFacet:
         self.xmax = max(self.x1, self.x2, self.x3)
         self.ymax = max(self.y1, self.y2, self.y3)
 
-    def bbIsInside(self, other):
-        '''Check if the bounding box of ProjectedFacet other is inside the
-        bounding box for this ProjectedFacet.'''
-        if (other.xmin < self.xmin or other.xmax > self.xmax or 
-            other.ymin < self.ymin or other.ymax > self.ymax):
-            return False
-        return True
 
-class Surface:
+class Surface(object):
     '''Class for STL objects.'''
 
     def __init__(self, fn=None):
-        '''Read the STL file fn into an STL Surface. Create an empty STL
+        '''Read the STL file fn into an STL surface. Create an empty STL
         object if fn is None.'''
         self.facet = []
         self.vertices = {}
