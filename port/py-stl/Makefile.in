@@ -1,13 +1,15 @@
 # New ports collection makefile for:    py-stl
-# Date created:                         22 Dec 2011
+# Date created:                         28 Dec 2011
 # Whom:                                 rsmith@xs4all.nl
 #
 # $FreeBSD:$
 
 PORTNAME=			py-stl
-PORTVERSION=		UkZTVkVS
+PORTVERSION=		3.0
 CATEGORIES=			graphics
 MASTER_SITES=		http://rsmith.home.xs4all.nl/software/
+PKGNAMEPREFIX=		${PYTHON_PKGNAMEPREFIX}
+DISTNAME=			py-stl-UkZTVkVS
 
 MAINTAINER=			rsmith@xs4all.nl
 COMMENT=			Converts STL models to POV-Ray meshes or PostScript/PDF images
@@ -15,15 +17,15 @@ COMMENT=			Converts STL models to POV-Ray meshes or PostScript/PDF images
 #for stl2pdf only
 RUN_DEPENDS=		${PYTHON_PKGNAMEPREFIX}reportlab2>2:${PORTSDIR}/print/py-reportlab2
 
-PKGNAMEPREFIX=		${PYTHON_PKGNAMEPREFIX}
-CONFLICTS=			stl2pov-[0-9]*
-NO_BUILD=			YES
-
 USE_ZIP=			YES
 USE_PYTHON=			2.5+
 USE_PYDISTUTILS=	YES
 
+CONFLICTS=			stl2pov-[0-9]*
+
 MAN1=				stl2pdf.1 stl2ps.1 stlinfo.1
+
+NO_BUILD=			YES
 
 post-install:
 	@${INSTALL_MAN} ${WRKSRC}/stl2pdf.1 ${MANPREFIX}/man/man1
