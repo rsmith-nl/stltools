@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-28 00:29:03 rsmith>
+# Time-stamp: <2011-12-30 22:41:57 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,6 +27,7 @@
 
 "Classes for handling STL files and trianglulated models."
 
+import hashlib
 import math
 import struct
 
@@ -81,7 +82,8 @@ class Vertex(object):
     def key(self):
         '''Create a unique key for the vertex so we can put it in a
         dictionary.'''
-        return hash((self.x, self.y, self.z))
+        ks = '({},{},{})'.format(self.x, self.y, self.z)
+        return hashlib.md5(ks).hexdigest()
 
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
@@ -130,6 +132,7 @@ class Edge(object):
     def __eq__(self, other):
         '''If both self and other contain the same endpoints, they're equal,
         irrespective of the direction of the edge.'''
+        assert isinstance(Edge, other), "Trying to compare a non-Edge."
         if self.p[0] == other.p[0] and self.p[1] == other.p[1]:
             return True
         if self.p[0] == other.p[1] and self.p[1] == other.p[0]:
@@ -163,6 +166,14 @@ class Edge(object):
         assert isinstance(f, Facet), "Reference is not a Facet."
         self.refs.append(f)
 
+    def key(self):
+        '''Create a unique key for the edge so we can put it in a
+        dictionary.'''
+        k1 = self.p[0].key()
+        k2 = self.p[1].key()
+        if k2 < k1:
+            return k2+k1
+        return k1+k2
 
 class Facet(object):
     '''Class for a 3D triangle.'''
@@ -413,19 +424,19 @@ class Surface(object):
 
     def edges(self):
         '''Returns a list of all edges in the Surface.'''
-        el = []
+        de = {}
         for f in self.facets:
             for j in range(0,3):
                 k = j +1
                 if k > 2:
                     k = 0
                 e = Edge(f.v[j], f.v[k], f)
-                try:
-                    k = el.index(e)
-                    el[k].addref(f)
-                except ValueError:
-                    el.append(e)
-        return el
+                s = e.key()
+                if s in de:
+                    de[s].addref(f)
+                else:
+                    de[s] = e
+        return de.values()
 
 # Built-in test.
 if __name__ == '__main__':
