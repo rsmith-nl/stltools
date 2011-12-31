@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-31 02:38:41 rsmith>
+# Time-stamp: <2011-12-31 02:50:24 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -43,7 +43,7 @@ class Vertex(object):
         self.y = float(y)
         self.z = float(z)
         ks = '({},{},{})'.format(self.x, self.y, self.z)
-        self._key =  hashlib.md5(ks).hexdigest()
+        self._key =  hashlib.md5(ks).hexdigest() # pylint: disable=E1101
 
     def __add__(self, other):
         '''Return the sum of 'self' and 'other' as a new vertex.'''
@@ -75,7 +75,7 @@ class Vertex(object):
         '''Apply the transformation tr to the vertex.'''
         (self.x, self.y, self.z) = tr.apply(self.x, self.y, self.z)
         ks = '({},{},{})'.format(self.x, self.y, self.z)
-        self._key =  hashlib.md5(ks).hexdigest()
+        self._key =  hashlib.md5(ks).hexdigest() # pylint: disable=E1101
 
     def cross(self, b):
         '''Returns the cross product of self and b.'''
