@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-30 22:41:57 rsmith>
+# Time-stamp: <2011-12-31 02:38:41 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -42,6 +42,8 @@ class Vertex(object):
         self.x = float(x)
         self.y = float(y)
         self.z = float(z)
+        ks = '({},{},{})'.format(self.x, self.y, self.z)
+        self._key =  hashlib.md5(ks).hexdigest()
 
     def __add__(self, other):
         '''Return the sum of 'self' and 'other' as a new vertex.'''
@@ -72,6 +74,8 @@ class Vertex(object):
     def xform(self, tr):
         '''Apply the transformation tr to the vertex.'''
         (self.x, self.y, self.z) = tr.apply(self.x, self.y, self.z)
+        ks = '({},{},{})'.format(self.x, self.y, self.z)
+        self._key =  hashlib.md5(ks).hexdigest()
 
     def cross(self, b):
         '''Returns the cross product of self and b.'''
@@ -80,10 +84,9 @@ class Vertex(object):
                       self.x*b.y-self.y*b.x)
 
     def key(self):
-        '''Create a unique key for the vertex so we can put it in a
+        '''Returns a unique key for the vertex so we can put it in a
         dictionary.'''
-        ks = '({},{},{})'.format(self.x, self.y, self.z)
-        return hashlib.md5(ks).hexdigest()
+        return self._key
 
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
@@ -116,14 +119,14 @@ class Edge(object):
     '''Class representing the edge of a Facet, a line segment between two
     vertices.'''
 
-    def __init__(self, s, e, f=None):
+    def __init__(self, start, end, f=None):
         '''Create the edge of a Facet.
         
-        s,e -- points of the line segment
+        start, end -- points of the line segment
         f   -- facet that the line segment belongs to.'''
-        assert isinstance(s, Vertex), "Start point of edge is not a Vertex"
-        assert isinstance(e, Vertex), "End point of edge is not a Vertex"
-        self.p = [s, e]
+        assert isinstance(start, Vertex), "Start point of edge is not a Vertex"
+        assert isinstance(end, Vertex), "End point of edge is not a Vertex"
+        self.p = [start, end]
         self.refs = []
         if f:
             assert isinstance(f, Facet), "Reference is not a Facet."
@@ -167,8 +170,9 @@ class Edge(object):
         self.refs.append(f)
 
     def key(self):
-        '''Create a unique key for the edge so we can put it in a
-        dictionary.'''
+        '''Return a unique key for the edge so we can put it in a
+        dictionary. The key is derived from the keys of the Edge's
+        Vertices.'''
         k1 = self.p[0].key()
         k2 = self.p[1].key()
         if k2 < k1:
@@ -426,16 +430,16 @@ class Surface(object):
         '''Returns a list of all edges in the Surface.'''
         de = {}
         for f in self.facets:
-            for j in range(0,3):
+            for j in range(0, 3):
                 k = j +1
                 if k > 2:
                     k = 0
-                e = Edge(f.v[j], f.v[k], f)
-                s = e.key()
+                ne = Edge(f.v[j], f.v[k], f)
+                s = ne.key()
                 if s in de:
                     de[s].addref(f)
                 else:
-                    de[s] = e
+                    de[s] = ne
         return de.values()
 
 # Built-in test.
