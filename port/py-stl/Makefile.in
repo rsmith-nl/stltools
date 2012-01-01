@@ -23,13 +23,14 @@ USE_PYDISTUTILS=	YES
 
 CONFLICTS=			stl2pov-[0-9]*
 
-MAN1=				stl2pdf.1 stl2ps.1 stlinfo.1
+MAN1=				stl2pdf.1 stl2ps.1 stl2pov.1 stlinfo.1
 
 NO_BUILD=			YES
 
 post-install:
 	@${INSTALL_MAN} ${WRKSRC}/stl2pdf.1 ${MANPREFIX}/man/man1
 	@${INSTALL_MAN} ${WRKSRC}/stl2ps.1 ${MANPREFIX}/man/man1
+	@${INSTALL_MAN} ${WRKSRC}/stl2pov.1 ${MANPREFIX}/man/man1
 	@${INSTALL_MAN} ${WRKSRC}/stlinfo.1 ${MANPREFIX}/man/man1
 	@${MV} ${PREFIX}/bin/stl2pdf.py ${PREFIX}/bin/stl2pdf
 	@${MV} ${PREFIX}/bin/stl2pov.py ${PREFIX}/bin/stl2pov

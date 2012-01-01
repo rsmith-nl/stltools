@@ -2,7 +2,7 @@
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
-ALL = stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py
+ALL = stl2pov.1 stl2pov.1.pdf stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py
 SRCS=setup.in.py stl2pdf.in.py stl2ps.in.py xform.py stl.py stl2pov.in.py stlinfo.in.py
 all: ${ALL} .git/hooks/post-commit
 #endskip
@@ -26,10 +26,11 @@ install: ${ALL}
 	rm -rf build
 #Install the manual pages.
 	gzip -c stl2ps.1 >stl2ps.1.gz
+	gzip -c stl2pov.1 >stl2pov.1.gz
 	gzip -c stl2pdf.1 >stl2pdf.1.gz
 	gzip -c stlinfo.1 >stlinfo.1.gz
-	install -m 644 stl2ps.1.gz stl2pdf.1.gz stlinfo.1.gz $(MANDIR)/man1
-	rm -f stl2ps.1.gz stl2pdf.1.gz stlinfo.1.gz
+	install -m 644 stl2ps.1.gz stl2pov.1.gz stl2pdf.1.gz stlinfo.1.gz $(MANDIR)/man1
+	rm -f stl2ps.1.gz stl2pov.1.gz stl2pdf.1.gz stlinfo.1.gz
 
 deinstall::
 	@if [ `id -u` != 0 ]; then \
@@ -39,8 +40,8 @@ deinstall::
 	rm -f ${PYSITE}/stl.py*
 	rm -f ${PYSITE}/xform.py*
 	rm -f $(BINDIR)/stl2ps $(BINDIR)/stl2pov $(BINDIR)/stl2pdf $(BINDIR)/stlinfo
-	rm -f $(MANDIR)/man1/stl2ps.1.gz $(MANDIR)/man1/stl2pdf.1.gz
-	rm -f $(MANDIR)/man1/stlinfo.1.gz
+	rm -f $(MANDIR)/man1/stl2ps.1* $(MANDIR)/man1/stl2pdf.1*
+	rm -f $(MANDIR)/man1/stlinfo.1* $(MANDIR)/man1/stl2pov.1*
 
 #beginskip
 dist: ${ALL}
@@ -91,6 +92,9 @@ stlinfo.py: stlinfo.in.py tools/replace.sed
 stl2ps.1: stl2ps.1.in tools/replace.sed
 	sed -f tools/replace.sed stl2ps.1.in >$@
 
+stl2pov.1: stl2pov.1.in tools/replace.sed
+	sed -f tools/replace.sed stl2pov.1.in >$@
+
 stl2pdf.1: stl2pdf.1.in tools/replace.sed
 	sed -f tools/replace.sed stl2pdf.1.in >$@
 
@@ -98,6 +102,11 @@ stlinfo.1: stlinfo.1.in tools/replace.sed
 	sed -f tools/replace.sed stlinfo.1.in >$@
 
 stl2ps.1.pdf: stl2ps.1
+	mandoc -Tps $> >$*.ps
+	epspdf $*.ps
+	rm -f $*.ps
+
+stl2pov.1.pdf: stl2pov.1
 	mandoc -Tps $> >$*.ps
 	epspdf $*.ps
 	rm -f $*.ps
