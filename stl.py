@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2011-12-31 02:50:24 rsmith>
+# Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Time-stamp: <>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
