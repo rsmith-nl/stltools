@@ -16,6 +16,8 @@ COMMENT=		Converts STL models to POV-Ray meshes or PostScript/PDF images
 
 GITVER=			UkZTVkVS
 
+OPTIONS=                STL2PDF "Add support for PDF images" on
+
 USE_ZIP=		YES
 USE_PYTHON=		2.5+
 USE_PYDISTUTILS=	YES
@@ -37,7 +39,7 @@ NO_BUILD=		YES
 .include <bsd.port.pre.mk>
 
 post-install:
-.if defined(STL2PDF)
+.if defined(WITH_STL2PDF)
 	@${INSTALL_MAN} ${WRKSRC}/stl2pdf.1 ${MANPREFIX}/man/man1
 	@${MV} ${PREFIX}/bin/stl2pdf.py ${PREFIX}/bin/stl2pdf
 .else
