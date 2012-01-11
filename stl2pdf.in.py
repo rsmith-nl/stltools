@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <>
+# Time-stamp: <2012-01-11 20:54:32 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -102,7 +102,7 @@ vizfacets = [f for f in stlobj.facets if pr.visible(f.n)]
 # Next, depth-sort the facets using the largest z-value of the three vertices.
 vizfacets.sort(None, lambda f: max([f.v[0].z, f.v[1].z, f.v[2].z]))
 # Project and illuminate the facets
-pf = [stl.ProjectedFacet(f, pr) for f in vizfacets]
+pf = (stl.ProjectedFacet(f, pr) for f in vizfacets)
 # Draw the triangles
 for f in pf:
     path = out.beginPath()

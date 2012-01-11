@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <>
+# Time-stamp: <2012-01-11 20:52:29 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -108,7 +108,7 @@ outs += "/f {moveto} def\n"
 outs += "/s {lineto} def\n"
 outs += "/t {lineto closepath gsave fill grestore stroke} def\n"
 # Project and illuminate the facets
-pf = [stl.ProjectedFacet(f, pr) for f in vizfacets]
+pf = (stl.ProjectedFacet(f, pr) for f in vizfacets)
 # Draw the triangles
 for f in pf:
     s = "{:4.2f} g {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t\n"

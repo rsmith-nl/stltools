@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <>
+# Time-stamp: <2012-01-11 20:59:08 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -101,9 +101,6 @@ class Normal(Vertex):
         if l == 0.0:
             raise ValueError("Length of vector is 0!")
         Vertex.__init__(self, dx/l, dy/l, dz/l)
-
-    def set(self, dx, dy, dz):
-        self.__init__(dx, dy, dz)
 
     def __str__(self):
         ns = '  facet normal {} {} {}'
@@ -271,8 +268,8 @@ class Surface(object):
         nf2 = facetsz/50
         if nf1 != nf2:
             raise ValueError("Number of facets doesn't match file size.")
-        # Chop the string into a list of 50 byte strings.
-        items = [contents[n:n+50] for n in range(0, facetsz, 50)]
+        # Chop the string into a generator of 50 byte strings.
+        items = (contents[n:n+50] for n in range(0, facetsz, 50))
         # Process the items
         for i in items:
             nx, ny, nz, f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
