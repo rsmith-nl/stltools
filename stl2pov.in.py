@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2012-01-01 20:02:53 rsmith>
+# Time-stamp: <2012-02-19 13:28:02 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -91,6 +91,9 @@ try:
 except:
     print "The file '{}' cannot be read or parsed. Exiting.".format(sys.argv[1])
     sys.exit(1)
+# Process the file
+for result in stlobj.processfacets:
+    print result
 # Remove spaces from name
 stlobj.name = stlobj.name.replace(' \t', '_')
 # Generate output

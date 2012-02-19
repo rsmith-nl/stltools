@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2012-01-11 20:59:08 rsmith>
+# Time-stamp: <2012-02-19 13:37:20 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,7 +25,7 @@
 
 #Check this code with 'pylint -r n stl.py'
 
-"Classes for handling STL files and trianglulated models."
+"Classes for handling STL files and triangulated models."
 
 import hashlib
 import math
@@ -161,6 +161,19 @@ class Edge(object):
             return (other, 2)
         return (self, index) # Doesn't fit
 
+    def contains(self, point):
+        '''Checks if a Vertex lies on the egde.
+
+        point -- Vertex to test.
+
+        Returns True if the point is on the Edge, false otherwise.'''
+        d1 = self.p[1] - self.p[0]
+        d2 = point - self.p[0]
+        xp = d1.cross(d2)
+        if len(xp) == 0.0 and (0.0 <= len(d2) <= 1.0):
+            return True
+        return False
+
     def addref(self, f):
         '''Add another Facet to the list of references.'''
         assert isinstance(f, Facet), "Reference is not a Facet."
@@ -182,9 +195,16 @@ class Facet(object):
     def __init__(self, p1, p2, p3, n):
         '''Initialize the Facet from the Vertices p1, p2 and p3 
         and a Normal n.'''
-        assert isinstance(p1, Vertex)
-        assert isinstance(p2, Vertex)
-        assert isinstance(p3, Vertex)
+        assert isinstance(p1, Vertex), "p1 is not a Vertex"
+        assert isinstance(p2, Vertex), "p2 is not a Vertex"
+        assert isinstance(p3, Vertex), "p3 is not a Vertex"
+        # Check for degenerate facets
+        if p1 == p2 or p1 == p3:
+            raise ValueError("Degenerate facet; coincident points.")
+        edge = Edge(p1, p2)
+        if edge.contains(p3):
+            raise ValueError("Degenerate facet; three colinear points.")
+        del edge
         self.v = [p1, p2, p3]
         if isinstance(n, Normal):
             self.n = n
@@ -239,14 +259,15 @@ class Surface(object):
         self.zmin = self.zmax = None
         self.mx = self.my = self.mz = 0.0
         if fn == None:
+            self.processfacets = None
             return
         f = open(fn)
         con = f.read()
         f.close()
         if con.find("vertex", 80) == -1:
-            self._process_bin(con)
+            self.processfacets = self._process_bin(con)
         else:
-            self._process_txt(con)
+            self.processfacets = self._process_txt(con)
 
     def __str__(self):
         s = "solid {}\n".format(self.name)
@@ -255,8 +276,8 @@ class Surface(object):
         s += 'endsolid'
         return s
 
-    def _process_bin(self, contents):
-        '''Process the contents of a binary file.'''
+    def _process_bin(self, contents=None):
+        '''Process the contents of a binary file as a generator.'''
         self.name, nf1 = struct.unpack("=80sI", contents[0:84])
         # Strip zero bytes, the prefix 'solid' and whitespace on both sides.
         self.name = self.name.replace("solid ", "")
@@ -268,8 +289,9 @@ class Surface(object):
         nf2 = facetsz/50
         if nf1 != nf2:
             raise ValueError("Number of facets doesn't match file size.")
-        # Chop the string into a generator of 50 byte strings.
-        items = (contents[n:n+50] for n in range(0, facetsz, 50))
+        # Chop the string into a list of 50 byte strings.
+        items = [contents[n:n+50] for n in range(0, facetsz, 50)]
+        del contents
         # Process the items
         for i in items:
             nx, ny, nz, f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
@@ -281,11 +303,16 @@ class Surface(object):
                 norm = Normal(nx, ny, nz)
             except ValueError:
                 norm = None
-            self.addfacet(v1, v2, v3, norm)
+            try:
+                self.addfacet(v1, v2, v3, norm)
+            except ValueError:
+                yield 'skipped degenerate facet {}.'.format(len(self.facets))
+            yield '{} of {} facets.'.format(len(self.facets), nf1)
 
-    def _process_txt(self, contents):
-        '''Process the contents of a text file.'''
+    def _process_txt(self, contents=None):
+        '''Process the contents of a text file as a generator.'''
         items = contents.split()
+        del contents
         items = [s.strip() for s in items]
         try:
             sn = items.index("solid")+1
@@ -296,6 +323,7 @@ class Surface(object):
             self.name = "unknown"
         else:
             self.name = ' '.join(items[sn:en])
+        nf1 = items.count('facet')
         del items[0:en]
         # Items now begins with "facet"
         while items[0] == "facet":
@@ -306,8 +334,12 @@ class Surface(object):
                 norm = Normal(items[2], items[3], items[4])
             except ValueError:
                 norm = None
-            self.addfacet(v1, v2, v3, norm)
+            try:
+                self.addfacet(v1, v2, v3, norm)
+            except ValueError:
+                yield 'skipped degenerate facet {}.'.format(len(self.facets))
             del items[:21]
+            yield '{} of {} facets.'.format(len(self.facets), nf1)
 
     def addfacet(self, v1, v2, v3, norm):
         '''Make vertices v1, v2, v3 and optionally normal vector norm into a

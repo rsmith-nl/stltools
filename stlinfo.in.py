@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <>
+# Time-stamp: <2012-02-19 13:32:46 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -57,6 +57,9 @@ try:
 except:
     print "The file '{}' cannot be read or parsed. Exiting.".format(sys.argv[1])
     exit(1)
+# Process the file, don't print output
+for result in stlobj.processfacets:
+    pass
 if print_text:
     print stlobj
 else:
