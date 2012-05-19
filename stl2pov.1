@@ -1,0 +1,95 @@
+.\" -*- nroff -*-
+.\" stl2pov.1
+.\" By: R.F. Smith <rsmith@xs4all.nl>
+.\" Time-stamp: <2012-05-20 00:47:49 rsmith>
+.\"
+.Dd $Date$
+.Os 
+.Dt STL2POV 1 CON
+.Sh NAME
+.Nm stl2pov
+.Nd Converts an STL file into a POV-ray mesh or mesh2.
+.Sh SYNOPSIS
+.Nm 
+.Op Ar -2
+infile
+.Op Ar outfile
+.Sh DESCRIPTION
+This manual page documents  
+.Ql $Revision$
+of the 
+.Nm
+program. 
+.Sh EXIT STATUS
+.Ex -std
+.Sh DIAGNOSTICS
+There are some errors which the program cannot ignore, and which will
+terminate the program.
+.Bl -tag -width "foo"
+.It The file '...' cannot be read or parsed. Exiting.
+If a given input file cannot be read, or if the file is not recognized as an
+STL file, this error is produced, and the program is terminated with exit code
+1.
+.It Cannot write output file '...'.
+An output file name was given on the command line, but the file in question
+could not be opened for writing or written to. The program is terminated with
+exit code 2.
+.El
+.Sh COMPATIBILITY
+The 
+.Nm
+program requires the Python interpreter. It was written for version 2.7, but
+should be able to work with 3.x after fixing with
+.Xr 2to3 .
+.Sh SEE ALSO
+.Xr python 1 ,
+.Xr 2to3.
+.Rs
+.%B Python Programming Language - Official Website
+.%U http://www.python.org/
+.Re
+.Sh HISTORY
+.Sh AUTHOR
+This manual and the 
+.Nm
+software were written by 
+.An Roland Smith Aq rsmith@xs4all.nl .
+.Pp
+The latest version of this program is available at:
+.Lk http://rsmith.home.xs4all.nl/software/ 
+.Sh LICENSE
+To the extent possible under law, Roland Smith has waived all copyright and
+related or neighboring rights to this manual. This work is published from the
+Netherlands. See 
+.Lk http://creativecommons.org/publicdomain/zero/1.0/
+.Pp
+The
+.Nm
+program itself is released under the two-clause BSD license given below;
+.Pp
+Copyright \(co 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+.Pp
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+.Bl -tag -width "foo" -compact
+.It 1.
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+.It 2.
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+.El
+.Pp
+THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\" EOF

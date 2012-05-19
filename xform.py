@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <>
+# Time-stamp: <2012-05-20 00:40:14 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,6 +29,8 @@ system as used in STL object. This means that the X-axis points to the right
 and Y-axis points up when looking down the Z-axis at the origin. Rotations
 around and axis are counterclockwise when looking down the axis towards the
 origin.'''
+
+__version__ = '$Revision$'[11:-2]
 
 import math
 

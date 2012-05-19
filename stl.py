@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2012-02-19 13:37:20 rsmith>
+# Time-stamp: <2012-05-20 00:28:30 rsmith>
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -26,6 +26,8 @@
 #Check this code with 'pylint -r n stl.py'
 
 "Classes for handling STL files and triangulated models."
+
+__version__ = '$Revision$'[11:-2]
 
 import hashlib
 import math

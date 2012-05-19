@@ -1,4 +1,20 @@
 #!/bin/sh
+# Script to be executed after a successfull commit.
+# Time-stamp: <2012-05-20 01:06:15 rsmith>
+# $Id: 3a91728b079ffa48971420b899b1f38745573c89 $
+# 
+# Looks for changed files that contain the keywords, removes those files
+# and checks them out again to refresh the keywords.
 
-git --no-pager log -1 HEAD --pretty=format:"s|UkZTVkVS|%h|%n" >tools/replace.sed
-git --no-pager log -1 HEAD --pretty=format:"s|UkZTREFU|%ci|'"|sed -e "s/ .*/|/" >>tools/replace.sed
+
+files=`git show HEAD | grep '^+++ b' | sed 's/.*b\///'`
+
+for f in $files; do
+    if grep -Eq '\$Id|\$Revision|\$Date' $f; then
+	echo "Checking out $f to update keywords."
+	rm -f $f
+	git checkout $f
+    else
+	echo "No keywords found in $f"
+    fi
+done

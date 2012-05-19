@@ -2,8 +2,7 @@
 .SUFFIXES: .ps .pdf .py
 
 #beginskip
-ALL = stl2pov.1 stl2pov.1.pdf stl2ps.1 stl2ps.1.pdf stl2pdf.1 stl2pdf.1.pdf stlinfo.1 stlinfo.1.pdf setup.py stl2ps.py stl2pdf.py stl2pov.py stlinfo.py
-SRCS=setup.in.py stl2pdf.in.py stl2ps.in.py xform.py stl.py stl2pov.in.py stlinfo.in.py
+ALL = stl2pov.1.pdf stl2ps.1.pdf stl2pdf.1.pdf stlinfo.1.pdf 
 all: ${ALL} .git/hooks/post-commit
 #endskip
 BASE=/usr/local
@@ -50,7 +49,7 @@ dist: ${ALL}
 	python setup.py sdist --format=zip
 	mv Makefile.org Makefile
 	rm -f MANIFEST
-	sed -f tools/replace.sed port/py-stl/Makefile.in >port/py-stl/Makefile
+#	sed -f tools/replace.sed port/py-stl/Makefile.in >port/py-stl/Makefile
 	cd dist ; sha256 py-stl-* >../port/py-stl/distinfo 
 	cd dist ; ls -l py-stl-* | awk '{printf "SIZE (%s) = %d\n", $$9, $$5};' >>../port/py-stl/distinfo 
 
@@ -69,37 +68,6 @@ check: .IGNORE
 
 tools/replace.sed: .git/index
 	tools/post-commit
-
-setup.py: setup.in.py tools/replace.sed
-	sed -f tools/replace.sed setup.in.py >$@
-
-stl2ps.py: stl2ps.in.py tools/replace.sed
-	sed -f tools/replace.sed stl2ps.in.py >$@
-	chmod 755 $@
-
-stl2pdf.py: stl2pdf.in.py tools/replace.sed
-	sed -f tools/replace.sed stl2pdf.in.py >$@
-	chmod 755 $@
-
-stl2pov.py: stl2pov.in.py tools/replace.sed
-	sed -f tools/replace.sed stl2pov.in.py >$@
-	chmod 755 $@
-
-stlinfo.py: stlinfo.in.py tools/replace.sed
-	sed -f tools/replace.sed stlinfo.in.py >$@
-	chmod 755 $@
-
-stl2ps.1: stl2ps.1.in tools/replace.sed
-	sed -f tools/replace.sed stl2ps.1.in >$@
-
-stl2pov.1: stl2pov.1.in tools/replace.sed
-	sed -f tools/replace.sed stl2pov.1.in >$@
-
-stl2pdf.1: stl2pdf.1.in tools/replace.sed
-	sed -f tools/replace.sed stl2pdf.1.in >$@
-
-stlinfo.1: stlinfo.1.in tools/replace.sed
-	sed -f tools/replace.sed stlinfo.1.in >$@
 
 stl2ps.1.pdf: stl2ps.1
 	mandoc -Tps $> >$*.ps
