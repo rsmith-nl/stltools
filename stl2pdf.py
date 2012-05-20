@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
 # Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Time-stamp: <2012-05-20 00:38:35 rsmith>
+# $Date$
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions

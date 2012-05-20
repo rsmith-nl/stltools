@@ -11,10 +11,10 @@ files=`git show HEAD | grep '^+++ b' | sed 's/.*b\///'`
 
 for f in $files; do
     if grep -Eq '\$Id|\$Revision|\$Date' $f; then
-	echo "Checking out $f to update keywords."
+#	echo "Checking out $f to update keywords."
 	rm -f $f
 	git checkout $f
-    else
-	echo "No keywords found in $f"
+#    else
+#	echo "No keywords found in $f"
     fi
 done

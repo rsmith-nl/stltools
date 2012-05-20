@@ -2,7 +2,7 @@
 # Installation script for stl2pov and friends
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Time-stamp: <2012-05-20 00:27:33 rsmith>
+# $Date$
 
 from distutils.core import setup
 
