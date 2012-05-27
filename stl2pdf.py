@@ -28,11 +28,9 @@
 
 import sys
 import os
-
 import stl
 import xform
-
-from reportlab.pdfgen import canvas
+import cairo
 
 name = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
        '] ('+'$Date$'[7:-2]+')')
@@ -96,11 +94,13 @@ if outfile == None:
     if outbase.endswith((".stl", ".STL")):
         outbase = outbase[:-4]
     outfile = outbase+".pdf"
-out = canvas.Canvas(outfile, (pr.w, pr.h), pageCompression=1)
-out.setCreator(name)
-out.setLineCap(1)
-out.setLineJoin(2)
-out.setLineWidth(0.25)
+#out = canvas.Canvas(outfile, (pr.w, pr.h), pageCompression=1)
+out = cairo.PDFSurface(outfile, pr.w, pr.h)
+ctx = cairo.Context(out)
+ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+ctx.set_line_width(0.25)
+
 # Calculate the visible facets
 vizfacets = [f for f in stlobj.facets if pr.visible(f.n)]
 # Next, depth-sort the facets using the largest z-value of the three vertices.
@@ -109,18 +109,14 @@ vizfacets.sort(None, lambda f: max([f.v[0].z, f.v[1].z, f.v[2].z]))
 pf = (stl.ProjectedFacet(f, pr) for f in vizfacets)
 # Draw the triangles
 for f in pf:
-    path = out.beginPath()
-    path.moveTo(f.x1, f.y1)
-    path.lineTo(f.x2, f.y2)
-    path.lineTo(f.x3, f.y3)
-    path.close()
-    out.setFillGray(f.gray)
-    out.setStrokeGray(f.gray)
-    out.drawPath(path, 1, 1)
+    path = ctx.new_path()
+    ctx.move_to(f.x1, f.y1)
+    ctx.line_to(f.x2, f.y2)
+    ctx.line_to(f.x3, f.y3)
+    ctx.close_path()
+    ctx.set_source_rgb(f.gray, f.gray, f.gray)
+    ctx.fill_preserve()
+    ctx.stroke()
 # Send output.
-out.showPage()
-try:
-    out.save()
-except:
-    print "Cannot write output file '{}'.".format(outfile)
-    sys.exit(2)
+out.show_page()
+out.finish()
