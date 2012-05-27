@@ -79,7 +79,8 @@ The
 .Nm
 program requires the Python interpreter. It was written for version
 2.7. Additionally, it requires the open source 
-.Xr "Reportlab Toolkit" .
+.Xr "Cairo" 
+vector graphics library, as well as its Pyton bindings.
 .Sh SEE ALSO
 .Xr python 1 ,
 .Xr stl2pov 1 ,
@@ -89,8 +90,8 @@ program requires the Python interpreter. It was written for version
 .%U http://www.python.org/
 .Re
 .Rs
-.%B ReportLab Toolkit
-.%U http://www.reportlab.com/software/opensource/rl-toolkit/
+.%B Cairo
+.%U http://cairographics.org/
 .Re
 .Sh HISTORY
 The origin of this software was found in the desire of the author to render 3D
@@ -103,12 +104,11 @@ experience. This resulted in a more re-usable version of the software to parse
 STL files as a Python module. Having done that, adding a front-end to produce
 PostScript output was relatively easy.
 .Pp
-After descovering the
-.Xr "Reportlab Toolkit"
-module for producing PDF files with Python, the author discovered that it
-would be relatively easy to modify
+With the 
+.Xr "Cairo" 
+library it was relatively easy to modify
 .Xr stl2ps
-to use reportlab to produce PDF output directly.
+to produce PDF output directly.
 .Sh AUTHOR
 This manual and the 
 .Nm
@@ -127,7 +127,7 @@ The
 .Nm
 program itself is released under the two-clause BSD license given below;
 .Pp
-Copyright \(co 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+Copyright \(co 2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 .Pp
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions

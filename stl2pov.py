@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
-# Copyright © 2011,2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # $Date$
 # 
 # Redistribution and use in source and binary forms, with or without
