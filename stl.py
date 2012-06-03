@@ -69,7 +69,7 @@ class Vertex(object):
         else:
             return False
 
-    def __len__(self):
+    def length(self):
         '''Distance of a Vertex to the origin.'''
         return math.sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
 
@@ -172,7 +172,7 @@ class Edge(object):
         d1 = self.p[1] - self.p[0]
         d2 = point - self.p[0]
         xp = d1.cross(d2)
-        if len(xp) == 0.0 and (0.0 <= len(d2) <= 1.0):
+        if xp.length() == 0.0 and (0.0 <= d2.length() <= 1.0):
             return True
         return False
 
