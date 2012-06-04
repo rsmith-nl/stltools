@@ -49,13 +49,12 @@ dist: ${ALL}
 	python setup.py sdist --format=zip
 	mv Makefile.org Makefile
 	rm -f MANIFEST
-#	sed -f tools/replace.sed port/py-stl/Makefile.in >port/py-stl/Makefile
 	cd dist ; sha256 py-stl-* >../port/py-stl/distinfo 
 	cd dist ; ls -l py-stl-* | awk '{printf "SIZE (%s) = %d\n", $$9, $$5};' >>../port/py-stl/distinfo 
 
 clean::
 	rm -rf dist build backup-*.tar.gz *.pyc ${ALL} MANIFEST
-	rm -f port/py-stl/Makefile port/py-stl/distinfo
+	rm -f port/py-stl/distinfo
 
 backup::
 	sh tools/genbackup
