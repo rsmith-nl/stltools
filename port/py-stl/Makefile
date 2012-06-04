@@ -1,21 +1,20 @@
-# New ports collection makefile for:    py-stl
-# Date created:                         28 Dec 2011
-# Whom:                                 rsmith@xs4all.nl
+# Ports collection makefile for: py-stl
+# Date created:                  28 Dec 2011
+# Whom:                          rsmith@xs4all.nl
 #
 # $FreeBSD$
 
 PORTNAME=		py-stl
 PORTVERSION=		3.1
-CATEGORIES=		graphics
+CATEGORIES=		graphics python
 MASTER_SITES=		http://rsmith.home.xs4all.nl/software/
 PKGNAMEPREFIX=		${PYTHON_PKGNAMEPREFIX}
 
 MAINTAINER=		rsmith@xs4all.nl
 COMMENT=		Converts STL models to POV-Ray meshes or PostScript/PDF images
 
-OPTIONS_DEFINE=		STL2PDF
-STL2PDF_DESC=		"Add support for generating PDF images (requires Cairo)"
-OPTIONS_DEFAULT=	STL2PDF
+# bypass infrastructure bug
+OPTIONSFILE=    ${PORT_DBDIR}/py27-${PORTNAME}/options
 
 USE_ZIP=		YES
 USE_PYTHON=		2.5+
@@ -25,8 +24,13 @@ CONFLICTS=		stl2pov-[0-9]*
 
 MAN1=			stl2ps.1 stlinfo.1
 
-.if ${PORT_OPTIONS:MSTL2PDF}
-RUN_DEPENDS+=		${PYTHON_PKGNAMEPREFIX}cairo>1.8:${PORTSDIR}/print/py-cairo
+OPTIONS_DEFINE=	PYCAIRO
+PYCAIRO_DESC=	Use (py)Cairo to enable stl2pdf
+
+.include <bsd.port.options.mk>
+
+.if ${PORT_OPTIONS:MPYCAIRO}
+RUN_DEPENDS+=		${PYTHON_PKGNAMEPREFIX}cairo>1.8:${PORTSDIR}/graphics/py-cairo
 MAN1+=			stl2pdf.1
 PLIST_SUB+=		STL2PDF=""
 .else
@@ -35,14 +39,13 @@ PLIST_SUB+=		STL2PDF="@comment "
 
 NO_BUILD=		YES
 
-.include <bsd.port.pre.mk>
-
 post-install:
-.if ${PORT_OPTIONS:MSTL2PDF}
+.if ${PORT_OPTIONS:MPYCAIRO}
 	@${INSTALL_MAN} ${WRKSRC}/stl2pdf.1 ${MANPREFIX}/man/man1
 	@${MV} ${PREFIX}/bin/stl2pdf.py ${PREFIX}/bin/stl2pdf
 .else
-	@${RM} ${PREFIX}/bin/stl2pdf.py
+	@${RM} -f ${PREFIX}/bin/stl2pdf.py
+	@${RM} -f  ${MANPREFIX}/man/man1/stl2pdf.1*
 .endif
 	@${INSTALL_MAN} ${WRKSRC}/stl2ps.1 ${MANPREFIX}/man/man1
 	@${INSTALL_MAN} ${WRKSRC}/stlinfo.1 ${MANPREFIX}/man/man1
@@ -51,4 +54,4 @@ post-install:
 	@${MV} ${PREFIX}/bin/stlinfo.py ${PREFIX}/bin/stlinfo
 	@${MV} ${PYTHON_SITELIBDIR}/py_stl-${PORTVERSION}-py${PYTHON_VER}.egg-info ${PYTHON_SITELIBDIR}/${PYDISTUTILS_EGGINFO}
 
-.include <bsd.port.post.mk>
+.include <bsd.port.mk>
