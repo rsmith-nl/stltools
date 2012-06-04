@@ -24,7 +24,7 @@ USE_PYDISTUTILS=	YES
 
 CONFLICTS=		stl2pov-[0-9]*
 
-MAN1=			stl2ps.1 stlinfo.1
+MAN1=			stl2ps.1 stlinfo.1 stl2pov.1
 
 OPTIONS_DEFINE=	PYCAIRO
 PYCAIRO_DESC=	Use (py)Cairo to enable stl2pdf
@@ -49,6 +49,7 @@ post-install:
 	@${RM} -f ${PREFIX}/bin/stl2pdf.py
 	@${RM} -f  ${MANPREFIX}/man/man1/stl2pdf.1*
 .endif
+	@${INSTALL_MAN} ${WRKSRC}/stl2pov.1 ${MANPREFIX}/man/man1
 	@${INSTALL_MAN} ${WRKSRC}/stl2ps.1 ${MANPREFIX}/man/man1
 	@${INSTALL_MAN} ${WRKSRC}/stlinfo.1 ${MANPREFIX}/man/man1
 	@${MV} ${PREFIX}/bin/stl2ps.py  ${PREFIX}/bin/stl2ps

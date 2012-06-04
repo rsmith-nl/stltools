@@ -1,4 +1,6 @@
 include Makefile
+include stl2pov.1
+include stl2pov.1.pdf
 include stl2ps.1
 include stl2ps.1.pdf
 include stl2pdf.1
