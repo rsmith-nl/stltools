@@ -13,6 +13,8 @@ PKGNAMEPREFIX=		${PYTHON_PKGNAMEPREFIX}
 MAINTAINER=		rsmith@xs4all.nl
 COMMENT=		Converts STL models to POV-Ray meshes or PostScript/PDF images
 
+LICENSE=		BSD
+
 # bypass infrastructure bug
 OPTIONSFILE=    ${PORT_DBDIR}/py27-${PORTNAME}/options
 
