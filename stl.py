@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # $Date$
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
@@ -10,7 +10,7 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -23,9 +23,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-#Check this code with 'pylint -r n stl.py'
+# Check this code with 'pylint -r n stl.py'
 
-"Classes for handling STL files and triangulated models."
+'''Classes for handling STL files and triangulated models.'''
 
 __version__ = '$Revision$'[11:-2]
 
@@ -33,8 +33,9 @@ import hashlib
 import math
 import struct
 
-# Points less than 'LIMIT' apart are considered equal.
+# Points less than LIMIT apart are considered equal.
 LIMIT = 1e-7
+
 
 class Vertex(object):
     '''Class for a 3D point in Cartesian space.'''
@@ -71,7 +72,7 @@ class Vertex(object):
 
     def length(self):
         '''Distance of a Vertex to the origin.'''
-        return math.sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
+        return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
 
     def xform(self, tr):
         '''Apply the transformation tr to the vertex.'''
@@ -81,28 +82,31 @@ class Vertex(object):
 
     def cross(self, b):
         '''Returns the cross product of self and b.'''
-        return Vertex(self.y*b.z-self.z*b.y, 
-                      self.z*b.x-self.x*b.z, 
-                      self.x*b.y-self.y*b.x)
+        return Vertex(self.y * b.z - self.z * b.y, 
+                      self.z * b.x - self.x * b.z, 
+                      self.x * b.y - self.y*b.x)
 
     def key(self):
         '''Returns a unique key for the vertex so we can put it in a
-        dictionary.'''
+        dictionary.
+        '''
         return self._key
+
 
 class Normal(Vertex):
     '''Class for a 3D normal vector in Cartesian space.'''
 
     def __init__(self, dx, dy, dz):
-        '''Set the normal from normalized values of dx, dy and dz.
-           This will raise a ValueError if the length of the vector is 0.'''
+        '''Set the normal from normalized values of dx, dy and dz. This will
+        raise a ValueError if the length of the vector is 0.
+        '''
         dx = float(dx)
         dy = float(dy)
         dz = float(dz)
-        l = math.sqrt(dx*dx+dy*dy+dz*dz)
+        l = math.sqrt(dx * dx + dy * dy + dz * dz)
         if l == 0.0:
             raise ValueError("Length of vector is 0!")
-        Vertex.__init__(self, dx/l, dy/l, dz/l)
+        Vertex.__init__(self, dx / l, dy / l, dz / l)
 
     def __str__(self):
         ns = '  facet normal {} {} {}'
@@ -116,15 +120,19 @@ class Normal(Vertex):
 
 class Edge(object):
     '''Class representing the edge of a Facet, a line segment between two
-    vertices.'''
+    vertices.
+    '''
 
     def __init__(self, start, end, f=None):
         '''Create the edge of a Facet.
         
         start, end -- points of the line segment
-        f   -- facet that the line segment belongs to.'''
-        assert isinstance(start, Vertex), "Start point of edge is not a Vertex"
-        assert isinstance(end, Vertex), "End point of edge is not a Vertex"
+        f -- facet that the line segment belongs to.
+        '''
+        assert isinstance(start, Vertex), \
+            "Start point of edge is not a Vertex"
+        assert isinstance(end, Vertex), \
+            "End point of edge is not a Vertex"
         self.p = [start, end]
         self.refs = []
         if f:
@@ -133,7 +141,8 @@ class Edge(object):
 
     def __eq__(self, other):
         '''If both self and other contain the same endpoints, they're equal,
-        irrespective of the direction of the edge.'''
+        irrespective of the direction of the edge.
+        '''
         assert isinstance(Edge, other), "Trying to compare a non-Edge."
         if self.p[0] == other.p[0] and self.p[1] == other.p[1]:
             return True
@@ -153,7 +162,8 @@ class Edge(object):
         index -- end of the Edge to test, either 1 (start) or 2 (end).
         other -- Edge to test.
 
-        Returns a tuple of the new end edge and its free point.'''
+        Returns a tuple of the new end edge and its free point.
+        '''
         index = int(index)
         assert index < 0 or index > 2, "Index out of bounds"
         assert isinstance(Edge, other), "Trying to fit a non-Edge."
@@ -168,7 +178,8 @@ class Edge(object):
 
         point -- Vertex to test.
 
-        Returns True if the point is on the Edge, false otherwise.'''
+        Returns True if the point is on the Edge, false otherwise.
+        '''
         d1 = self.p[1] - self.p[0]
         d2 = point - self.p[0]
         xp = d1.cross(d2)
@@ -184,19 +195,22 @@ class Edge(object):
     def key(self):
         '''Return a unique key for the edge so we can put it in a
         dictionary. The key is derived from the keys of the Edge's
-        Vertices.'''
+        Vertices.
+        '''
         k1 = self.p[0].key()
         k2 = self.p[1].key()
         if k2 < k1:
             return k2+k1
         return k1+k2
 
+
 class Facet(object):
     '''Class for a 3D triangle.'''
 
     def __init__(self, p1, p2, p3, n):
         '''Initialize the Facet from the Vertices p1, p2 and p3 
-        and a Normal n.'''
+        and a Normal n.
+        '''
         assert isinstance(p1, Vertex), "p1 is not a Vertex"
         assert isinstance(p2, Vertex), "p2 is not a Vertex"
         assert isinstance(p3, Vertex), "p3 is not a Vertex"
@@ -225,8 +239,10 @@ class Facet(object):
         s += '    endloop\n  endfacet'
         return s
 
+
 class ProjectedFacet(object):
     '''Class for a 3D triangle projected on 2 2D surface.'''
+
     def __init__(self, f, pr):
         '''Initialize the ProjectedFacet from the Facet f, and a Zpar pr.'''
         ambient = 0.05
@@ -251,7 +267,8 @@ class Surface(object):
 
     def __init__(self, fn=None):
         '''Read the STL file fn into an STL surface. Create an empty STL
-        object if fn is None.'''
+        object if fn is None.
+        '''
         self.facets = []
         self.vertices = {}
         self.normals = {}
@@ -288,7 +305,7 @@ class Surface(object):
             self.name = "unknown"
         contents = contents[84:]
         facetsz = len(contents)
-        nf2 = facetsz/50
+        nf2 = facetsz / 50
         if nf1 != nf2:
             raise ValueError("Number of facets doesn't match file size.")
         # Chop the string into a list of 50 byte strings.
@@ -345,7 +362,8 @@ class Surface(object):
 
     def addfacet(self, v1, v2, v3, norm):
         '''Make vertices v1, v2, v3 and optionally normal vector norm into a
-        Facet and add it to the STL object.'''
+        Facet and add it to the STL object.
+        '''
         k1 = v1.key()
         if k1 not in self.vertices:
             self.vertices[k1] = v1
@@ -377,7 +395,8 @@ class Surface(object):
 
     def extents(self):
         '''Returns the maximum and minimum x, y and z coordinates in the 
-           form of a tuple (xmin, xmax, ymin, ymax, zmin, zmax).'''
+        form of a tuple (xmin, xmax, ymin, ymax, zmin, zmax).
+        '''
         return (self.xmin, self.xmax, self.ymin, self.ymax, 
                 self.zmin, self.zmax)
 
@@ -388,8 +407,9 @@ class Surface(object):
 
     def meanpoint(self):
         '''Returns the average of all Vertexes of all Facets 
-           in a tuple (x, y, z).'''
-        c = 3*len(self.facets)
+        in a tuple (x, y, z).
+        '''
+        c = 3 * len(self.facets)
         return (self.mx/c, self.my/c, self.mz/c)
 
     def stats(self, prefix=''):
@@ -472,6 +492,7 @@ class Surface(object):
                 else:
                     de[s] = ne
         return de.values()
+
 
 # Built-in test.
 if __name__ == '__main__':
