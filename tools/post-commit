@@ -1,5 +1,6 @@
 #!/bin/sh
 # Script to be executed after a successfull commit.
+# $Date: 2012-10-21 14:17:40 +0200 $
 # 
 # Looks for files changed in the last commit, removes those files and checks
 # them out again to refresh the keywords. Keyword expansion only works should
@@ -7,5 +8,5 @@
 
 FILES=`git diff-tree HEAD~1 HEAD --name-only -r`
 rm -f $FILES
-git checkout $FILES
+git checkout -f $FILES
 
