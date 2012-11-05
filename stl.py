@@ -63,12 +63,9 @@ class Vertex(object):
     def __eq__(self, other):
         if other == None:
             return False
-        if (math.fabs(self.x - other.x) < LIMIT and 
-            math.fabs(self.y - other.y) < LIMIT and 
-            math.fabs(self.z - other.z) < LIMIT):
+        if self.x == other.x and self.y == other.y and self.z == other.z:
             return True
-        else:
-            return False
+        return False
 
     def length(self):
         '''Distance of a Vertex to the origin.'''
@@ -135,6 +132,7 @@ class Edge(object):
             "End point of edge is not a Vertex"
         self.p = [start, end]
         self.refs = []
+        self.visible = False
         if f:
             assert isinstance(f, Facet), "Reference is not a Facet."
             self.refs.append(f)
@@ -215,7 +213,7 @@ class Facet(object):
         assert isinstance(p2, Vertex), "p2 is not a Vertex"
         assert isinstance(p3, Vertex), "p3 is not a Vertex"
         # Check for degenerate facets
-        if p1 == p2 or p1 == p3:
+        if p1 == p2 or p1 == p3 or p2 == p3:
             raise ValueError("Degenerate facet; coincident points.")
         edge = Edge(p1, p2)
         if edge.contains(p3):
