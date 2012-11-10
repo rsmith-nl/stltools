@@ -52,3 +52,36 @@ array([[ 0,  1,  2],
        [24, 25, 26],
        [27, 28, 29],
        [31, 32, 33]])
+
+-------------------------
+
+t = np.array([[ 0.,  0.,  1.], [ 1.,  0.,  1.], [ 0.,  1.,  1.], [ 1.,  0.,  1.]])
+
+In [21]: t
+Out[21]: 
+array([[ 0.,  0.,  1.],
+       [ 1.,  0.,  1.],
+       [ 0.,  1.,  1.],
+       [ 1.,  0.,  1.]])
+
+In [22]: np.all(t == np.array([ 0.,  1.,  1.]), axis=1)
+Out[22]: array([False, False,  True, False], dtype=bool)
+
+In [40]: np.all(t == np.array([ 0.,  4.,  1.]), axis=1)
+Out[40]: array([False, False, False, False], dtype=bool)
+
+In [25]: np.nonzero(np.all(t == np.array([ 0.,  4.,  1.]), axis=1))
+Out[25]: (array([], dtype=int64),)
+
+In [28]: np.nonzero(np.all(t == np.array([ 0.,  1.,  1.]), axis=1))
+Out[28]: (array([2]),)
+
+In [35]: np.all(t == np.array([ 0.,  4.,  1.]), axis=1)
+Out[35]: array([False, False, False, False], dtype=bool)
+
+In [37]: np.any(np.all(t == np.array([ 0.,  4.,  1.]), axis=1))
+Out[37]: False
+
+In [38]: np.any(np.all(t == np.array([ 0.,  1.,  1.]), axis=1))
+Out[38]: True
+
