@@ -30,19 +30,26 @@
 __version__ = '$Revision$'[11:-2]
 
 import struct
-import numpy as np
+
+
+def fromstl(fname):
+    t = TriSurf2(fname)
+    for f in t.reader:
+        pass
+    return t
 
 class TriSurf(object):
 
     def __init__(self, fn=None):
         self.fn = fn
         self.name = None
-        self.v = np.array([], dtype=float) # vertices
-        self.tv = None # transformed vertices
-        self.pv = np.array([], dtype=float) # projected vertices
-        self.n = np.array([], dtype=float) # normals
-        self.tn = None # transformed normals
-        self.e = [] # edges
+        self.v = [] # vertices
+        self.sv = set()
+        self.tv = [] # transformed vertices
+        self.pv = [] # projected vertices
+        self.n = [] # normals
+        self.sn = set()
+        self.tn = [] # transformed normals
         self.f = [] # facets
         if fn == None:
             self.reader = None
@@ -58,45 +65,35 @@ class TriSurf(object):
         '''Create a facet from the three points a, b and c.
 
         Arguments:
-        a -- numpy array containing the coordinates of the first vertex.
-        b -- numpy array containing the coordinates of the second vertex.
-        c -- numpy array containing the coordinates of the third vertex.
+        a -- tuple containing the coordinates of the first vertex.
+        b -- tuple containing the coordinates of the second vertex.
+        c -- tuple containing the coordinates of the third vertex.
         '''
         # Calculate normal vector.
-        u = b-a
-        v = c-b
-        n = np.cross(u, v)
-        if np.all(n == 0):
-            raise ValueError
-        n /= (n*n).sum()**0.5
+        u = _sub(b, a)
+        v = _sub(c, b)
+        n = _cross(u, v)
+        n  = _norm(n)
         # Add normal vector to list.
-        newnormal = 1
-        if len(self.n) == 0:
-            self.n = np.array([n])
-            ni = 0
+        if n in self.sn:
+            ni = self.n.index(n)
+            newnormal = 0
         else:
-            where = np.ravel(np.nonzero(np.all(n == self.n, axis=1)))
-            if len(where) == 0:
-                ni = len(self.n)
-                self.n = np.vstack((self.n, n))
-            else:
-                ni = where[0]
-                newnormal = 0
+            ni = len(self.n)
+            self.n.append(n)
+            self.sn.add(n)
+            newnormal = 1
         # Add vertices to list if not already in it.
         vi = []
         newverts = 3
         for t in a, b, c:
-            if len(self.v) == 0:
-                self.v = np.array([t])
-                vi.append(0)
+            if t in set(self.sv):
+                vi.append(self.v.index(t))
+                newverts -= 1
             else:
-                where = np.ravel(np.nonzero(np.all(t == self.v, axis=1)))
-                if len(where) == 0:
-                    vi.append(len(self.v))
-                    self.v = np.vstack((self.v, t))
-                else:
-                    vi.append(where[0])
-                    newverts -= 1
+                vi.append(len(self.v))
+                self.v.append(t)
+                self.sv.add(t)
         # Calculate the edges, store them in an edge list.
         edges = [tuple(sorted(vi[0:2])), tuple(sorted(vi[1:3])), 
                     (vi[0], vi[2])]
@@ -104,6 +101,14 @@ class TriSurf(object):
         self.f.append([vi, ni, edges, False, 0.0])
         # Return the number of new vertices and normals
         return newverts, newnormal
+
+    def getbb(self):
+        '''Calculate the bounding box.
+        '''
+        x = [p[0] for p in self.v]
+        y = [p[1] for p in self.v]
+        z = [p[2] for p in self.v]
+        return ((min(x), max(x)), (min(y), max(y)), (min(z), max(z)))
         
     def _readbinary(self, contents=None):
         '''Process the contents of a binary STL file as a
@@ -131,9 +136,9 @@ class TriSurf(object):
         for i in items:
             f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
             struct.unpack("=12x9f2x", i)
-            v1 = np.array([f1x, f1y, f1z], dtype=float)
-            v2 = np.array([f2x, f2y, f2z], dtype=float)
-            v3 = np.array([f3x, f3y, f3z], dtype=float)
+            v1 = (f1x, f1y, f1z)
+            v2 = (f2x, f2y, f2z)
+            v3 = (f3x, f3y, f3z)
             try:
                 nv, nn = self.addfacet(v1, v2, v3)
             except ValueError:
@@ -162,9 +167,9 @@ class TriSurf(object):
         # Items now begins with "facet"
         et = 'skipped degenerate facet {}.'
         while items[0] == "facet":
-            v1 = np.array([items[8], items[9], items[10]], dtype=float)
-            v2 = np.array([items[12], items[13], items[14]], dtype=float)
-            v3 = np.array([items[16], items[17], items[18]], dtype=float)
+            v1 = (float(items[8]), float(items[9]), float(items[10]))
+            v2 = (float(items[12]), float(items[13]), float(items[14]))
+            v3 = (float(items[16]), float(items[17]), float(items[18]))
             try:
                 nv, nn = self.addfacet(v1, v2, v3)
             except ValueError:
@@ -172,6 +177,11 @@ class TriSurf(object):
             del items[:21]
             ot = 'facet {}/{}: {} new vertices, {} new normals.'
             yield ot.format(len(self.f), nf1, nv, nn)
+
+    def __len__(self):
+        '''The length of a TriSurf is defined as the number of facets.
+        '''
+        return len(self.f)
 
     def zproj(self):
         '''Perform a Z parallel projection.
@@ -193,6 +203,46 @@ class TriSurf(object):
         '''        
         pass
 
+
+def _add(a, b):
+    '''Calculate and return a+b.
+    
+    Arguments
+    a -- 3-tuple of floats
+    b -- 3-tuple of floats
+    '''
+    return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+
+def _sub(a, b):
+    '''Calculate and return a-b.
+    
+    Arguments
+    a -- 3-tuple of floats
+    b -- 3-tuple of floats
+    '''
+    return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+
+def _cross(a, b):
+    '''Calculate and return the cross product of a and b.
+    
+    Arguments
+    a -- 3-tuple of floats
+    b -- 3-tuple of floats
+    '''
+    return (a[1]*b[2] - a[2]*b[1], 
+            a[2]*b[0] - a[0]*b[2], 
+            a[0]*b[1] - a[1]*b[0])
+
+def _norm(a):
+    '''Calculate and return the normalized a.
+    
+    Arguments
+    a -- 3-tuple of floats
+    '''
+    L = (a[0]**2 + a[1]**2 + a[2]**2)**0.5
+    if L == 0.0:
+        raise ValueError('zero-length normal vector')
+    return (a[0]/L, a[1]/L, a[2]/L)
 
 
 # Built-in test.
