@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright © 2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # $Date$
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ def fromstl(fname):
     fname -- file to read the STL file from.
 
     Returns:
-    A tuple: (name, nf, reader)
+    A tuple (name, nf, reader)
     name -- the name of the STL object
     nf   -- the numbers of facets in the object
     reader -- a generator for the facets.
@@ -95,6 +95,41 @@ def allfacets(reader, verbose=False):
         if facet:
             fl.append(facet)
     return fl
+
+
+def reassemble(facets):
+    '''Re-assemble the unconnected facets into connected
+    facets, making the vertices and normals unique.
+    '''
+    pnts = []
+    norms = []
+    ilines = []
+    ifcts = []
+    for a, b, c, n in facets:
+        try:
+            newni = norms.index(n)
+        except ValueError:
+            newni = len(norms)
+            norms.append(n)
+        newpi = []
+        for x in a, b, c:
+            try:
+                newpi.append(pnts.index(x))
+            except ValueError:
+                newpi.append(len(pnts))
+                pnts.append(x)
+        newpi.sort()
+        newlines = [(newpi[0], newpi[1]), (newpi[1], newpi[2]), 
+                    (newpi[2], newpi[0])]
+        newli = []
+        for l in newlines:
+            try:
+                newli.append(ilines.index(l))
+            except ValueError:
+                newli.append(len(ilines))
+                ilines.append(l)
+        ifcts.append((tuple(newpi), newni, tuple(newli)))
+    return pnts, norms, ilines, ifcts
 
 
 def _readbinary(items=None):
@@ -210,9 +245,39 @@ def _norm(a):
 
 # Built-in test.
 if __name__ == '__main__':
-    print "===== begin of text file ====="
-    fn = "test/cube.stl"
-    print "===== end of text file ====="
-    print "===== begin of binary file ====="
-    fn = "test/ad5-rtm-light.stl"
-    print "===== end of binary file ====="
+    import time
+    def test(name):
+        print "===== begin of file {} =====".format(name)
+        start = time.clock()
+        stop = time.clock()
+        delta = stop-start
+
+        start = time.clock()
+        nm, nf, rd = fromstl(name)
+        stop = time.clock()
+        print 'Read file in {} seconds.'.format(stop-start-delta)
+        print 'Object name:', nm
+
+        start = time.clock()
+        facets = allfacets(rd)
+        stop = time.clock()
+        s = 'Processed {} facets in {} seconds.'.format(nf, stop-start-delta)
+        print s
+
+        start = time.clock()
+        p, n, ilns, ifcts = reassemble(facets)
+        stop = time.clock()
+        print 'Re-assembled in {} seconds.'.format(stop-start-delta)
+
+        print 'Points:', len(p)
+        print 'Normals:', len(n)
+        print 'Lines:', len(ilns)
+        print 'Facets:', len(ifcts)
+        print "===== end of file {} =====".format(name)
+
+    test('test/cube.stl')
+    test('test/chaise.stl')
+    test('test/ad5-rtm-light.stl')
+#    test('test/ad5-rtm-light-ondermal.stl')
+#    test('test/salamanders.stl')
+
