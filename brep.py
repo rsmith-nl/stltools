@@ -100,6 +100,23 @@ def allfacets(reader, verbose=False):
 def reassemble(facets):
     '''Re-assemble the unconnected facets into connected
     facets, making the vertices and normals unique.
+
+    Arguments:
+    facets -- list of facets. Each facet is a tuple (a,b,c,n) where
+    a-c are 3-tuples of coordinates of the vertices and n is a 3-tuple
+    of the normalized normal vector.
+
+    Returns:
+    A tuple (pnts, norms, ilines, ifcts), where
+    pnts -- a list of 3-tuples each representing an unique vertex
+    norms -- a list of 3-tuples each representing an unique normalized
+    normal vector
+    ilines -- a list of 2-tuples each holding the indices of the
+    points defining a line segment.
+    fcts -- a list of tuples of the form ((a,b,c), d, (e,f,g)) where
+    a-c are the indices of the vertices of the facet, d is the index
+    of the normal vector and e-g are the indices os the line segments
+    making up the facets.
     '''
     pnts = []
     norms = []
@@ -130,6 +147,44 @@ def reassemble(facets):
                 ilines.append(l)
         ifcts.append((tuple(newpi), newni, tuple(newli)))
     return pnts, norms, ilines, ifcts
+
+
+def bbox(pnts):
+    '''Calculate the bounding box of all pnts.
+
+    Arguments:
+    pnts -- list of 3-tuples holding the point coordinates
+
+    Returns
+    A tuple (xmin, xmax, ymin, ymax, zmin, zmax)
+    '''
+    if pnts:
+        x = [p[0] for p in pnts]
+        y = [p[1] for p in pnts]
+        z = [p[2] for p in pnts]
+        return (min(x), max(x), min(y), max(y), min(z), max(z))
+    else:
+        raise ValueError('empyty list of points')
+
+
+#def translate(pnts, v):
+#    '''Translate all the points according to vec.
+#
+#    Arguments:
+#    pnts -- list of 3-tuples holding the point coordinates
+#    v  -- 3-tuple holding the translation vector
+#
+#    Returns
+#    a list of translated points.
+#    '''
+#    if pnts:
+#        if v:
+#            x, y, z = v
+#        else:
+#            raise ValueError('empyty vector')
+#        return [(p[0] + x, p[1] + y, p[2] + z) for p in pnts]
+#    else:
+#        raise ValueError('empyty list of points')
 
 
 def _readbinary(items=None):
