@@ -25,46 +25,46 @@
 
 # Check this code with 'pylint -r n vector.py'
 
-'''Vector manipulation functions. Vectors are 3-tuples of floats.'''
+"""Vector manipulation functions. Vectors are 3-tuples of floats."""
 
 def add(a, b):
-    '''Calculate and return a+b.
+    """Calculate and return a+b.
     
     Arguments
     a -- 3-tuple of floats
     b -- 3-tuple of floats
-    '''
+    """
     return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
 
 
 def sub(a, b):
-    '''Calculate and return a-b.
+    """Calculate and return a-b.
     
     Arguments
     a -- 3-tuple of floats
     b -- 3-tuple of floats
-    '''
+    """
     return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
 
 
 def cross(a, b):
-    '''Calculate and return the cross product of a and b.
+    """Calculate and return the cross product of a and b.
     
     Arguments
     a -- 3-tuple of floats
     b -- 3-tuple of floats
-    '''
+    """
     return (a[1]*b[2] - a[2]*b[1], 
             a[2]*b[0] - a[0]*b[2], 
             a[0]*b[1] - a[1]*b[0])
 
 
 def norm(a):
-    '''Calculate and return the normalized a.
+    """Calculate and return the normalized a.
     
     Arguments
     a -- 3-tuple of floats
-    '''
+    """
     L = (a[0]**2 + a[1]**2 + a[2]**2)**0.5
     if L == 0.0:
         raise ValueError('zero-length normal vector')
@@ -72,14 +72,14 @@ def norm(a):
 
 
 def bbox(pnts):
-    '''Calculate the bounding box of all pnts.
+    """Calculate the bounding box of all pnts.
 
     Arguments:
     pnts -- list of 3-tuples holding the point coordinates
 
     Returns
     A tuple (xmin, xmax, ymin, ymax, zmin, zmax)
-    '''
+    """
     if pnts:
         x = [p[0] for p in pnts]
         y = [p[1] for p in pnts]
@@ -90,7 +90,7 @@ def bbox(pnts):
 
 
 def translate(pnts, v):
-    '''Translate all the points according to vec.
+    """Translate all the points according to vec.
 
     Arguments:
     pnts -- list of 3-tuples holding the point coordinates
@@ -98,7 +98,7 @@ def translate(pnts, v):
 
     Returns
     a list of translated points.
-    '''
+    """
     if pnts:
         if v:
             x, y, z = v

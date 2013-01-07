@@ -25,7 +25,7 @@
 
 # Check this code with 'pylint -r n read.py'
 
-'''Reading triangulated models.'''
+"""Reading triangulated models."""
 
 __version__ = '$Revision$'[11:-2]
 
@@ -33,7 +33,7 @@ import struct
 from . import vector
 
 def fromfile(fname):
-    '''Prepare for processing an STL file.
+    """Prepare for processing an STL file.
     
     Arguments:
     fname -- file to read the STL file from.
@@ -43,7 +43,7 @@ def fromfile(fname):
     name -- the name of the STL object
     nf   -- the numbers of facets in the object
     reader -- a generator for the facets.
-    '''
+    """
     with open(fname, 'r') as stlfile:
         data = stlfile.read()
     if data.find('vertex', 120) == -1: # Binary file format
@@ -77,7 +77,7 @@ def fromfile(fname):
 
 
 def allfacets(reader, verbose=False):
-    '''Convenience function to read all facets in one go.
+    """Convenience function to read all facets in one go.
 
     Arguments:
     reader -- generator for the facets
@@ -87,7 +87,7 @@ def allfacets(reader, verbose=False):
     A list of facets, each of which is a tuple (a,b,c,n) where a,b,c
     are the 3-tuples of the coordinates of the vertices, and n is a
     normalized 3-tuple containing the normal vector of the facet.
-    '''
+    """
     fl = []
     for stat, facet in reader:
         if verbose:
@@ -98,7 +98,7 @@ def allfacets(reader, verbose=False):
 
 
 def reassemble(facets):
-    '''Re-assemble the unconnected facets into connected
+    """Re-assemble the unconnected facets into connected
     facets, making the vertices and normals unique.
 
     Arguments:
@@ -117,7 +117,7 @@ def reassemble(facets):
     a-c are the indices of the vertices of the facet, d is the index
     of the normal vector and e-g are the indices os the line segments
     making up the facets.
-    '''
+    """
     pnts = []
     norms = []
     ilines = []
@@ -150,7 +150,7 @@ def reassemble(facets):
 
 
 def assembler(facets, pnts, norms, ilines, ifcts):
-    '''A generator to re-assemble the unconnected facets into
+    """A generator to re-assemble the unconnected facets into
     connected facets, making the vertices and normals unique.
 
     Arguments:
@@ -170,7 +170,7 @@ def assembler(facets, pnts, norms, ilines, ifcts):
 
     Yields:
     The new facet. Also appends to the lists pnts, norms, ilines, ifcts.
-    '''
+    """
     for a, b, c, n in facets:
         stat = ''
         try:
@@ -217,7 +217,7 @@ def assembler(facets, pnts, norms, ilines, ifcts):
 
 
 def _readbinary(items=None):
-    '''Process the contents of a binary STL file as a
+    """Process the contents of a binary STL file as a
     generator.
 
     Arguments:
@@ -229,7 +229,7 @@ def _readbinary(items=None):
               facet
     facet  -- A tuple (a, b, c, n), where a,b and c are vertices and n
               is the normalized normal vector, or None.
-    '''
+    """
     # Process the items
     for cnt, i in enumerate(items):
         f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
@@ -250,7 +250,7 @@ def _readbinary(items=None):
 
 
 def _readtext(items=None):
-    '''Process the contents of a text STL file as a
+    """Process the contents of a text STL file as a
     generator.
 
     Arguments:
@@ -262,7 +262,7 @@ def _readtext(items=None):
               facet
     facet  -- A tuple (a, b, c, n), where a,b and c are vertices and n
               is the normalized normal vector, or None.
-    '''
+    """
     # Items now begins with "facet"
     cnt = 0
     while items[0] == "facet":
