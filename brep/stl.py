@@ -23,16 +23,16 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-# Check this code with 'pylint -r n brep.py'
+# Check this code with 'pylint -r n read.py'
 
 '''Reading triangulated models.'''
 
 __version__ = '$Revision$'[11:-2]
 
 import struct
+from . import vector
 
-
-def fromstl(fname):
+def fromfile(fname):
     '''Prepare for processing an STL file.
     
     Arguments:
@@ -149,42 +149,71 @@ def reassemble(facets):
     return pnts, norms, ilines, ifcts
 
 
-def bbox(pnts):
-    '''Calculate the bounding box of all pnts.
+def assembler(facets, pnts, norms, ilines, ifcts):
+    '''A generator to re-assemble the unconnected facets into
+    connected facets, making the vertices and normals unique.
 
     Arguments:
-    pnts -- list of 3-tuples holding the point coordinates
+    facets -- list of facets. Each facet is a tuple (a,b,c,n) where
+    a-c are 3-tuples of coordinates of the vertices and n is a 3-tuple
+    of the normalized normal vector.
+    pnts -- a list where 3-tuples each representing a new unique
+    vertex are stored
+    norms -- a list where 3-tuples each representing a new unique
+    normalized normal vector are stored
+    ilines -- a list where 2-tuples each holding the indices of the
+    points defining a line segment are stored.
+    fcts -- a list where tuples of the form ((a,b,c), d, (e,f,g)) are
+    stored. a-c are the indices of the vertices of the facet, d is the
+    index of the normal vector and e-g are the indices os the line
+    segments making up the new facet.
 
-    Returns
-    A tuple (xmin, xmax, ymin, ymax, zmin, zmax)
+    Yields:
+    The new facet. Also appends to the lists pnts, norms, ilines, ifcts.
     '''
-    if pnts:
-        x = [p[0] for p in pnts]
-        y = [p[1] for p in pnts]
-        z = [p[2] for p in pnts]
-        return (min(x), max(x), min(y), max(y), min(z), max(z))
-    else:
-        raise ValueError('empyty list of points')
+    for a, b, c, n in facets:
+        stat = ''
+        try:
+            newni = norms.index(n)
+        except ValueError:
+            newni = len(norms)
+            norms.append(n)
+            stat = 'Found 1 new normal, index {}. '.format(newni)
+        newpi = []
+        nnp = []
+        for x in a, b, c:
+            try:
+                newpi.append(pnts.index(x))
+            except ValueError:
+                i = len(pnts)
+                newpi.append(i)
+                pnts.append(x)
+                nnp.append(i)
+        if nnp:
+            stat += 'Found {} new points; {}. '.format(len(nnp), str(nnp))
+        newpi.sort()
+        lines = [(newpi[0], newpi[1]), (newpi[1], newpi[2]), 
+                    (newpi[2], newpi[0])]
+        newli = []
+        nni = []
+        for l in lines:
+            try:
+                newli.append(ilines.index(l))
+            except ValueError:
+                i = len(ilines)
+                newli.append(i)
+                ilines.append(l)
+                nni.append(i)
+        if nni:
+            stat += 'Found {} new lines; {}.'.format(len(nni), str(nni))
+        ifcts.append((tuple(newpi), newni, tuple(newli)))
+        yield stat, ifcts[-1] 
 
-
-#def translate(pnts, v):
-#    '''Translate all the points according to vec.
-#
-#    Arguments:
-#    pnts -- list of 3-tuples holding the point coordinates
-#    v  -- 3-tuple holding the translation vector
-#
-#    Returns
-#    a list of translated points.
-#    '''
-#    if pnts:
-#        if v:
-#            x, y, z = v
-#        else:
-#            raise ValueError('empyty vector')
-#        return [(p[0] + x, p[1] + y, p[2] + z) for p in pnts]
-#    else:
-#        raise ValueError('empyty list of points')
+#def mkquat(v, theta):
+#    s = math.sin(0.5*theta)
+#    c = math.cos(0.5*theta)
+#    vnrm = _norm(v)
+#    return [c, s*v[0], s*v[1], s*v[2]]
 
 
 def _readbinary(items=None):
@@ -208,12 +237,12 @@ def _readbinary(items=None):
         a = (f1x, f1y, f1z)
         b = (f2x, f2y, f2z)
         c = (f3x, f3y, f3z)
-        u = _sub(b, a)
-        v = _sub(c, b)
-        n = _cross(u, v)
+        u = vector.sub(b, a)
+        v = vector.sub(c, b)
+        n = vector.cross(u, v)
         status = 'facet {} OK'.format(cnt+1)
         try:
-            n  = _norm(n)
+            n  = vector.norm(n)
         except ValueError:
             status = 'skipped degenerate facet {}.'.format(cnt+1)
             yield status, None
@@ -240,75 +269,33 @@ def _readtext(items=None):
         a = (float(items[8]), float(items[9]), float(items[10]))
         b = (float(items[12]), float(items[13]), float(items[14]))
         c = (float(items[16]), float(items[17]), float(items[18]))
-        u = _sub(b, a)
-        v = _sub(c, b)
-        n = _cross(u, v)
+        u = vector.sub(b, a)
+        v = vector.sub(c, b)
+        n = vector.cross(u, v)
         del items[:21]
         cnt += 1
         status = 'facet {} OK'.format(cnt)
         try:
-            n  = _norm(n)
+            n  = vector.norm(n)
         except ValueError:
             status = 'skipped degenerate facet {}.'.format(cnt)
             yield status, None
         yield status, (a, b, c, n)
 
 
-def _add(a, b):
-    '''Calculate and return a+b.
-    
-    Arguments
-    a -- 3-tuple of floats
-    b -- 3-tuple of floats
-    '''
-    return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
-
-
-def _sub(a, b):
-    '''Calculate and return a-b.
-    
-    Arguments
-    a -- 3-tuple of floats
-    b -- 3-tuple of floats
-    '''
-    return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
-
-
-def _cross(a, b):
-    '''Calculate and return the cross product of a and b.
-    
-    Arguments
-    a -- 3-tuple of floats
-    b -- 3-tuple of floats
-    '''
-    return (a[1]*b[2] - a[2]*b[1], 
-            a[2]*b[0] - a[0]*b[2], 
-            a[0]*b[1] - a[1]*b[0])
-
-
-def _norm(a):
-    '''Calculate and return the normalized a.
-    
-    Arguments
-    a -- 3-tuple of floats
-    '''
-    L = (a[0]**2 + a[1]**2 + a[2]**2)**0.5
-    if L == 0.0:
-        raise ValueError('zero-length normal vector')
-    return (a[0]/L, a[1]/L, a[2]/L)
-
-
 # Built-in test.
 if __name__ == '__main__':
     import time
+
+
     def test(name):
-        print "===== begin of file {} =====".format(name)
+        print "===== test: begin of file {} =====".format(name)
         start = time.clock()
         stop = time.clock()
         delta = stop-start
 
         start = time.clock()
-        nm, nf, rd = fromstl(name)
+        nm, nf, rd = fromfile(name)
         stop = time.clock()
         print 'Read file in {} seconds.'.format(stop-start-delta)
         print 'Object name:', nm
@@ -328,11 +315,49 @@ if __name__ == '__main__':
         print 'Normals:', len(n)
         print 'Lines:', len(ilns)
         print 'Facets:', len(ifcts)
-        print "===== end of file {} =====".format(name)
+        print "===== test: end of file {} =====".format(name)
 
-    test('test/cube.stl')
-    test('test/chaise.stl')
-    test('test/ad5-rtm-light.stl')
-#    test('test/ad5-rtm-light-ondermal.stl')
+
+    def test2(name):
+        print "===== test2: begin of file {} =====".format(name)
+        start = time.clock()
+        stop = time.clock()
+        delta = stop-start
+
+        start = time.clock()
+        nm, nf, rd = fromfile(name)
+        stop = time.clock()
+        print 'Read file in {} seconds.'.format(stop-start-delta)
+        print 'Object name:', nm
+
+        start = time.clock()
+        facets = allfacets(rd)
+        stop = time.clock()
+        s = 'Processed {} facets in {} seconds.'.format(nf, stop-start-delta)
+        print s
+
+        points = []
+        norms = []
+        lines = []
+        fcts = []
+        start = time.clock()
+        for s, fct in assembler(facets, points, norms, lines, fcts):
+            print s
+            print 'new facet:', fct
+        stop = time.clock()
+        print '-----'
+        print 'Re-assembled in {} seconds.'.format(stop-start-delta)
+        print 'Points:', len(points)
+        print 'Normals:', len(norms)
+        print 'Lines:', len(lines)
+        print 'Facets:', len(fcts)
+        print "===== test2: end of file {} =====".format(name)
+
+
+    test('../test/cube.stl')
+    test2('../test/cube.stl')
+#    test('test/chaise.stl')
+#    test('test/ad5-rtm-light.stl')
+#    test2('test/ad5-rtm-light-ondermal.stl')
 #    test('test/salamanders.stl')
 
