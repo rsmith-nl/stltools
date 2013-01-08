@@ -80,13 +80,24 @@ def bbox(pnts):
     Returns
     A tuple (xmin, xmax, ymin, ymax, zmin, zmax)
     """
-    if pnts:
-        x = [p[0] for p in pnts]
-        y = [p[1] for p in pnts]
-        z = [p[2] for p in pnts]
-        return (min(x), max(x), min(y), max(y), min(z), max(z))
-    else:
-        raise ValueError('empyty list of points')
+    x = [p[0] for p in pnts]
+    y = [p[1] for p in pnts]
+    z = [p[2] for p in pnts]
+    return (min(x), max(x), min(y), max(y), min(z), max(z))
+
+def mean(pnts):
+    """Calculate the mean of all pnts.
+
+    Arguments:
+    pnts -- list of 3-tuples holding the point coordinates
+
+    Returns
+    A tuple (x,y,z)
+    """
+    x = [p[0] for p in pnts]
+    y = [p[1] for p in pnts]
+    z = [p[2] for p in pnts]
+    return (sum(x)/len(x), sum(y)/len(y), sum(z)/len(z))
 
 
 def translate(pnts, v):

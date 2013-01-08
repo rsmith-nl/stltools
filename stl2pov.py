@@ -36,20 +36,15 @@ ver = ('stl2pov [ver. ' + '$Revision$'[11:-2] +
        '] ('+'$Date$'[7:-2]+')')
 
 
-def usage():
-    print ver
-    print "Usage: stl2pov infile [outfile]"
-
-
 def mesh1(facets, name):
     """Returns a string containing the facet list s as a POV-ray mesh
     object."""
-    ms = "# declare m_{} = mesh {{\n".format(name)
-    sot = "  triangle {{ // #{}\n"
+    ms = "# declare m_{} = mesh {{\n".format(name.replace(' ', '_'))
+    sot = "  triangle {\n"
     fc = "    <{1}, {0}, {2}>,\n"
     fct = "    <{1}, {0}, {2}>\n"
-    for n, f in enumerate(facets):
-        ms += sot.format(n+1)
+    for f in facets:
+        ms += sot
         ms += fc.format(f[0][0], f[0][1], f[0][2])
         ms += fc.format(f[1][0], f[1][1], f[1][2])
         ms += fct.format(f[2][0], f[2][1], f[2][2])
@@ -61,15 +56,12 @@ def mesh1(facets, name):
 def mesh2(points, facets, name):
     """Returns a string containing the Surface s as a POV-ray mesh2
     object."""
-    ms = "# declare m_{} = mesh2 {{\n".format(name)
+    ms = "# declare m_{} = mesh2 {{\n".format(name.replace(' ', '_'))
     ms += '  vertex_vectors {\n'
     ms += '    {},\n'.format(len(points))
-    for i, p in enumerate(points):
-        ms += '    <{1}, {0}, {2}>,'.format(p[0], p[1], p[2])
-        ms += ' // vertex #{}\n'.format(i)
-    j = ms.rindex(', //')
-    ms = ms[:j]
-    ms += '  // vertex #{}\n'.format(i)
+    for p in points:
+        ms += '    <{1}, {0}, {2}>,\n'.format(p[0], p[1], p[2])
+    ms = ms[:-2]
     ms += '  }\n'
     ms += '  face_indices {\n'
     ms += '    {},\n'.format(len(facets))
@@ -84,14 +76,14 @@ def main(argv):
     """Main program.
 
     Keyword arguments:
-    argv -- command line arguments
+    argv -- command line arguments (without program name!)
     """
     parser = argparse.ArgumentParser(description=__doc__)
-    argtxt = 'wether the program should generate a mesh2 object.'
+    argtxt = 'generate a mesh2 object.'
     parser.add_argument('-2,' '--mesh2', action='store_true', 
                         help=argtxt, dest='mesh2')
-    parser.add_argument('file', nargs='*')
-    args = parser.parse_args(argv[1:])
+    parser.add_argument('file', nargs='*', help='one or more file names')
+    args = parser.parse_args(argv)
     if not args.file:
         parser.print_help()
         sys.exit(0)
@@ -120,4 +112,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main(sys.argv[1:])

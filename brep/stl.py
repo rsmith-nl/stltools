@@ -209,6 +209,62 @@ def assembler(facets, pnts, norms, ilines, ifcts):
         ifcts.append((tuple(newpi), newni, tuple(newli)))
         yield stat, ifcts[-1] 
 
+
+def stats(pnts, norms, ilines, ifcts):
+    """Calculate statistics about an STL model.
+
+    Arguments:
+    pnts -- a list of 3-tuples each representing a unique vertex
+    norms -- a list of 3-tuples each representing a unique 
+    normalized normal vector
+    ilines -- a list of 2-tuples each holding the indices of the
+    points defining a line segment
+    ifcts -- a list of tuples of the form ((a,b,c), d, (e,f,g)) are. 
+    a-c are the indices of the vertices of the facet, d is the
+    index of the normal vector and e-g are the indices os the line
+    segments making up the new facet.
+    """
+    s = "{} facets, {} vertices, {} normal vectors, {} edges.\n"
+    outs = s.format(len(ifcts), len(pnts), len(norms), len(ilines))
+    outs += "3D Extents of the model (in STL units):\n"
+    (xmin, xmax, ymin, ymax, zmin, zmax) = vector.bbox(pnts)
+    outs += "{} ≤ x ≤ {},\n".format(xmin, xmax)
+    outs += "{} ≤ y ≤ {},\n".format(ymin, ymax)
+    outs += "{} ≤ z ≤ {}.\n".format(zmin, zmax)
+    s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
+    outs += s.format((xmin+xmax)/2.0, (ymin+ymax)/2.0, (zmin+zmax)/2.0)
+    s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
+    x, y, z = vector.mean(pnts)
+    outs += s.format(x, y, z)
+    return outs
+
+def astext(nm, pnts, norms, ifcts):
+    """Return a string containing the text representation of an STL model.
+
+    Arguments:
+    pnts -- a list of 3-tuples each representing a unique vertex
+    norms -- a list of 3-tuples each representing a unique 
+    normalized normal vector
+    ilines -- a list of 2-tuples each holding the indices of the
+    points defining a line segment
+    ifcts -- a list of tuples of the form ((a,b,c), d, (e,f,g)) are. 
+    a-c are the indices of the vertices of the facet, d is the
+    index of the normal vector and e-g are the indices os the line
+    segments making up the new facet.
+    """
+    outs = "solid {}\n".format(nm)
+    for (v, n, l) in ifcts:
+        nv = norms[n]
+        outs +=  '  facet normal {} {} {}\n'.format(nv[0], nv[1], nv[2])
+        outs += '    outer loop\n'
+        for i in v:
+            p = pnts[i]
+            outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
+        outs += '    endloop\n  endfacet\n'
+    outs +='endsolid\n'
+    return outs
+
+
 #def mkquat(v, theta):
 #    s = math.sin(0.5*theta)
 #    c = math.cos(0.5*theta)
@@ -311,10 +367,7 @@ if __name__ == '__main__':
         stop = time.clock()
         print 'Re-assembled in {} seconds.'.format(stop-start-delta)
 
-        print 'Points:', len(p)
-        print 'Normals:', len(n)
-        print 'Lines:', len(ilns)
-        print 'Facets:', len(ifcts)
+        print stats(p, n, ilns, ifcts)
         print "===== test: end of file {} =====".format(name)
 
 
