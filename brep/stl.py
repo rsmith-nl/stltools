@@ -32,17 +32,182 @@ __version__ = '$Revision$'[11:-2]
 import struct
 from . import vector
 
+class RawFacet(object):
+    def __init__(self, a, b, c):
+        self.points = (a, b, c)
+        u = vector.sub(b, a)
+        v = vector.sub(c, b)
+        n = vector.cross(u, v)
+        try:
+            self.normal  = vector.norm(n)
+        except ValueError:
+            self.normal = None
+
+    def __str__(self):
+        n = self.normal
+        if n == None:
+            return ''
+        outs = '  facet normal {} {} {}\n    outer loop\n'
+        outs = outs.format(n[0], n[1], n[2])
+        for p in self.points:
+            outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
+        outs += '    endloop\n  endfacet\n'
+        return outs
+
+
+def stats_from_raw(lf):
+    """Compile and return statistics from a list of RawFacets.
+
+    Arguments:
+    lf -- list of RawFacets
+    """
+    outs = '{} facets\n'.format(len(lf))
+    points = [f.points[0] for f in lf]
+    points += [f.points[1] for f in lf]
+    points += [f.points[2] for f in lf]
+    x = [p[0] for p in points]
+    y = [p[1] for p in points]
+    z = [p[2] for p in points]
+    minx = min(x)
+    maxx = max(x)
+    miny = min(y)
+    maxy = max(y)
+    minz = min(z)
+    maxz = max(z)
+    outs += "3D Extents of the model (in STL units):\n"
+    outs += "{} ≤ x ≤ {},\n".format(minx, maxx)
+    outs += "{} ≤ y ≤ {},\n".format(miny, maxy)
+    outs += "{} ≤ z ≤ {}.\n".format(minz, maxz)
+    s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
+    outs += s.format((minx + maxx)/2.0, (miny + maxy)/2.0, (miny + maxz)/2.0)
+    s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
+    x, y, z = vector.mean(points)
+    outs += s.format(x, y, z)
+    return outs
+
+
+class Surface(object):
+    def __init__(self, name='Unknown'):
+        self.name = name
+        self.points = []
+        self.normals = []
+        self.ilines = []
+        self.ifacets = []
+        self.xmin = self.xmax = None
+        self.ymin = self.ymax = None
+        self.zmin = self.zmax = None
+
+    def __len__(self):
+        return len(self.facets)
+
+    def _extents(self):
+        x = [p[0] for p in self.points]
+        y = [p[1] for p in self.points]
+        z = [p[2] for p in self.points]
+        self.xmin = min(x)
+        self.xmax = max(x)
+        self.ymin = min(y)
+        self.ymax = max(y)
+        self.zmin = min(z)
+        self.zmax = max(z)
+
+    def addfacet(self, f):
+        if f.normal == None:
+            return # Skip degenerate facets.
+        stat = ''
+        # Normal vector
+        try:
+            newni = self.normals.index(f.normal)
+        except ValueError:
+            newni = len(self.normals)
+            self.normals.append(f.normal)
+            stat += 'Found 1 new normal, index {}. '.format(newni)
+        # Vertices:
+        newpi = []
+        nnp = []
+        for x in f.points:
+            try:
+                newpi.append(self.points.index(x))
+            except ValueError:
+                i = len(self.points)
+                newpi.append(i)
+#                self._updminmax(x)
+                self.points.append(x)
+                nnp.append(i)
+        if nnp:
+            stat += 'Found {} new points; {}. '.format(len(nnp), str(nnp))
+        newpi.sort()
+        lines = [(newpi[0], newpi[1]), (newpi[1], newpi[2]), 
+                    (newpi[2], newpi[0])]
+        newli = []
+        nni = []
+        for l in lines:
+            try:
+                newli.append(self.ilines.index(l))
+            except ValueError:
+                i = len(self.ilines)
+                newli.append(i)
+                self.ilines.append(l)
+                nni.append(i)
+        if nni:
+            stat += 'Found {} new lines; {}.'.format(len(nni), str(nni))
+        self.ifacets.append((tuple(newpi), newni, tuple(newli)))
+        return stat
+
+    def __str__(self):
+        outs = "solid {}\n".format(self.name)
+        for (v, n, l) in self.ifacts:
+            nv = self.normal[n]
+            outs +=  '  facet normal {} {} {}\n'.format(nv[0], nv[1], nv[2])
+            outs += '    outer loop\n'
+            for i in v:
+                p = self.points[i]
+                outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
+            outs += '    endloop\n  endfacet\n'
+        outs +='endsolid\n'
+        return outs
+
+    def stats(self):
+        """Return statistics about an STL model.
+        """
+        if self.xmin == None:
+            x = [p[0] for p in self.points]
+            y = [p[1] for p in self.points]
+            z = [p[2] for p in self.points]
+            self.xmin = min(x)
+            self.xmax = max(x)
+            self.ymin = min(y)
+            self.ymax = max(y)
+            self.zmin = min(z)
+            self.zmax = max(z)
+        s = "{} facets, {} vertices, {} normal vectors, {} edges.\n"
+        outs = s.format(len(self.ifacets), len(self.points), 
+                        len(self.normals), len(self.ilines))
+        outs += "3D Extents of the model (in STL units):\n"
+        outs += "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
+        outs += "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
+        outs += "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
+        s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
+        outs += s.format((self.xmin + self.xmax)/2.0, 
+                         (self.ymin + self.ymax)/2.0, 
+                         (self.zmin + self.zmax)/2.0)
+        s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
+        x, y, z = vector.mean(self.points)
+        outs += s.format(x, y, z)
+        return outs
+
+
 def fromfile(fname):
-    """Prepare for processing an STL file.
+    """Read an STL file.
     
     Arguments:
     fname -- file to read the STL file from.
 
     Returns:
-    A tuple (name, nf, reader)
+    A tuple (name, nf, facets)
     name -- the name of the STL object
     nf   -- the numbers of facets in the object
-    reader -- a generator for the facets.
+    facets -- list of RawFacets.
     """
     with open(fname, 'r') as stlfile:
         data = stlfile.read()
@@ -73,203 +238,10 @@ def fromfile(fname):
         nf1 = items.count('facet')
         del items[0:en]
         reader = _readtext(items)
-    return name, nf1, reader
-
-
-def allfacets(reader, verbose=False):
-    """Convenience function to read all facets in one go.
-
-    Arguments:
-    reader -- generator for the facets
-    verbose -- wether to print the status messages generated by reader
-
-    Returns:
-    A list of facets, each of which is a tuple (a,b,c,n) where a,b,c
-    are the 3-tuples of the coordinates of the vertices, and n is a
-    normalized 3-tuple containing the normal vector of the facet.
-    """
     fl = []
-    for stat, facet in reader:
-        if verbose:
-            print stat
-        if facet:
-            fl.append(facet)
-    return fl
-
-
-def reassemble(facets):
-    """Re-assemble the unconnected facets into connected
-    facets, making the vertices and normals unique.
-
-    Arguments:
-    facets -- list of facets. Each facet is a tuple (a,b,c,n) where
-    a-c are 3-tuples of coordinates of the vertices and n is a 3-tuple
-    of the normalized normal vector.
-
-    Returns:
-    A tuple (pnts, norms, ilines, ifcts), where
-    pnts -- a list of 3-tuples each representing an unique vertex
-    norms -- a list of 3-tuples each representing an unique normalized
-    normal vector
-    ilines -- a list of 2-tuples each holding the indices of the
-    points defining a line segment.
-    fcts -- a list of tuples of the form ((a,b,c), d, (e,f,g)) where
-    a-c are the indices of the vertices of the facet, d is the index
-    of the normal vector and e-g are the indices os the line segments
-    making up the facets.
-    """
-    pnts = []
-    norms = []
-    ilines = []
-    ifcts = []
-    for a, b, c, n in facets:
-        try:
-            newni = norms.index(n)
-        except ValueError:
-            newni = len(norms)
-            norms.append(n)
-        newpi = []
-        for x in a, b, c:
-            try:
-                newpi.append(pnts.index(x))
-            except ValueError:
-                newpi.append(len(pnts))
-                pnts.append(x)
-        newpi.sort()
-        newlines = [(newpi[0], newpi[1]), (newpi[1], newpi[2]), 
-                    (newpi[2], newpi[0])]
-        newli = []
-        for l in newlines:
-            try:
-                newli.append(ilines.index(l))
-            except ValueError:
-                newli.append(len(ilines))
-                ilines.append(l)
-        ifcts.append((tuple(newpi), newni, tuple(newli)))
-    return pnts, norms, ilines, ifcts
-
-
-def assembler(facets, pnts, norms, ilines, ifcts):
-    """A generator to re-assemble the unconnected facets into
-    connected facets, making the vertices and normals unique.
-
-    Arguments:
-    facets -- list of facets. Each facet is a tuple (a,b,c,n) where
-    a-c are 3-tuples of coordinates of the vertices and n is a 3-tuple
-    of the normalized normal vector.
-    pnts -- a list where 3-tuples each representing a new unique
-    vertex are stored
-    norms -- a list where 3-tuples each representing a new unique
-    normalized normal vector are stored
-    ilines -- a list where 2-tuples each holding the indices of the
-    points defining a line segment are stored.
-    fcts -- a list where tuples of the form ((a,b,c), d, (e,f,g)) are
-    stored. a-c are the indices of the vertices of the facet, d is the
-    index of the normal vector and e-g are the indices os the line
-    segments making up the new facet.
-
-    Yields:
-    The new facet. Also appends to the lists pnts, norms, ilines, ifcts.
-    """
-    for a, b, c, n in facets:
-        stat = ''
-        try:
-            newni = norms.index(n)
-        except ValueError:
-            newni = len(norms)
-            norms.append(n)
-            stat = 'Found 1 new normal, index {}. '.format(newni)
-        newpi = []
-        nnp = []
-        for x in a, b, c:
-            try:
-                newpi.append(pnts.index(x))
-            except ValueError:
-                i = len(pnts)
-                newpi.append(i)
-                pnts.append(x)
-                nnp.append(i)
-        if nnp:
-            stat += 'Found {} new points; {}. '.format(len(nnp), str(nnp))
-        newpi.sort()
-        lines = [(newpi[0], newpi[1]), (newpi[1], newpi[2]), 
-                    (newpi[2], newpi[0])]
-        newli = []
-        nni = []
-        for l in lines:
-            try:
-                newli.append(ilines.index(l))
-            except ValueError:
-                i = len(ilines)
-                newli.append(i)
-                ilines.append(l)
-                nni.append(i)
-        if nni:
-            stat += 'Found {} new lines; {}.'.format(len(nni), str(nni))
-        ifcts.append((tuple(newpi), newni, tuple(newli)))
-        yield stat, ifcts[-1] 
-
-
-def stats(pnts, norms, ilines, ifcts):
-    """Calculate statistics about an STL model.
-
-    Arguments:
-    pnts -- a list of 3-tuples each representing a unique vertex
-    norms -- a list of 3-tuples each representing a unique 
-    normalized normal vector
-    ilines -- a list of 2-tuples each holding the indices of the
-    points defining a line segment
-    ifcts -- a list of tuples of the form ((a,b,c), d, (e,f,g)) are. 
-    a-c are the indices of the vertices of the facet, d is the
-    index of the normal vector and e-g are the indices os the line
-    segments making up the new facet.
-    """
-    s = "{} facets, {} vertices, {} normal vectors, {} edges.\n"
-    outs = s.format(len(ifcts), len(pnts), len(norms), len(ilines))
-    outs += "3D Extents of the model (in STL units):\n"
-    (xmin, xmax, ymin, ymax, zmin, zmax) = vector.bbox(pnts)
-    outs += "{} ≤ x ≤ {},\n".format(xmin, xmax)
-    outs += "{} ≤ y ≤ {},\n".format(ymin, ymax)
-    outs += "{} ≤ z ≤ {}.\n".format(zmin, zmax)
-    s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
-    outs += s.format((xmin+xmax)/2.0, (ymin+ymax)/2.0, (zmin+zmax)/2.0)
-    s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
-    x, y, z = vector.mean(pnts)
-    outs += s.format(x, y, z)
-    return outs
-
-def astext(nm, pnts, norms, ifcts):
-    """Return a string containing the text representation of an STL model.
-
-    Arguments:
-    pnts -- a list of 3-tuples each representing a unique vertex
-    norms -- a list of 3-tuples each representing a unique 
-    normalized normal vector
-    ilines -- a list of 2-tuples each holding the indices of the
-    points defining a line segment
-    ifcts -- a list of tuples of the form ((a,b,c), d, (e,f,g)) are. 
-    a-c are the indices of the vertices of the facet, d is the
-    index of the normal vector and e-g are the indices os the line
-    segments making up the new facet.
-    """
-    outs = "solid {}\n".format(nm)
-    for (v, n, l) in ifcts:
-        nv = norms[n]
-        outs +=  '  facet normal {} {} {}\n'.format(nv[0], nv[1], nv[2])
-        outs += '    outer loop\n'
-        for i in v:
-            p = pnts[i]
-            outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
-        outs += '    endloop\n  endfacet\n'
-    outs +='endsolid\n'
-    return outs
-
-
-#def mkquat(v, theta):
-#    s = math.sin(0.5*theta)
-#    c = math.cos(0.5*theta)
-#    vnrm = _norm(v)
-#    return [c, s*v[0], s*v[1], s*v[2]]
+    for facet in reader:
+        fl.append(facet)
+    return name, nf1, fl
 
 
 def _readbinary(items=None):
@@ -280,11 +252,7 @@ def _readbinary(items=None):
     items -- file data minus header split into 50-byte blocks.
 
     Yields:
-    A tuple (status, facet)
-    status -- string describing the status of the conversion of the
-              facet
-    facet  -- A tuple (a, b, c, n), where a,b and c are vertices and n
-              is the normalized normal vector, or None.
+    a RawFacet
     """
     # Process the items
     for cnt, i in enumerate(items):
@@ -293,16 +261,7 @@ def _readbinary(items=None):
         a = (f1x, f1y, f1z)
         b = (f2x, f2y, f2z)
         c = (f3x, f3y, f3z)
-        u = vector.sub(b, a)
-        v = vector.sub(c, b)
-        n = vector.cross(u, v)
-        status = 'facet {} OK'.format(cnt+1)
-        try:
-            n  = vector.norm(n)
-        except ValueError:
-            status = 'skipped degenerate facet {}.'.format(cnt+1)
-            yield status, None
-        yield status, (a, b, c, n)
+        yield RawFacet(a,b,c)
 
 
 def _readtext(items=None):
@@ -313,104 +272,13 @@ def _readtext(items=None):
     items -- stripped lines of the text STL file
 
     Yields:
-    A tuple (status, facet)
-    status -- string describing the status of the conversion of the
-              facet
-    facet  -- A tuple (a, b, c, n), where a,b and c are vertices and n
-              is the normalized normal vector, or None.
+    a RawFacet
     """
     # Items now begins with "facet"
-    cnt = 0
     while items[0] == "facet":
         a = (float(items[8]), float(items[9]), float(items[10]))
         b = (float(items[12]), float(items[13]), float(items[14]))
         c = (float(items[16]), float(items[17]), float(items[18]))
-        u = vector.sub(b, a)
-        v = vector.sub(c, b)
-        n = vector.cross(u, v)
         del items[:21]
-        cnt += 1
-        status = 'facet {} OK'.format(cnt)
-        try:
-            n  = vector.norm(n)
-        except ValueError:
-            status = 'skipped degenerate facet {}.'.format(cnt)
-            yield status, None
-        yield status, (a, b, c, n)
-
-
-# Built-in test.
-if __name__ == '__main__':
-    import time
-
-
-    def test(name):
-        print "===== test: begin of file {} =====".format(name)
-        start = time.clock()
-        stop = time.clock()
-        delta = stop-start
-
-        start = time.clock()
-        nm, nf, rd = fromfile(name)
-        stop = time.clock()
-        print 'Read file in {} seconds.'.format(stop-start-delta)
-        print 'Object name:', nm
-
-        start = time.clock()
-        facets = allfacets(rd)
-        stop = time.clock()
-        s = 'Processed {} facets in {} seconds.'.format(nf, stop-start-delta)
-        print s
-
-        start = time.clock()
-        p, n, ilns, ifcts = reassemble(facets)
-        stop = time.clock()
-        print 'Re-assembled in {} seconds.'.format(stop-start-delta)
-
-        print stats(p, n, ilns, ifcts)
-        print "===== test: end of file {} =====".format(name)
-
-
-    def test2(name):
-        print "===== test2: begin of file {} =====".format(name)
-        start = time.clock()
-        stop = time.clock()
-        delta = stop-start
-
-        start = time.clock()
-        nm, nf, rd = fromfile(name)
-        stop = time.clock()
-        print 'Read file in {} seconds.'.format(stop-start-delta)
-        print 'Object name:', nm
-
-        start = time.clock()
-        facets = allfacets(rd)
-        stop = time.clock()
-        s = 'Processed {} facets in {} seconds.'.format(nf, stop-start-delta)
-        print s
-
-        points = []
-        norms = []
-        lines = []
-        fcts = []
-        start = time.clock()
-        for s, fct in assembler(facets, points, norms, lines, fcts):
-            print s
-            print 'new facet:', fct
-        stop = time.clock()
-        print '-----'
-        print 'Re-assembled in {} seconds.'.format(stop-start-delta)
-        print 'Points:', len(points)
-        print 'Normals:', len(norms)
-        print 'Lines:', len(lines)
-        print 'Facets:', len(fcts)
-        print "===== test2: end of file {} =====".format(name)
-
-
-    test('../test/cube.stl')
-    test2('../test/cube.stl')
-#    test('test/chaise.stl')
-#    test('test/ad5-rtm-light.stl')
-#    test2('test/ad5-rtm-light-ondermal.stl')
-#    test('test/salamanders.stl')
+        yield RawFacet(a,b,c)
 
