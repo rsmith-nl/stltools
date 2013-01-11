@@ -30,74 +30,65 @@
 __version__ = '$Revision$'[11:-2]
 
 import struct
+from os.path import basename
 from . import vector
-
-class RawFacet(object):
-    def __init__(self, a, b, c):
-        self.points = (a, b, c)
-        u = vector.sub(b, a)
-        v = vector.sub(c, b)
-        n = vector.cross(u, v)
-        try:
-            self.normal  = vector.norm(n)
-        except ValueError:
-            self.normal = None
-
-    def __str__(self):
-        n = self.normal
-        if n == None:
-            return ''
-        outs = '  facet normal {} {} {}\n    outer loop\n'
-        outs = outs.format(n[0], n[1], n[2])
-        for p in self.points:
-            outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
-        outs += '    endloop\n  endfacet\n'
-        return outs
-
 
 class Facets(object):
 
     def __init__(self, name):
         self.name = name
         self.facets = []
+        self.minx = None
+        self.maxx = None
+        self.miny = None
+        self.maxy = None
+        self.minz = None
+        self.maxz = None
 
     def addfacet(self, f):
-        self.facets.append(f)
+        a, b, c = f
+        u = vector.sub(b, a)
+        v = vector.sub(c, b)
+        n = vector.cross(u, v)
+        try:
+            n  = vector.norm(n)
+        except ValueError:
+            n = None
+        self.facets.append((a, b, c, n))
 
-
-def stats_from_raw(lf):
-    """Compile and return statistics from a list of RawFacets.
-
-    Arguments:
-    lf -- list of RawFacets
-    """
-    outs = '{} facets\n'.format(len(lf))
-    points = [f.points[0] for f in lf]
-    points += [f.points[1] for f in lf]
-    points += [f.points[2] for f in lf]
-    x = [p[0] for p in points]
-    y = [p[1] for p in points]
-    z = [p[2] for p in points]
-    minx = min(x)
-    maxx = max(x)
-    miny = min(y)
-    maxy = max(y)
-    minz = min(z)
-    maxz = max(z)
-    outs += "3D Extents of the model (in STL units):\n"
-    outs += "{} ≤ x ≤ {},\n".format(minx, maxx)
-    outs += "{} ≤ y ≤ {},\n".format(miny, maxy)
-    outs += "{} ≤ z ≤ {}.\n".format(minz, maxz)
-    s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
-    outs += s.format((minx + maxx)/2.0, (miny + maxy)/2.0, (miny + maxz)/2.0)
-    s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
-    x, y, z = vector.mean(points)
-    outs += s.format(x, y, z)
-    return outs
+    def stats(self, prefix=''):
+        if not self.minx:
+            points = [f[0] for f in self.facets]
+            points += [f[1] for f in self.facets]
+            points += [f[2] for f in self.facets]
+            x = [p[0] for p in points]
+            y = [p[1] for p in points]
+            z = [p[2] for p in points]
+            self.minx = min(x)
+            self.maxx = max(x)
+            self.miny = min(y)
+            self.maxy = max(y)
+            self.minz = min(z)
+            self.maxz = max(z)
+        outs = prefix + 'Model name: "{}"\n'.format(self.name)
+        outs += prefix + '{} facets\n'.format(len(self.facets))
+        outs += prefix + "3D Extents of the model (in STL units):\n"
+        outs += prefix + "{} ≤ x ≤ {},\n".format(self.minx, self.maxx)
+        outs += prefix + "{} ≤ y ≤ {},\n".format(self.miny, self.maxy)
+        outs += prefix + "{} ≤ z ≤ {}.\n".format(self.minz, self.maxz)
+        s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
+        outs += prefix + s.format((self.minx + self.maxx)/2.0, 
+                                  (self.miny + self.maxy)/2.0, 
+                                  (self.minz +self. maxz)/2.0)
+        s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
+        x, y, z = vector.mean(points)
+        outs += prefix + s.format(x, y, z)
+        return outs
 
 
 class Surface(object):
-    def __init__(self, name='Unknown'):
+
+    def __init__(self, name):
         self.name = name
         self.points = []
         self.normals = []
@@ -122,20 +113,21 @@ class Surface(object):
         self.zmax = max(z)
 
     def addfacet(self, f):
-        if f.normal == None:
+        a, b, c, n = f
+        if n == None:
             return # Skip degenerate facets.
         stat = ''
         # Normal vector
         try:
-            newni = self.normals.index(f.normal)
+            newni = self.normals.index(n)
         except ValueError:
             newni = len(self.normals)
-            self.normals.append(f.normal)
+            self.normals.append(f[3])
             stat += 'Found 1 new normal, index {}. '.format(newni)
         # Vertices:
         newpi = []
         nnp = []
-        for x in f.points:
+        for x in a, b, c:
             try:
                 newpi.append(self.points.index(x))
             except ValueError:
@@ -178,7 +170,7 @@ class Surface(object):
         outs +='endsolid\n'
         return outs
 
-    def stats(self):
+    def stats(self, prefix=''):
         """Return statistics about an STL model.
         """
         if self.xmin == None:
@@ -191,20 +183,21 @@ class Surface(object):
             self.ymax = max(y)
             self.zmin = min(z)
             self.zmax = max(z)
-        s = "{} facets, {} vertices, {} normal vectors, {} edges.\n"
+        s = prefix + 'Model name: "{}"\n'.format(self.name)
+        s = prefix + "{} facets, {} vertices, {} normal vectors, {} edges.\n"
         outs = s.format(len(self.ifacets), len(self.points), 
                         len(self.normals), len(self.ilines))
-        outs += "3D Extents of the model (in STL units):\n"
-        outs += "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
-        outs += "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
-        outs += "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
+        outs += prefix + "3D Extents of the model (in STL units):\n"
+        outs += prefix + "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
+        outs += prefix + "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
+        outs += prefix + "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
         s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
-        outs += s.format((self.xmin + self.xmax)/2.0, 
-                         (self.ymin + self.ymax)/2.0, 
-                         (self.zmin + self.zmax)/2.0)
+        outs += prefix + s.format((self.xmin + self.xmax)/2.0, 
+                                  (self.ymin + self.ymax)/2.0, 
+                                  (self.zmin + self.zmax)/2.0)
         s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
         x, y, z = vector.mean(self.points)
-        outs += s.format(x, y, z)
+        outs += prefix + s.format(x, y, z)
         return outs
 
 
@@ -215,10 +208,7 @@ def fromfile(fname):
     fname -- file to read the STL file from.
 
     Returns:
-    A tuple (name, nf, facets)
-    name -- the name of the STL object
-    nf   -- the numbers of facets in the object
-    facets -- list of RawFacets.
+    facets -- a Facets object.
     """
     def _readbinary(items=None):
         """Process the contents of a binary STL file as a
@@ -237,7 +227,7 @@ def fromfile(fname):
             a = (f1x, f1y, f1z)
             b = (f2x, f2y, f2z)
             c = (f3x, f3y, f3z)
-            yield RawFacet(a,b,c)
+            yield (a, b, c)
 
     def _readtext(items=None):
         """Process the contents of a text STL file as a
@@ -255,7 +245,7 @@ def fromfile(fname):
             b = (float(items[12]), float(items[13]), float(items[14]))
             c = (float(items[16]), float(items[17]), float(items[18]))
             del items[:21]
-            yield RawFacet(a,b,c)
+            yield (a, b, c)
 
     with open(fname, 'r') as stlfile:
         data = stlfile.read()
@@ -264,7 +254,7 @@ def fromfile(fname):
         name = name.replace("solid ", "")
         name = name.strip('\x00 \t\n\r')
         if len(name) == 0:
-            name = "unknown"
+            name = basename(fname)[:-4]
         data = data[84:]
         facetsz = len(data)
         nf2 = facetsz / 50
@@ -286,10 +276,10 @@ def fromfile(fname):
         nf1 = items.count('facet')
         del items[0:en]
         reader = _readtext(items)
-    fl = []
-    for facet in reader:
-        fl.append(facet)
-    return name, nf1, fl
+    fl = Facets(name)
+    for f in reader:
+        fl.addfacet(f)
+    return fl
 
 
 
