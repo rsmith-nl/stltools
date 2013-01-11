@@ -55,6 +55,16 @@ class RawFacet(object):
         return outs
 
 
+class Facets(object):
+
+    def __init__(self, name):
+        self.name = name
+        self.facets = []
+
+    def addfacet(self, f):
+        self.facets.append(f)
+
+
 def stats_from_raw(lf):
     """Compile and return statistics from a list of RawFacets.
 
@@ -98,7 +108,7 @@ class Surface(object):
         self.zmin = self.zmax = None
 
     def __len__(self):
-        return len(self.facets)
+        return len(self.ifacets)
 
     def _extents(self):
         x = [p[0] for p in self.points]
@@ -131,11 +141,11 @@ class Surface(object):
             except ValueError:
                 i = len(self.points)
                 newpi.append(i)
-#                self._updminmax(x)
                 self.points.append(x)
                 nnp.append(i)
         if nnp:
             stat += 'Found {} new points; {}. '.format(len(nnp), str(nnp))
+        # Lines
         newpi.sort()
         lines = [(newpi[0], newpi[1]), (newpi[1], newpi[2]), 
                     (newpi[2], newpi[0])]
@@ -151,6 +161,7 @@ class Surface(object):
                 nni.append(i)
         if nni:
             stat += 'Found {} new lines; {}.'.format(len(nni), str(nni))
+        # Facet
         self.ifacets.append((tuple(newpi), newni, tuple(newli)))
         return stat
 
@@ -209,6 +220,43 @@ def fromfile(fname):
     nf   -- the numbers of facets in the object
     facets -- list of RawFacets.
     """
+    def _readbinary(items=None):
+        """Process the contents of a binary STL file as a
+        generator.
+
+        Arguments:
+        items -- file data minus header split into 50-byte blocks.
+
+        Yields:
+        a RawFacet
+        """
+        # Process the items
+        for cnt, i in enumerate(items):
+            f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
+            struct.unpack("=12x9f2x", i)
+            a = (f1x, f1y, f1z)
+            b = (f2x, f2y, f2z)
+            c = (f3x, f3y, f3z)
+            yield RawFacet(a,b,c)
+
+    def _readtext(items=None):
+        """Process the contents of a text STL file as a
+        generator.
+
+        Arguments:
+        items -- stripped lines of the text STL file
+
+        Yields:
+        a RawFacet
+        """
+        # Items now begins with "facet"
+        while items[0] == "facet":
+            a = (float(items[8]), float(items[9]), float(items[10]))
+            b = (float(items[12]), float(items[13]), float(items[14]))
+            c = (float(items[16]), float(items[17]), float(items[18]))
+            del items[:21]
+            yield RawFacet(a,b,c)
+
     with open(fname, 'r') as stlfile:
         data = stlfile.read()
     if data.find('vertex', 120) == -1: # Binary file format
@@ -244,41 +292,4 @@ def fromfile(fname):
     return name, nf1, fl
 
 
-def _readbinary(items=None):
-    """Process the contents of a binary STL file as a
-    generator.
-
-    Arguments:
-    items -- file data minus header split into 50-byte blocks.
-
-    Yields:
-    a RawFacet
-    """
-    # Process the items
-    for cnt, i in enumerate(items):
-        f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
-        struct.unpack("=12x9f2x", i)
-        a = (f1x, f1y, f1z)
-        b = (f2x, f2y, f2z)
-        c = (f3x, f3y, f3z)
-        yield RawFacet(a,b,c)
-
-
-def _readtext(items=None):
-    """Process the contents of a text STL file as a
-    generator.
-
-    Arguments:
-    items -- stripped lines of the text STL file
-
-    Yields:
-    a RawFacet
-    """
-    # Items now begins with "facet"
-    while items[0] == "facet":
-        a = (float(items[8]), float(items[9]), float(items[10]))
-        b = (float(items[12]), float(items[13]), float(items[14]))
-        c = (float(items[16]), float(items[17]), float(items[18]))
-        del items[:21]
-        yield RawFacet(a,b,c)
 
