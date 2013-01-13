@@ -345,7 +345,7 @@ def _process_points(facets):
         for i in m:
             indexes[i] = j
             todo.remove(i)
-        print j, 'is the same point as', m
+#        print j, 'is the same point as', m
     u = sorted(list(set(indexes)))
     upoints = [points[i] for i in u]
     x = {u[i]: i for i in xrange(len(u))}
@@ -381,7 +381,7 @@ def _process_normals(facets):
         for i in m:
             indexes[i] = j
             todo.remove(i)
-        print j, 'is the same normal as', m
+#        print j, 'is the same normal as', m
     u = sorted(list(set(indexes)))
     unormals = [normals[i] for i in u]
     x = {u[i]: i for i in xrange(len(u))}
