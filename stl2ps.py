@@ -30,11 +30,25 @@ import os
 import sys
 import time
 
-import stl
-import xform
+from brep import stl, xform
 
 name = ('stl2ps [ver. ' + '$Revision$'[11:-2] + 
        '] ('+'$Date$'[7:-2]+')')
+
+
+def main(args):
+    """Main program.
+
+    Keyword arguments:
+    argv -- command line arguments (without program name!)
+    """
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-x', '--rotate-x')
+    parser.add_argument('file', nargs=1, help='input file name')
+
+
+
+
 
 def usage():
     print name

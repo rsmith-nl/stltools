@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright © 2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2012,2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # $Date$
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -23,24 +23,26 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-'''Classes for handling coordinate transformations and projections for STL
+# Check this code with 'pylint -r n xform.py'
+
+"""Classes for handling coordinate transformations and projections for STL
 objects. The transformations and projection imply a right-handed coordinate
 system as used in STL object. This means that the X-axis points to the right
 and Y-axis points up when looking down the Z-axis at the origin. Rotations
 around and axis are counterclockwise when looking down the axis towards the
-origin.'''
+origin."""
 
 __version__ = '$Revision$'[11:-2]
 
 import math
 
 class Zpar:
-    '''Class for parallel projection along the Z-axis. Output
-       screen coordinates from left bottom, size 100×100 mm.'''
+    """Class for parallel projection along the Z-axis. Output
+       screen coordinates from left bottom, size 100×100 mm."""
 
     def __init__(self, xmin, xmax, ymin, ymax):
-        '''Initialize the projection for an object in the rectangle, 
-           xmin, xmax, ymin, ymax, to the target window.'''
+        """Initialize the projection for an object in the rectangle, 
+           xmin, xmax, ymin, ymax, to the target window."""
         # 100 mm is 100/25.4*72 = 283.46457 PostScript points
         self.s = min(283.46457/(xmax-xmin), 283.46457/(ymax-ymin))
         self.xmin = xmin
@@ -48,52 +50,71 @@ class Zpar:
         self.w = math.ceil(self.s*(xmax-xmin))
         self.h = math.ceil(self.s*(ymax-ymin))
 
-    def project(self, x, y, z):
-        '''Transforms a vector x,y,z. Returns an (x,y) tuple'''
+    def project(self, p):
+        """Projects a point. 
+
+        Arguments:
+        p -- 3-tuple containing a point
+
+        Returns:
+        a 2-tuple containing the projection of that point
+        """
+        x, y, z = p # pylint: disable=W0612
         rx = (x-self.xmin)*self.s
         ry = (y-self.ymin)*self.s
         return (rx, ry)
 
     def visible(self, n):
-        '''Checks a normal vector n to see if it points toward or away
-           from the viewer. Returns True in the first case.'''
-        if (n.z > 0.0): 
+        """Checks a normal vector n to see if it points toward or away
+        from the viewer.
+
+        Argument:
+        n -- 3-tuple containing a normal vector
+
+        Returns: 
+        True if the projected vector points towards the viewer, False
+        otherwise.
+        """
+        if (n[2] > 0.0): 
             return True
         return False
 
 
-_limit = 1e-7
-
-
-def _unity():
-    return [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], 
-            [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
-
-def _mmul(m1, m2):
-    r = _unity()
-    for i in range(4):
-        for j in range(4):
-            r[i][j] = (m1[i][0]*m2[0][j] + m1[i][1]*m2[1][j] + 
-            m1[i][2]*m2[2][j] + m1[i][3]*m2[3][j])
-            if math.fabs(r[i][j]) < _limit: 
-                r[i][j] = 0.0
-    return r
+_LIMIT = 1e-7
 
 
 class Xform:
-    '''Class for coordinate transformations in the form of rotations around
-       the axis.'''
+    """Class for coordinate transformations in 3D space."""
+
+    @staticmethod
+    def _unitmatrix():
+        """Returns the 4x4 unit matrix (a nested list).
+        """
+        return [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], 
+                [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+
+    @staticmethod
+    def _mmul(m1, m2):
+        """Multiplies two 4x4 unit matrices."""        
+        r = Xform._unitmatrix()
+        for i in xrange(4):
+            for j in xrange(4):
+                r[i][j] = (m1[i][0]*m2[0][j] + m1[i][1]*m2[1][j] + 
+                           m1[i][2]*m2[2][j] + m1[i][3]*m2[3][j])
+                if math.fabs(r[i][j]) < _LIMIT: 
+                    r[i][j] = 0.0
+        return r
 
     def __init__(self):
-        '''Initialize the transformation to the unity transform.'''
-        self.m = _unity()
-        self.unity = True
+        """Initialize the transformation to the unity transform.
+        """
+        self.m = Xform._unitmatrix()
 
     def __eq__(self, other):
-        '''Check if two transformations are equal'''
+        """Check if two transformations are equal."""
         for i in range(3):
             for j in range(3):
-                if math.fabs(self.m[i][j] - other.m[i][j]) > _limit:
+                if math.fabs(self.m[i][j] - other.m[i][j]) > _LIMIT:
                     return False
         return True
 
@@ -107,12 +128,11 @@ class Xform:
         return outs
 
     def reset(self):
-        '''Reverts to the unity transformation.'''
+        """Reverts to the unity transformation."""
         self.__init__()
 
     def rotx(self, deg):
-        '''Adds a rotation around the x-axis to the transformation.'''
-        self.unity = False
+        """Adds a rotation around the x-axis to the transformation."""
         rad = math.radians(deg)
         s = math.sin(rad)
         c = math.cos(rad)
@@ -120,11 +140,10 @@ class Xform:
                [0.0,   c,  -s, 0.0],
                [0.0,   s,   c, 0.0],
                [0.0, 0.0, 0.0, 1.0]]
-        self.m = _mmul(add, self.m)
+        self.m = Xform._mmul(add, self.m)
 
     def roty(self, deg):
-        '''Adds a rotation around the y-axis to the transformation.'''
-        self.unity = False
+        """Adds a rotation around the y-axis to the transformation."""
         rad = math.radians(deg)
         s = math.sin(rad)
         c = math.cos(rad)
@@ -132,11 +151,10 @@ class Xform:
                [0.0, 1.0, 0.0, 0.0],
                [ -s, 0.0,   c, 0.0],
                [0.0, 0.0, 0.0, 1.0]]
-        self.m = _mmul(add, self.m)
+        self.m = Xform._mmul(add, self.m)
 
     def rotz(self, deg):
-        '''Adds a rotation around the z-axis to the transformation.'''
-        self.unity = False
+        """Adds a rotation around the z-axis to the transformation."""
         rad = math.radians(deg)
         s = math.sin(rad)
         c = math.cos(rad)
@@ -144,28 +162,29 @@ class Xform:
                [  s,   c, 0.0, 0.0],
                [0.0, 0.0, 1.0, 0.0],
                [0.0, 0.0, 0.0, 1.0]]
-        self.m = _mmul(add, self.m)
+        self.m = Xform._mmul(add, self.m)
 
-    def trans(self, x=0, y=0, z=0):
-        self.unity = False
-        add = _unity()
+    def trans(self, p):
+        x, y, z = p
+        add = Xform._unitmatrix()
         add[0][3] = float(x)
         add[1][3] = float(y)
         add[2][3] = float(z)
-        self.m = _mmul(add, self.m)
+        self.m = Xform._mmul(add, self.m)
 
-    def applyrot(self, x, y, z):
-        '''Apply the rotation part of transformation to point x,y,z and return
-           the transformed coordinates as a tuple.'''
+    def applyrot(self, p):
+        """Apply the rotation part of transformation to 3-tuple p
+           and return the transformed coordinates as a tuple."""
+        x, y, z = p
         xr = self.m[0][0]*x + self.m[0][1]*y + self.m[0][2]*z
         yr = self.m[1][0]*x + self.m[1][1]*y + self.m[1][2]*z
         zr = self.m[2][0]*x + self.m[2][1]*y + self.m[2][2]*z
         return (xr, yr, zr)
 
-    def apply(self, x, y, z):
-        '''Apply the transformation to point x,y,z and return the transformed
-           coordinates as a tuple.'''
-        xr, yr, zr = self.applyrot(x, y, z)
+    def apply(self, p):
+        """Apply the transformation to point p and return the
+           transformed coordinates as a tuple."""
+        xr, yr, zr = self.applyrot(p)
         xr += self.m[0][3]
         yr += self.m[1][3]
         zr += self.m[2][3]
@@ -197,13 +216,13 @@ if __name__ == '__main__':
     print "rotation 90,270° around Z:\n", tr
     tr.reset()
     tr.rotx(90)
-    res = tr.apply(0, 1, 0)
+    res = tr.apply((0, 1, 0))
     print "(0,1,0) rotated 90° around X:", res
     tr.reset()
     tr.roty(90)
-    res = tr.apply(0, 0, 1)
+    res = tr.apply((0, 0, 1))
     print "(0,0,1) rotated 90° around Y:", res
     tr.reset()
     tr.rotz(90)
-    res = tr.apply(1, 0, 0)
+    res = tr.apply((1, 0, 0))
     print "(1,0,0) rotated 90° around Z:", res

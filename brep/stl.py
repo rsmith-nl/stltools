@@ -33,7 +33,7 @@ import struct
 from os.path import basename
 from . import vector
 
-class Facets(object):
+class Facets(object): # pylint: disable=R0924
     """The Facets class is designed to hold raw data read from an STL
     file. Instances are generally created by the fromfile() function
     """
@@ -105,11 +105,11 @@ class Facets(object):
         outs += prefix + s.format(x, y, z)
         return outs
 
-    def __len__(self):
+    def __len__(self): 
         return len(self.facets)
 
 
-class IndexedMesh(object):
+class IndexedMesh(object): # pylint: disable=R0924
     """The IndexedMesh uses indices into a list if unique points and
     normals to describe facets. Thus the facets remain the same even
     is the list of points and normals are transformed or projected.
@@ -202,15 +202,15 @@ class IndexedMesh(object):
 
     def __str__(self):
         outs = "solid {}\n".format(self.name)
-        for (v, n, l) in self.ifacts:
-            nv = self.normal[n]
+        for (v, n, l) in self.ifacets: # pylint: disable=W0612
+            nv = self.normals[n]
             outs +=  '  facet normal {} {} {}\n'.format(nv[0], nv[1], nv[2])
             outs += '    outer loop\n'
             for i in v:
                 p = self.points[i]
                 outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
             outs += '    endloop\n  endfacet\n'
-        outs +='endsolid\n'
+        outs += 'endsolid\n'
         return outs
 
     def __len__(self):
@@ -237,7 +237,7 @@ def fromfile(fname):
         a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
         """
         # Process the items
-        for cnt, i in enumerate(items):
+        for i in items:
             f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
             struct.unpack("=12x9f2x", i)
             a = (f1x, f1y, f1z)
@@ -350,7 +350,7 @@ def _process_points(facets):
     upoints = [points[i] for i in u]
     x = {u[i]: i for i in xrange(len(u))}
     ni = [x[i] for i in indexes]
-    ifacets = [(ni[i], ni[i+1], ni[i+2]) for i in xrange(0,len(ni),3)]
+    ifacets = [(ni[i], ni[i+1], ni[i+2]) for i in xrange(0, len(ni), 3)]
     return upoints, ifacets
 
 
@@ -387,10 +387,3 @@ def _process_normals(facets):
     x = {u[i]: i for i in xrange(len(u))}
     ni = [x[i] for i in indexes]
     return unormals, ni
-
-
-
-
-
-
-
