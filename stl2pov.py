@@ -58,7 +58,7 @@ def mesh2(s):
     mesh2 object."""
     ms = "# declare m_{} = mesh2 {{\n".format(s.name)
     ms += '  vertex_vectors {\n'
-    ms += '    {},\n'.format(len(s))
+    ms += '    {},\n'.format(len(s.points))
     for p in s.points:
         ms += '    <{1}, {0}, {2}>,\n'.format(p[0], p[1], p[2])
     ms = ms[:-2]
