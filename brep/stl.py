@@ -34,74 +34,162 @@ from os.path import basename
 from . import vector
 
 class Facets(object):
+    """The Facets class is designed to hold raw data read from an STL
+    file. Instances are generally created by the fromfile() function
+    """
 
     def __init__(self, name):
+        """Creates an empty Facets instance.
+
+        Arguments:
+        name -- string containing the name of the object
+        """
         self.name = name
         self.facets = []
-        self.minx = None
-        self.maxx = None
-        self.miny = None
-        self.maxy = None
-        self.minz = None
-        self.maxz = None
+        self.degenerate_facets = []
+
+    def extents(self):
+        """Calculate the extents of a Facet.
+
+        Returns:
+        a 6-tuple containing the minimal and maximal value in x, y and
+        z direction of all points.
+        """
+        if not self.facets:
+            raise ValueError('empty Facets object')
+        points  = [p for fct in self.facets for p in fct[0:3]]
+        x = [p[0] for p in points]
+        y = [p[1] for p in points]
+        z = [p[2] for p in points]
+        return (min(x), max(x), min(y), max(y), min(z), max(z))
 
     def addfacet(self, f):
+        """Add a facet to the Facets object. Mainly for use in the
+        fromfile() function. A facet is a 4-tuple (a,b,c,n) where a, b
+        and c are vertices and n is the normalized normal vector.
+
+        Arguments:
+        f -- a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
+        """
         a, b, c = f
         u = vector.sub(b, a)
         v = vector.sub(c, b)
-        n = vector.cross(u, v)
+        n = vector.cross(u, v) # Calculate the normal vector
         try:
             n  = vector.norm(n)
+            self.facets.append((a, b, c, n))
         except ValueError:
-            n = None
-        self.facets.append((a, b, c, n))
+            self.degenerate_facets.append(f)
 
     def stats(self, prefix=''):
-        if not self.minx:
-            points = [f[0] for f in self.facets]
-            points += [f[1] for f in self.facets]
-            points += [f[2] for f in self.facets]
-            x = [p[0] for p in points]
-            y = [p[1] for p in points]
-            z = [p[2] for p in points]
-            self.minx = min(x)
-            self.maxx = max(x)
-            self.miny = min(y)
-            self.maxy = max(y)
-            self.minz = min(z)
-            self.maxz = max(z)
+        """Produces a string containing statistics about the object.
+        """
+        minx, maxx, miny, maxy, minz, maxz = self.extents() 
         outs = prefix + 'Model name: "{}"\n'.format(self.name)
         outs += prefix + '{} facets\n'.format(len(self.facets))
+        dft = '{} degenerate facets\n'
+        outs += prefix + dft.format(len(self.degenerate_facets))
         outs += prefix + "3D Extents of the model (in STL units):\n"
-        outs += prefix + "{} ≤ x ≤ {},\n".format(self.minx, self.maxx)
-        outs += prefix + "{} ≤ y ≤ {},\n".format(self.miny, self.maxy)
-        outs += prefix + "{} ≤ z ≤ {}.\n".format(self.minz, self.maxz)
+        outs += prefix + "{} ≤ x ≤ {},\n".format(minx, maxx)
+        outs += prefix + "{} ≤ y ≤ {},\n".format(miny, maxy)
+        outs += prefix + "{} ≤ z ≤ {}.\n".format(minz, maxz)
         s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
-        outs += prefix + s.format((self.minx + self.maxx)/2.0, 
-                                  (self.miny + self.maxy)/2.0, 
-                                  (self.minz +self. maxz)/2.0)
+        outs += prefix + s.format((minx + maxx)/2.0, 
+                                  (miny + maxy)/2.0, 
+                                  (minz + maxz)/2.0)
         s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
+        points = [f[0] for f in self.facets]
+        points += [f[1] for f in self.facets]
+        points += [f[2] for f in self.facets]
         x, y, z = vector.mean(points)
         outs += prefix + s.format(x, y, z)
         return outs
 
+    def __len__(self):
+        return len(self.facets)
 
-class Surface(object):
+
+class IndexedMesh(object):
+    """The IndexedMesh uses indices into a list if unique points and
+    normals to describe facets. Thus the facets remain the same even
+    is the list of points and normals are transformed or projected.
+    """
 
     def __init__(self, name):
+        """Create an empty IndexedMesh.
+
+        Arguments:
+        name -- string containing the name of the object
+        """
         self.name = name
         self.points = []
         self.normals = []
-        self.ilines = []
         self.ifacets = []
         self.xmin = self.xmax = None
         self.ymin = self.ymax = None
         self.zmin = self.zmax = None
 
-    def __len__(self):
-        return len(self.ifacets)
+    def addfacet(self, f):
+        """Add a facet to the IndexedMesh object. Mainly for creating
+        an IndexedMesh by hand. The make_indexed_mesh() function
+        should be used to convert a Facets object into an IndexedMesh.
 
-    def _extents(self):
+        Arguments:
+        f -- a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
+        """
+        a, b, c, n = f
+        if n == None:
+            return 'Skipped degenerate facet.'
+        stat = ''
+        # Normal vector
+        try:
+            ni = self.normals.index(n)
+        except ValueError:
+            ni = len(self.normals)
+            self.normals.append(f[3])
+            stat += 'Found 1 new normal, index {}. '.format(ni)
+        # Vertices:
+        pi = []
+        nnp = []
+        for x in a, b, c:
+            try:
+                pi.append(self.points.index(x))
+            except ValueError:
+                i = len(self.points)
+                pi.append(i)
+                self.points.append(x)
+                nnp.append(i)
+        if nnp:
+            stat += 'Found {} new points; {}. '.format(len(nnp), str(nnp))
+        # Lines
+        li = ((pi[0], pi[1]), (pi[1], pi[2]), 
+              (pi[2], pi[0]))
+        # Facet
+        self.ifacets.append((tuple(pi), ni, li))
+        return stat
+
+    def stats(self, prefix=''):
+        """Return statistics about an STL model.
+        """
+        self.update_extents()
+        s = prefix + 'Model name: "{}"\n'.format(self.name)
+        s = prefix + "{} facets, {} vertices, {} normal vectors.\n"
+        outs = s.format(len(self.ifacets), len(self.points), 
+                        len(self.normals))
+        outs += prefix + "3D Extents of the model (in STL units):\n"
+        outs += prefix + "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
+        outs += prefix + "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
+        outs += prefix + "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
+        s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
+        outs += prefix + s.format((self.xmin + self.xmax)/2.0, 
+                                  (self.ymin + self.ymax)/2.0, 
+                                  (self.zmin + self.zmax)/2.0)
+        s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
+        x, y, z = vector.mean(self.points)
+        outs += prefix + s.format(x, y, z)
+        return outs
+
+    def update_extents(self):
         x = [p[0] for p in self.points]
         y = [p[1] for p in self.points]
         z = [p[2] for p in self.points]
@@ -111,51 +199,6 @@ class Surface(object):
         self.ymax = max(y)
         self.zmin = min(z)
         self.zmax = max(z)
-
-    def addfacet(self, f):
-        a, b, c, n = f
-        if n == None:
-            return # Skip degenerate facets.
-        stat = ''
-        # Normal vector
-        try:
-            newni = self.normals.index(n)
-        except ValueError:
-            newni = len(self.normals)
-            self.normals.append(f[3])
-            stat += 'Found 1 new normal, index {}. '.format(newni)
-        # Vertices:
-        newpi = []
-        nnp = []
-        for x in a, b, c:
-            try:
-                newpi.append(self.points.index(x))
-            except ValueError:
-                i = len(self.points)
-                newpi.append(i)
-                self.points.append(x)
-                nnp.append(i)
-        if nnp:
-            stat += 'Found {} new points; {}. '.format(len(nnp), str(nnp))
-        # Lines
-        newpi.sort()
-        lines = [(newpi[0], newpi[1]), (newpi[1], newpi[2]), 
-                    (newpi[2], newpi[0])]
-        newli = []
-        nni = []
-        for l in lines:
-            try:
-                newli.append(self.ilines.index(l))
-            except ValueError:
-                i = len(self.ilines)
-                newli.append(i)
-                self.ilines.append(l)
-                nni.append(i)
-        if nni:
-            stat += 'Found {} new lines; {}.'.format(len(nni), str(nni))
-        # Facet
-        self.ifacets.append((tuple(newpi), newni, tuple(newli)))
-        return stat
 
     def __str__(self):
         outs = "solid {}\n".format(self.name)
@@ -170,45 +213,18 @@ class Surface(object):
         outs +='endsolid\n'
         return outs
 
-    def stats(self, prefix=''):
-        """Return statistics about an STL model.
-        """
-        if self.xmin == None:
-            x = [p[0] for p in self.points]
-            y = [p[1] for p in self.points]
-            z = [p[2] for p in self.points]
-            self.xmin = min(x)
-            self.xmax = max(x)
-            self.ymin = min(y)
-            self.ymax = max(y)
-            self.zmin = min(z)
-            self.zmax = max(z)
-        s = prefix + 'Model name: "{}"\n'.format(self.name)
-        s = prefix + "{} facets, {} vertices, {} normal vectors, {} edges.\n"
-        outs = s.format(len(self.ifacets), len(self.points), 
-                        len(self.normals), len(self.ilines))
-        outs += prefix + "3D Extents of the model (in STL units):\n"
-        outs += prefix + "{} ≤ x ≤ {},\n".format(self.xmin, self.xmax)
-        outs += prefix + "{} ≤ y ≤ {},\n".format(self.ymin, self.ymax)
-        outs += prefix + "{} ≤ z ≤ {}.\n".format(self.zmin, self.zmax)
-        s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
-        outs += prefix + s.format((self.xmin + self.xmax)/2.0, 
-                                  (self.ymin + self.ymax)/2.0, 
-                                  (self.zmin + self.zmax)/2.0)
-        s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
-        x, y, z = vector.mean(self.points)
-        outs += prefix + s.format(x, y, z)
-        return outs
+    def __len__(self):
+        return len(self.ifacets)
 
 
 def fromfile(fname):
     """Read an STL file.
     
     Arguments:
-    fname -- file to read the STL file from.
+    fname -- filename to read the STL file from.
 
     Returns:
-    facets -- a Facets object.
+    a Facets object.
     """
     def _readbinary(items=None):
         """Process the contents of a binary STL file as a
@@ -218,7 +234,7 @@ def fromfile(fname):
         items -- file data minus header split into 50-byte blocks.
 
         Yields:
-        a RawFacet
+        a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
         """
         # Process the items
         for cnt, i in enumerate(items):
@@ -237,7 +253,7 @@ def fromfile(fname):
         items -- stripped lines of the text STL file
 
         Yields:
-        a RawFacet
+        a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
         """
         # Items now begins with "facet"
         while items[0] == "facet":
@@ -280,6 +296,101 @@ def fromfile(fname):
     for f in reader:
         fl.addfacet(f)
     return fl
+
+
+def make_indexed_mesh(f):
+    """Creates an IndexedMesh instance from a Facets instance.
+
+    Arguments:
+    f -- Facets instance
+
+    Returns:
+    an IndexedMesh instance.
+    """
+    upoints, fi = _process_points(f.facets)
+    unormals, ni = _process_normals(f.facets)
+    s = IndexedMesh(f.name)
+    s.points = upoints
+    s.update_extents()
+    s.normals = unormals
+    li = [((c[0], c[1]),(c[1], c[2]),(c[2], c[0])) for c in fi]
+    s.ifacets = zip(fi, ni, li)
+    return s
+
+
+def _process_points(facets):
+    """Find all unique points in the facets.
+
+    Arguments:
+    facets -- a list of 4-tuples (a,b,c,n) where the first three are
+    3-tuples containing vertex coordinates and the last is is a
+    3-tuple containing a normalized normal vector.
+
+    Returns:
+    A tuple (upoints, ifacets) where
+    upoints -- a list of unique 3-tuples each containing vertex
+    coordinates
+    ifacets -- a list of facets as 3-tuples of integers which are
+    indexes into the upoints list.
+    """
+    points = [p for fct in facets for p in fct[0:3]]
+    indexes = range(len(points))
+    todo = range(len(points))
+    for j in todo:
+        m = [i for i in xrange(j+1, len(points)) if points[i][0] ==
+             points[j][0]]
+        m = [i for i in m if points[i][1] == points[j][1]]
+        m = [i for i in m if points[i][2] == points[j][2]]
+        # m is now a list of all indexes of points equal to points[j]
+        for i in m:
+            indexes[i] = j
+            todo.remove(i)
+        print j, 'is the same point as', m
+    u = sorted(list(set(indexes)))
+    upoints = [points[i] for i in u]
+    x = {u[i]: i for i in xrange(len(u))}
+    ni = [x[i] for i in indexes]
+    ifacets = [(ni[i], ni[i+1], ni[i+2]) for i in xrange(0,len(ni),3)]
+    return upoints, ifacets
+
+
+def _process_normals(facets):
+    """Find all unique normal vectors in the facets.
+
+    Arguments:
+    facets -- a list of 4-tuples (a,b,c,n) where the first three are
+    3-tuples containing vertex coordinates and the last is is a
+    3-tuple containing a normalized normal vector.
+
+    Returns:
+    A tuple (unormals, ni) where
+    unormals -- a list of unique 3-tuples each containing a normal
+    vector.
+    ifacets -- a list of facet normals which are indexes into the
+    unormals list.
+    """
+    normals = [f[3] for f in facets]
+    indexes = range(len(normals))
+    todo = range(len(normals))
+    for j in todo:
+        m = [i for i in xrange(j+1, len(normals)) if normals[i][0] ==
+             normals[j][0]]
+        m = [i for i in m if normals[i][1] == normals[j][1]]
+        m = [i for i in m if normals[i][2] == normals[j][2]]
+        # m is now a list of all indexes of normal equal to normals[j]
+        for i in m:
+            indexes[i] = j
+            todo.remove(i)
+        print j, 'is the same normal as', m
+    u = sorted(list(set(indexes)))
+    unormals = [normals[i] for i in u]
+    x = {u[i]: i for i in xrange(len(u))}
+    ni = [x[i] for i in indexes]
+    return unormals, ni
+
+
+
+
 
 
 
