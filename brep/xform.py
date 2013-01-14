@@ -50,7 +50,7 @@ class Zpar:
         self.w = math.ceil(self.s*(xmax-xmin))
         self.h = math.ceil(self.s*(ymax-ymin))
 
-    def project(self, p):
+    def point(self, p):
         """Projects a point. 
 
         Arguments:

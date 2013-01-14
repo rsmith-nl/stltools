@@ -41,6 +41,7 @@ def usage():
     print "Usage: stl2ps infile [outfile] [transform [transform ...]]"
     print "where [transform] is [x number|y number|z number]"
 
+
 def main(args):
     """Main program.
 
@@ -84,9 +85,9 @@ def main(args):
         print "The file '{}' cannot be read or parsed. Exiting.".format(infile)
         sys.exit(1)
     # Remove spaces from name
-    stlobj.name = stlobj.name.strip()
+    stlobj.name = stlobj.name.strip() # TODO; move to stl.py.
     # Apply transformations
-    stlobj.xform(tr) # TODO: fix
+    stlobj.xform(tr)
     # Calculate viewport and transformation
     xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents()
     pr = xform.Zpar(xmin, xmax, ymin, ymax)
@@ -101,24 +102,23 @@ def main(args):
         " {:.0f}×{:.0f} mm.\n"
     outs += s.format(pr.w, pr.h, pr.w/72*25.4, pr.h/72*25.4)
     # Calculate the visible facets
-    vizfacets = [f for f in stlobj.facets if pr.visible(f[3])]
-    outs += "% {} of {} facets are visible.\n".format(len(vizfacets), len(stlobj))
+    pf = [f for f in stlobj.projected_facets(pr)]
+    outs += "% {} of {} facets are visible.\n".format(len(pf), len(stlobj))
     # Next, depth-sort the facets using the smallest distance to the viewer
     # of the three vertices.
-    vizfacets.sort(None, lambda f: max([f[0][2], f[1][2], f[2][2]]))
+    pf.sort(None, lambda f: max([f[3][0], f[3][1], f[3][2]]))
     # PostScript settings and macros.
     outs += ".5 setlinewidth\n"
     outs += "/g {setgray} def\n"
     outs += "/f {moveto} def\n"
     outs += "/s {lineto} def\n"
     outs += "/t {lineto closepath gsave fill grestore stroke} def\n"
-    # Project and illuminate the facets
-    pf = (stl.ProjectedFacet(f, pr) for f in vizfacets) #TODO; fix
     # Draw the triangles
     for f in pf:
         # TODO; fix
         s = "{:4.2f} g {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t\n"
-        outs += s.format(f.gray, f.x1, f.y1, f.x2, f.y2, f.x3, f.y3)
+        outs += s.format(f[4], f[0][0], f[0][1], f[1][0], f[1][1], 
+                         f[2][0], f[2][1])
     # Showpage must be the last line in the PostScript output.
     outs += "showpage\n"
     # Send output.

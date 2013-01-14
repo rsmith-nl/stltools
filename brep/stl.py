@@ -44,9 +44,12 @@ class Facets(object): # pylint: disable=R0924
         Arguments:
         name -- string containing the name of the object
         """
-        self.name = name
+        self.name = name.strip()
         self.facets = []
         self.degenerate_facets = []
+
+    def __len__(self): 
+        return len(self.facets)
 
     def extents(self):
         """Calculate the extents of a Facet.
@@ -105,8 +108,30 @@ class Facets(object): # pylint: disable=R0924
         outs += prefix + s.format(x, y, z)
         return outs
 
-    def __len__(self): 
-        return len(self.facets)
+    def xform(self, t):
+        """Apply the transformation t to the object.
+
+        Arguments:
+        t -- Xform object.
+        """
+        self.facets = [(t.apply(f[0]), t.apply(f[1]), t.apply(f[2]),
+                        t.applyrot(f[3])) for f in self.facets]
+
+    def projected_facets(self, pr):
+        """Generates visible projected facets
+
+        Arguments:
+        pr -- Zpar object.
+
+        Yields:
+        a tuple containing three 2-tuples with the projected vertices,
+        a 3-tuple of the z-values of the vertices for depth sorting
+        and the z-value of the normal vector.
+        """        
+        for f in self.facets:
+            if pr.visible(f[3]):
+                yield (pr.point(f[0]), pr.point(f[1]), pr.point(f[2]),
+                       (f[0][2], f[1][2], f[2][2]), f[3][2])
 
 
 class IndexedMesh(object): # pylint: disable=R0924
@@ -128,6 +153,31 @@ class IndexedMesh(object): # pylint: disable=R0924
         self.xmin = self.xmax = None
         self.ymin = self.ymax = None
         self.zmin = self.zmax = None
+
+    def __str__(self):
+        outs = "solid {}\n".format(self.name)
+        for (v, n, l) in self.ifacets: # pylint: disable=W0612
+            nv = self.normals[n]
+            outs +=  '  facet normal {} {} {}\n'.format(nv[0], nv[1], nv[2])
+            outs += '    outer loop\n'
+            for i in v:
+                p = self.points[i]
+                outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
+            outs += '    endloop\n  endfacet\n'
+        outs += 'endsolid\n'
+        return outs
+
+    def __len__(self):
+        return len(self.ifacets)
+
+    def xform(self, t):
+        """Apply the transformation t to the object.
+
+        Arguments:
+        t -- Xform object.
+        """
+        self.points = [t.apply(p)  for p in self.points]
+        self.normals = [t.applyrot(n)  for n in self.normals]
 
     def addfacet(self, f):
         """Add a facet to the IndexedMesh object. Mainly for creating
@@ -200,21 +250,25 @@ class IndexedMesh(object): # pylint: disable=R0924
         self.zmin = min(z)
         self.zmax = max(z)
 
-    def __str__(self):
-        outs = "solid {}\n".format(self.name)
-        for (v, n, l) in self.ifacets: # pylint: disable=W0612
-            nv = self.normals[n]
-            outs +=  '  facet normal {} {} {}\n'.format(nv[0], nv[1], nv[2])
-            outs += '    outer loop\n'
-            for i in v:
-                p = self.points[i]
-                outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
-            outs += '    endloop\n  endfacet\n'
-        outs += 'endsolid\n'
-        return outs
+    def projected_facets(self, pr):
+        """Generates visible projected facets
 
-    def __len__(self):
-        return len(self.ifacets)
+        Arguments:
+        pr -- Zpar object.
+
+        Yields: 
+        a tuple containing three 2-tuples with the projected vertices,
+        a 3-tuple of the z-values of the vertices for depth sorting
+        and the z-value of the normal vector.
+        """        
+        pp = [pr.point(i) for i in self.points]
+        pn = [pr.visible(i) for i in self.normals]
+        for pi, ni, li in self.facets:
+            if pn[ni]:
+                ix, iy, iz = pi
+                yield (pp[ix], pp[iy], pp[iz], 
+                       (self.points[ix][2], self.points[iy][2], 
+                        self.points[iz][2]), self.normals[ni])
 
 
 def fromfile(fname):
