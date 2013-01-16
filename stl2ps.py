@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
-# Copyright © 2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2012,2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # $Date$
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 import os
 import sys
 import time
-
 from brep import stl, xform
 
 name = ('stl2ps [ver. ' + '$Revision$'[11:-2] + 
@@ -42,12 +41,7 @@ def usage():
     print "where [transform] is [x number|y number|z number]"
 
 
-def main(args):
-    """Main program.
-
-    Keyword arguments:
-    argv -- command line arguments (without program name!)
-    """
+def getargs(args):
     # Process the command-line arguments
     validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
     if len(args) < 1:
@@ -78,14 +72,21 @@ def main(args):
         except:
             print "Argument '{}' is not a number, ignored.".format(args[1])
             continue
+    return (infile, outfile, tr)
+
+def main(args):
+    """Main program.
+
+    Keyword arguments:
+    argv -- command line arguments (without program name!)
+    """
+    infile, outfile, tr = getargs(args)
     # Open the file
     try:
         stlobj = stl.fromfile(infile)
     except:
         print "The file '{}' cannot be read or parsed. Exiting.".format(infile)
         sys.exit(1)
-    # Remove spaces from name
-    stlobj.name = stlobj.name.strip() # TODO; move to stl.py.
     # Apply transformations
     stlobj.xform(tr)
     # Calculate viewport and transformation
