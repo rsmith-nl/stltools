@@ -42,7 +42,12 @@ def usage():
 
 
 def getargs(args):
-    # Process the command-line arguments
+    """ Process the command-line arguments.
+
+    Returns:
+    A tuple containing the input file name, the output filename and
+    the transformation matrix.
+    """
     validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
     if len(args) < 1:
         usage()
@@ -51,6 +56,10 @@ def getargs(args):
     if len(args) < 2 or args[1] in validargs:
         outfile = None
         del args[:1]
+        outbase = os.path.basename(infile)
+        if outbase.endswith((".stl", ".STL")):
+            outbase = outbase[:-4]
+        outfile = outbase+".pdf"
     else:
         outfile = args[1]
         del args[:2]
@@ -74,6 +83,7 @@ def getargs(args):
             continue
     return (infile, outfile, tr)
 
+
 def main(args):
     """Main program.
 
@@ -81,7 +91,6 @@ def main(args):
     argv -- command line arguments (without program name!)
     """
     infile, outfile, tr = getargs(args)
-    # Open the file
     try:
         stlobj = stl.fromfile(infile)
     except:

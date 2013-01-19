@@ -64,7 +64,7 @@ class Zpar:
         ry = (y-self.ymin)*self.s
         return (rx, ry)
 
-    def visible(self, n):
+    def isvisible(self, n):
         """Checks a normal vector n to see if it points toward or away
         from the viewer.
 
@@ -190,39 +190,3 @@ class Xform:
         zr += self.m[2][3]
         return (xr, yr, zr)
 
-# Built-in tests.
-if __name__ == '__main__':
-    tr = Xform()
-    print "Original matrix:\n", tr
-    tr.rotx(45) 
-#    tr.rotx(-45)
-#    print "rotation 45,-45° around X:\n", tr
-    print "rotation 45° around X:\n", tr
-    tr.rotx(-45)
-    tr.rotx(45)
-    tr.rotx(315)
-    print "rotation 45,315° around X:\n", tr
-    tr.roty(30)
-    tr.roty(-30)
-    print "rotation 30,-30° around Y:\n", tr
-    tr.roty(30)
-    tr.roty(330)
-    print "rotation 30,330° around Y:\n", tr
-    tr.rotz(90)
-    tr.rotz(-90)
-    print "rotation 90,-90° around Z:\n", tr
-    tr.rotz(90)
-    tr.rotz(270)
-    print "rotation 90,270° around Z:\n", tr
-    tr.reset()
-    tr.rotx(90)
-    res = tr.apply((0, 1, 0))
-    print "(0,1,0) rotated 90° around X:", res
-    tr.reset()
-    tr.roty(90)
-    res = tr.apply((0, 0, 1))
-    print "(0,0,1) rotated 90° around Y:", res
-    tr.reset()
-    tr.rotz(90)
-    res = tr.apply((1, 0, 0))
-    print "(1,0,0) rotated 90° around Z:", res

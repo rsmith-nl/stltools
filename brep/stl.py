@@ -129,7 +129,7 @@ class Facets(object): # pylint: disable=R0924
         and the z-value of the normal vector.
         """        
         for f in self.facets:
-            if pr.visible(f[3]):
+            if pr.isvisible(f[3]):
                 yield (pr.point(f[0]), pr.point(f[1]), pr.point(f[2]),
                        (f[0][2], f[1][2], f[2][2]), f[3][2])
 
@@ -262,7 +262,7 @@ class IndexedMesh(object): # pylint: disable=R0924
         and the z-value of the normal vector.
         """        
         pp = [pr.point(i) for i in self.points]
-        pn = [pr.visible(i) for i in self.normals]
+        pn = [pr.isvisible(i) for i in self.normals]
         for pi, ni, li in self.facets:
             if pn[ni]:
                 ix, iy, iz = pi
@@ -361,6 +361,71 @@ def make_indexed_mesh(f):
     Returns:
     an IndexedMesh instance.
     """
+    def _process_points(facets):
+        """Find all unique points in the facets.
+
+        Arguments:
+        facets -- a list of 4-tuples (a,b,c,n) where the first three are
+        3-tuples containing vertex coordinates and the last is is a
+        3-tuple containing a normalized normal vector.
+
+        Returns:
+        A tuple (upoints, ifacets) where
+        upoints -- a list of unique 3-tuples each containing vertex
+        coordinates
+        ifacets -- a list of facets as 3-tuples of integers which are
+        indexes into the upoints list.
+        """
+        points = [p for fct in facets for p in fct[0:3]]
+        indexes = range(len(points))
+        todo = range(len(points))
+        for j in todo:
+            m = [i for i in xrange(j+1, len(points)) if points[i][0] ==
+                 points[j][0]]
+            m = [i for i in m if points[i][1] == points[j][1]]
+            m = [i for i in m if points[i][2] == points[j][2]]
+            # m is now a list of all indexes of points equal to points[j]
+            for i in m:
+                indexes[i] = j
+                todo.remove(i)
+        u = sorted(list(set(indexes)))
+        upoints = [points[i] for i in u]
+        x = {u[i]: i for i in xrange(len(u))}
+        ni = [x[i] for i in indexes]
+        ifacets = [(ni[i], ni[i+1], ni[i+2]) for i in xrange(0, len(ni), 3)]
+        return upoints, ifacets
+    def _process_normals(facets):
+        """Find all unique normal vectors in the facets.
+
+        Arguments:
+        facets -- a list of 4-tuples (a,b,c,n) where the first three are
+        3-tuples containing vertex coordinates and the last is is a
+        3-tuple containing a normalized normal vector.
+
+        Returns:
+        A tuple (unormals, ni) where
+        unormals -- a list of unique 3-tuples each containing a normal
+        vector.
+        ifacets -- a list of facet normals which are indexes into the
+        unormals list.
+        """
+        normals = [f[3] for f in facets]
+        indexes = range(len(normals))
+        todo = range(len(normals))
+        for j in todo:
+            m = [i for i in xrange(j+1, len(normals)) if normals[i][0] ==
+                 normals[j][0]]
+            m = [i for i in m if normals[i][1] == normals[j][1]]
+            m = [i for i in m if normals[i][2] == normals[j][2]]
+            # m is now a list of all indexes of normal equal to normals[j]
+            for i in m:
+                indexes[i] = j
+                todo.remove(i)
+        u = sorted(list(set(indexes)))
+        unormals = [normals[i] for i in u]
+        x = {u[i]: i for i in xrange(len(u))}
+        ni = [x[i] for i in indexes]
+        return unormals, ni
     upoints, fi = _process_points(f.facets)
     unormals, ni = _process_normals(f.facets)
     s = IndexedMesh(f.name)
@@ -372,72 +437,3 @@ def make_indexed_mesh(f):
     return s
 
 
-def _process_points(facets):
-    """Find all unique points in the facets.
-
-    Arguments:
-    facets -- a list of 4-tuples (a,b,c,n) where the first three are
-    3-tuples containing vertex coordinates and the last is is a
-    3-tuple containing a normalized normal vector.
-
-    Returns:
-    A tuple (upoints, ifacets) where
-    upoints -- a list of unique 3-tuples each containing vertex
-    coordinates
-    ifacets -- a list of facets as 3-tuples of integers which are
-    indexes into the upoints list.
-    """
-    points = [p for fct in facets for p in fct[0:3]]
-    indexes = range(len(points))
-    todo = range(len(points))
-    for j in todo:
-        m = [i for i in xrange(j+1, len(points)) if points[i][0] ==
-             points[j][0]]
-        m = [i for i in m if points[i][1] == points[j][1]]
-        m = [i for i in m if points[i][2] == points[j][2]]
-        # m is now a list of all indexes of points equal to points[j]
-        for i in m:
-            indexes[i] = j
-            todo.remove(i)
-#        print j, 'is the same point as', m
-    u = sorted(list(set(indexes)))
-    upoints = [points[i] for i in u]
-    x = {u[i]: i for i in xrange(len(u))}
-    ni = [x[i] for i in indexes]
-    ifacets = [(ni[i], ni[i+1], ni[i+2]) for i in xrange(0, len(ni), 3)]
-    return upoints, ifacets
-
-
-def _process_normals(facets):
-    """Find all unique normal vectors in the facets.
-
-    Arguments:
-    facets -- a list of 4-tuples (a,b,c,n) where the first three are
-    3-tuples containing vertex coordinates and the last is is a
-    3-tuple containing a normalized normal vector.
-
-    Returns:
-    A tuple (unormals, ni) where
-    unormals -- a list of unique 3-tuples each containing a normal
-    vector.
-    ifacets -- a list of facet normals which are indexes into the
-    unormals list.
-    """
-    normals = [f[3] for f in facets]
-    indexes = range(len(normals))
-    todo = range(len(normals))
-    for j in todo:
-        m = [i for i in xrange(j+1, len(normals)) if normals[i][0] ==
-             normals[j][0]]
-        m = [i for i in m if normals[i][1] == normals[j][1]]
-        m = [i for i in m if normals[i][2] == normals[j][2]]
-        # m is now a list of all indexes of normal equal to normals[j]
-        for i in m:
-            indexes[i] = j
-            todo.remove(i)
-#        print j, 'is the same normal as', m
-    u = sorted(list(set(indexes)))
-    unormals = [normals[i] for i in u]
-    x = {u[i]: i for i in xrange(len(u))}
-    ni = [x[i] for i in indexes]
-    return unormals, ni

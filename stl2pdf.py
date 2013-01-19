@@ -35,13 +35,20 @@ from brep import stl, xform
 name = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
        '] ('+'$Date$'[7:-2]+')')
 
+
 def usage():
     print name
     print "Usage: stl2pdf infile [outfile] [transform [transform ...]]"
     print "where [transform] is [x number|y number|z number]"
 
+
 def getargs(args):
-    # Process the command-line arguments
+    """ Process the command-line arguments.
+
+    Returns:
+    A tuple containing the input file name, the output filename and
+    the transformation matrix.
+    """
     validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
     if len(args) < 1:
         usage()
@@ -50,6 +57,10 @@ def getargs(args):
     if len(args) < 2 or args[1] in validargs:
         outfile = None
         del args[:1]
+        outbase = os.path.basename(infile)
+        if outbase.endswith((".stl", ".STL")):
+            outbase = outbase[:-4]
+        outfile = outbase+".pdf"
     else:
         outfile = args[1]
         del args[:2]
@@ -80,7 +91,6 @@ def main(args):
     argv -- command line arguments (without program name!)
     """
     infile, outfile, tr = getargs(args)
-    # Open the file
     try:
         stlobj = stl.fromfile(infile)
     except:
@@ -91,33 +101,25 @@ def main(args):
     # Calculate viewport and transformation
     xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents()
     pr = xform.Zpar(xmin, xmax, ymin, ymax)
-    # Prepare output.
-    if outfile == None:
-        outbase = os.path.basename(infile)
-        if outbase.endswith((".stl", ".STL")):
-            outbase = outbase[:-4]
-        outfile = outbase+".pdf"
-    #out = canvas.Canvas(outfile, (pr.w, pr.h), pageCompression=1)
     out = cairo.PDFSurface(outfile, pr.w, pr.h)
     ctx = cairo.Context(out)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
-
     # Calculate the visible facets
-    vizfacets = [f for f in stlobj.facets if pr.visible(f.n)]
+    pf = [f for f in stlobj.projected_facets(pr)]
     # Next, depth-sort the facets using the largest z-value of the three vertices.
-    vizfacets.sort(None, lambda f: max([f.v[0].z, f.v[1].z, f.v[2].z]))
-    # Project and illuminate the facets
-    pf = (stl.ProjectedFacet(f, pr) for f in vizfacets)
-    # Draw the triangles
+    pf.sort(None, lambda f: max([f[3][0], f[3][1], f[3][2]]))
+    # Draw the triangles. The transform is needed because Cairo uses a
+    # different coordinate system.
+    ctx.transform(cairo.Matrix(1.0, 0.0, 0.0, -1.0, 0.0, pr.h))
     for f in pf:
         path = ctx.new_path()
-        ctx.move_to(f.x1, f.y1)
-        ctx.line_to(f.x2, f.y2)
-        ctx.line_to(f.x3, f.y3)
+        ctx.move_to(f[0][0], f[0][1])
+        ctx.line_to(f[1][0], f[1][1])
+        ctx.line_to(f[2][0], f[2][1])
         ctx.close_path()
-        ctx.set_source_rgb(f.gray, f.gray, f.gray)
+        ctx.set_source_rgb(f[4], f[4], f[4])
         ctx.fill_preserve()
         ctx.stroke()
     # Send output.
