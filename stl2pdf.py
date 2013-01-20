@@ -99,7 +99,7 @@ def main(args):
     # Apply transformations
     stlobj.xform(tr)
     # Calculate viewport and transformation
-    xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents()
+    xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents() #pylint: disable=W0612
     pr = xform.Zpar(xmin, xmax, ymin, ymax)
     out = cairo.PDFSurface(outfile, pr.w, pr.h)
     ctx = cairo.Context(out)
@@ -108,13 +108,14 @@ def main(args):
     ctx.set_line_width(0.25)
     # Calculate the visible facets
     pf = [f for f in stlobj.projected_facets(pr)]
-    # Next, depth-sort the facets using the largest z-value of the three vertices.
+    # Next, depth-sort the facets using the largest z-value of the
+    # three vertices. 
     pf.sort(None, lambda f: max([f[3][0], f[3][1], f[3][2]]))
     # Draw the triangles. The transform is needed because Cairo uses a
     # different coordinate system.
     ctx.transform(cairo.Matrix(1.0, 0.0, 0.0, -1.0, 0.0, pr.h))
     for f in pf:
-        path = ctx.new_path()
+        ctx.new_path()
         ctx.move_to(f[0][0], f[0][1])
         ctx.line_to(f[1][0], f[1][1])
         ctx.line_to(f[2][0], f[2][1])

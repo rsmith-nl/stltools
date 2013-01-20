@@ -99,7 +99,8 @@ def main(args):
     # Apply transformations
     stlobj.xform(tr)
     # Calculate viewport and transformation
-    xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents()
+    (xmin, xmax, ymin, 
+     ymax, zmin, zmax) = stlobj.extents() #pylint: disable=W0612
     pr = xform.Zpar(xmin, xmax, ymin, ymax)
     # Prepare output string.
     outs = "%!PS-Adobe-1.0\n"
@@ -125,7 +126,6 @@ def main(args):
     outs += "/t {lineto closepath gsave fill grestore stroke} def\n"
     # Draw the triangles
     for f in pf:
-        # TODO; fix
         s = "{:4.2f} g {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t\n"
         outs += s.format(f[4], f[0][0], f[0][1], f[1][0], f[1][1], 
                          f[2][0], f[2][1])

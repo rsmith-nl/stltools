@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-# Check this code with 'pylint -r n read.py'
+# Check this code with 'pylint -r n stl.py'
 
 """Reading triangulated models."""
 
@@ -75,13 +75,10 @@ class Facets(object): # pylint: disable=R0924
         f -- a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
         """
         a, b, c = f
-        u = vector.sub(b, a)
-        v = vector.sub(c, b)
-        n = vector.cross(u, v) # Calculate the normal vector
-        try:
-            n  = vector.norm(n)
+        n = vector.normal(a, b, c)
+        if n:
             self.facets.append((a, b, c, n))
-        except ValueError:
+        else:
             self.degenerate_facets.append(f)
 
     def stats(self, prefix=''):
@@ -140,19 +137,35 @@ class IndexedMesh(object): # pylint: disable=R0924
     is the list of points and normals are transformed or projected.
     """
 
-    def __init__(self, name):
+    def __init__(self, a):
         """Create an empty IndexedMesh.
 
         Arguments:
-        name -- string containing the name of the object
+        a -- a string containing the name of the object, or a Facets
+        instance.
         """
-        self.name = name
-        self.points = []
-        self.normals = []
-        self.ifacets = []
-        self.xmin = self.xmax = None
-        self.ymin = self.ymax = None
-        self.zmin = self.zmax = None
+        if isinstance(a, str):
+            self.name = a
+            self.points = []
+            self.normals = []
+            self.ifacets = []
+            self.xmin = self.xmax = None
+            self.ymin = self.ymax = None
+            self.zmin = self.zmax = None
+        elif isinstance(a, Facets):
+            c = make_indexed_mesh(a)
+            self.name = c.name
+            self.points = c.points
+            self.normals = c.normals
+            self.ifacets = c.ifacets
+            self.xmin = c.xmin
+            self.xmax = c.xmax
+            self.ymin = c.ymin
+            self.ymax = c.ymax
+            self.zmin = c.zmin
+            self.zmax = c.zmax
+        else:
+            raise ValueError('a must be a string or a Facets instance')
 
     def __str__(self):
         outs = "solid {}\n".format(self.name)
@@ -185,9 +198,15 @@ class IndexedMesh(object): # pylint: disable=R0924
         should be used to convert a Facets object into an IndexedMesh.
 
         Arguments:
-        f -- a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
+        f -- a nested tuple (a,b,c,n) or (a,b,c)
         """
-        a, b, c, n = f
+        if len(f) == 4:
+            a, b, c, n = f
+        elif len(f) == 3:
+            a, b, c = f
+            n = vector.normal(a, b, c)
+        else:
+            raise ValueError('facet must be a 3-tuple or 4-tuple')
         if n == None:
             return 'Skipped degenerate facet.'
         stat = ''
@@ -196,7 +215,7 @@ class IndexedMesh(object): # pylint: disable=R0924
             ni = self.normals.index(n)
         except ValueError:
             ni = len(self.normals)
-            self.normals.append(f[3])
+            self.normals.append(n)
             stat += 'Found 1 new normal, index {}. '.format(ni)
         # Vertices:
         pi = []
@@ -263,7 +282,7 @@ class IndexedMesh(object): # pylint: disable=R0924
         """        
         pp = [pr.point(i) for i in self.points]
         pn = [pr.isvisible(i) for i in self.normals]
-        for pi, ni, li in self.facets:
+        for pi, ni, li in self.ifacets: #pylint: disable=W0612
             if pn[ni]:
                 ix, iy, iz = pi
                 yield (pp[ix], pp[iy], pp[iz], 
@@ -380,6 +399,9 @@ def make_indexed_mesh(f):
         indexes = range(len(points))
         todo = range(len(points))
         for j in todo:
+            # with every list comprehension, m becomes smaller so
+            # don't try and fit it in a single one. It will most
+            # probably be slower.
             m = [i for i in xrange(j+1, len(points)) if points[i][0] ==
                  points[j][0]]
             m = [i for i in m if points[i][1] == points[j][1]]
@@ -436,4 +458,29 @@ def make_indexed_mesh(f):
     s.ifacets = zip(fi, ni, li)
     return s
 
+
+def box(name, dx, dy, dz):
+    """Creates a box-shaped IndexedMesh object of dimensions dx, dy,
+    dz centered on (0,0,0)"""
+    b = IndexedMesh(name)
+    dx = float(dx)/2.0
+    dy = float(dy)/2.0
+    dz = float(dz)/2.0
+    p = [(-dx, -dy,  dz), ( dx, -dy,  dz), ( dx, -dy, -dz),
+         (-dx, -dy, -dz), (-dx,  dy,  dz), ( dx,  dy,  dz),
+         ( dx,  dy, -dz), (-dx,  dy, -dz)]
+    b.addfacet((p[0], p[1], p[4]))
+    b.addfacet((p[1], p[5], p[4]))
+    b.addfacet((p[0], p[2], p[1]))
+    b.addfacet((p[0], p[3], p[2]))
+    b.addfacet((p[4], p[5], p[6]))
+    b.addfacet((p[4], p[6], p[7]))
+    b.addfacet((p[3], p[7], p[2]))
+    b.addfacet((p[7], p[6], p[2]))
+    b.addfacet((p[1], p[2], p[5]))
+    b.addfacet((p[5], p[2], p[6]))
+    b.addfacet((p[0], p[4], p[3]))
+    b.addfacet((p[3], p[4], p[7]))
+    b.update_extents()
+    return b
 

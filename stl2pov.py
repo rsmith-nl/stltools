@@ -65,7 +65,7 @@ def mesh2(s):
     ms += '\n  }\n'
     ms += '  face_indices {\n'
     ms += '    {},\n'.format(len(s.ifacets))
-    for ((a, b, c), ni, li) in s.ifacets:
+    for ((a, b, c), ni, li) in s.ifacets:  #pylint: disable=W0612
         ms += '    <{}, {}, {}>,\n'.format(a, b, c)
     ms = ms[:-2]
     ms += '\n  }\n}\n'
@@ -88,7 +88,7 @@ def main(argv):
         parser.print_help()
         sys.exit(0)
     for fn in args.file:
-        root, ext = os.path.splitext(fn)
+        root, ext = os.path.splitext(fn)  #pylint: disable=W0612
         outfn = os.path.basename(root) + '.inc'
         try:
             rf = stl.fromfile(fn)

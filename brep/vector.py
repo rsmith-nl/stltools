@@ -59,7 +59,36 @@ def cross(a, b):
             a[0]*b[1] - a[1]*b[0])
 
 
-def norm(a):
+def length(a):
+    """Calculate and return the length of a.
+    
+    Arguments
+    a -- 3-tuple of floats
+    """
+    return (a[0]**2 + a[1]**2 + a[2]**2)**0.5
+
+
+def normal(a, b, c):
+    """Calculate and return the normalized normal vector for the
+    triangle defined by the vertices a, b and c.
+    
+    Arguments
+    a -- 3-tuple of floats
+    b -- 3-tuple of floats
+    v -- 3-tuple of floats
+    """
+    u = sub(b, a)
+    v = sub(c, b)
+    n = cross(u, v) # Calculate the normal vector
+    L = length(n)
+    if L == 0.0:
+        n = None
+    else:
+        n = (n[0]/L, n[1]/L, n[2]/L)
+    return n
+
+
+def normalize(a):
     """Calculate and return the normalized a.
     
     Arguments
