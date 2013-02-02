@@ -114,6 +114,7 @@ def bbox(pnts):
     z = [p[2] for p in pnts]
     return (min(x), max(x), min(y), max(y), min(z), max(z))
 
+
 def mean(pnts):
     """Calculate the mean of all pnts.
 
@@ -129,21 +130,28 @@ def mean(pnts):
     return (sum(x)/len(x), sum(y)/len(y), sum(z)/len(z))
 
 
-def translate(pnts, v):
-    """Translate all the points according to vec.
+def lstindex(plst, p):
+    """Check if points are in a list of points. If not, add them to the
+    list. Return the indices of the found or added points.
 
     Arguments:
-    pnts -- list of 3-tuples holding the point coordinates
-    v  -- 3-tuple holding the translation vector
+    plst -- list of 3-tuples holding the point coordinates
+    p  -- 3-tuple holding the point, or a list/tuple of them
 
     Returns
-    a list of translated points.
+    a list of point indices.
     """
-    if pnts:
-        if v:
-            x, y, z = v
-        else:
-            raise ValueError('empyty vector')
-        return [(p[0] + x, p[1] + y, p[2] + z) for p in pnts]
+    if isinstance(p[0], float) and len(p) == 3: # single point
+        p = [p]
+    elif isinstance(p[0], tuple) and len(p[0]) == 3:
+        pass
     else:
-        raise ValueError('empyty list of points')
+        raise ValueError('p should be a 3-tuple or a iterable of 3-tuples')
+    ri = []
+    for f in p:
+        try:
+            ri.append(plst.index(f))
+        except ValueError:
+            ri.append(len(plst))
+            plst.append(f)
+    return ri
