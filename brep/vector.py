@@ -27,45 +27,64 @@
 
 """Vector manipulation functions. Vectors are 3-tuples of floats."""
 
-def add(a, b):
-    """Calculate and return a+b.
+from collections import namedtuple
+
+#Vector = namedtuple('Vector', ['x', 'y', 'z'])
+
+BoundingBox = namedtuple('BoundingBox', ['minx', 'maxx', 'miny',
+                                         'maxy', 'minz', 'maxz'])
+
+class Vector3(object):
+
+    def __init__(self, x, y, z):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+    def __add__(self, other):
+        return Vector3(self.x + other.x, self.y + other.y, 
+                       self.z + other.z)
+
+    def __sub__(self, other):
+        return Vector3(self.x - other.x, self.y - other.y, 
+                       self.z - other.z)
+
+    def __mul__(self, scalar):
+        if isinstance(scalar, Vector3):
+            raise NotImplementedError
+        s = float(scalar)
+        if s == 0:
+            raise ValueError('would create a 0-length vector')
+        return Vector3(self.x*s, self.y*s, self.z*s)
+
+    def cross(self, other):
+        '''Returns the cross product.'''
+        return Vector3(self.y * other.z - self.z * other.y, 
+                      self.z * other.x - self.x * other.z, 
+                      self.x * other.y - self.y * other.x)
+
+    def dot(self, other):
+        '''Returns the dot- or scalar product.'''
+        return (self.x * other.x + self.y * other.y + self.z * other.z)
+
+    def __div__(self, scalar):
+        if isinstance(scalar, Vector3):
+            raise NotImplementedError
+        s = float(scalar)
+        if s == 0:
+            raise ValueError('division by 0')
+        return Vector3(self.x/s, self.y/s, self.z/s)
     
-    Arguments
-    a -- 3-tuple of floats
-    b -- 3-tuple of floats
-    """
-    return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+    def __eq__(self, other):
+        return (self.x == other.x and self.y == other.y and 
+                self.z == other.z) 
 
+    def __ne__(self, other):
+        return (self.x != other.x or self.y != other.y or 
+                self.z != other.z) 
 
-def sub(a, b):
-    """Calculate and return a-b.
-    
-    Arguments
-    a -- 3-tuple of floats
-    b -- 3-tuple of floats
-    """
-    return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
-
-
-def cross(a, b):
-    """Calculate and return the cross product of a and b.
-    
-    Arguments
-    a -- 3-tuple of floats
-    b -- 3-tuple of floats
-    """
-    return (a[1]*b[2] - a[2]*b[1], 
-            a[2]*b[0] - a[0]*b[2], 
-            a[0]*b[1] - a[1]*b[0])
-
-
-def length(a):
-    """Calculate and return the length of a.
-    
-    Arguments
-    a -- 3-tuple of floats
-    """
-    return (a[0]**2 + a[1]**2 + a[2]**2)**0.5
+    def __len__(self):
+        return (self.x**2 + self.y**2 + self.z**2)**0.5
 
 
 def normal(a, b, c):
@@ -73,61 +92,50 @@ def normal(a, b, c):
     triangle defined by the vertices a, b and c.
     
     Arguments
-    a -- 3-tuple of floats
-    b -- 3-tuple of floats
-    v -- 3-tuple of floats
+    a -- Vector3
+    b -- Vector3
+    v -- Vector3
     """
-    u = sub(b, a)
-    v = sub(c, b)
-    n = cross(u, v) # Calculate the normal vector
-    L = length(n)
+    u = b - a
+    v = c - b
+    n = u * v # Calculate the normal vector
+    L = len(n)
     if L == 0.0:
         n = None
     else:
-        n = (n[0]/L, n[1]/L, n[2]/L)
+        n = n/L
     return n
-
-
-def normalize(a):
-    """Calculate and return the normalized a.
-    
-    Arguments
-    a -- 3-tuple of floats
-    """
-    L = (a[0]**2 + a[1]**2 + a[2]**2)**0.5
-    if L == 0.0:
-        raise ValueError('zero-length normal vector')
-    return (a[0]/L, a[1]/L, a[2]/L)
 
 
 def bbox(pnts):
     """Calculate the bounding box of all pnts.
 
     Arguments:
-    pnts -- list of 3-tuples holding the point coordinates
+    pnts -- list of Vector3 holding the point coordinates
 
     Returns
     A tuple (xmin, xmax, ymin, ymax, zmin, zmax)
     """
-    x = [p[0] for p in pnts]
-    y = [p[1] for p in pnts]
-    z = [p[2] for p in pnts]
-    return (min(x), max(x), min(y), max(y), min(z), max(z))
+    x = [p.x for p in pnts]
+    y = [p.y for p in pnts]
+    z = [p.z for p in pnts]
+    return BoundingBox(min(x), max(x), min(y), max(y), min(z), max(z))
 
 
 def mean(pnts):
     """Calculate the mean of all pnts.
 
     Arguments:
-    pnts -- list of 3-tuples holding the point coordinates
+    pnts -- list of Vector3 holding the point coordinates
 
     Returns
     A tuple (x,y,z)
     """
-    x = [p[0] for p in pnts]
-    y = [p[1] for p in pnts]
-    z = [p[2] for p in pnts]
-    return (sum(x)/len(x), sum(y)/len(y), sum(z)/len(z))
+    L = len(pnts)
+    x = [p.x for p in pnts]
+    y = [p.y for p in pnts]
+    z = [p.z for p in pnts]
+    return Vector(sum(x)/L, sum(y)/L, sum(z)/L)
 
 
 def lstindex(plst, p):
@@ -135,18 +143,18 @@ def lstindex(plst, p):
     list. Return the indices of the found or added points.
 
     Arguments:
-    plst -- list of 3-tuples holding the point coordinates
-    p  -- 3-tuple holding the point, or a list/tuple of them
+    plst -- list of Vectors holding the point coordinates
+    p  -- Vector, or a list/tuple of them
 
     Returns
     a list of point indices.
     """
-    if isinstance(p[0], float) and len(p) == 3: # single point
+    if isinstance(p, Vector3): # single point
         p = [p]
-    elif isinstance(p[0], tuple) and len(p[0]) == 3:
+    elif isinstance(p, tuple) or isinstance(p, list):
         pass
     else:
-        raise ValueError('p should be a 3-tuple or a iterable of 3-tuples')
+        raise ValueError('p should be a Vector3 or a list/tuple of them')
     ri = []
     for f in p:
         try:
