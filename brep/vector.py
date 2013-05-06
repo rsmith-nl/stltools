@@ -27,29 +27,42 @@
 
 """Vector manipulation functions. Vectors are 3-tuples of floats."""
 
-from collections import namedtuple
+__version__ = '$Revision$'[11:-2]
 
-#Vector = namedtuple('Vector', ['x', 'y', 'z'])
+from collections import namedtuple
 
 BoundingBox = namedtuple('BoundingBox', ['minx', 'maxx', 'miny',
                                          'maxy', 'minz', 'maxz'])
 
 class Vector3(object):
 
-    def __init__(self, x, y, z):
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
+    @staticmethod
+    def _chkv(v):
+        if not isinstance(v, Vector3):
+            raise ValueError('argument must be a Vector3')
+
+    def __init__(self, x, y=0.0, z=0.0):
+        """Create a 3D vector."""
+        if ((isinstance(x, list) or isinstance(x, tuple)) 
+            and len(x) == 3):
+            self.x, self.y, self.z = float(x[0]), float(x[1]), float(x[2])
+        else:
+            self.x, self.y, self.z = float(x), float(y), float(z)
 
     def __add__(self, other):
+        """Return the sum of the 3D vectors self and other."""
+        Vector3._chkv(other)
         return Vector3(self.x + other.x, self.y + other.y, 
                        self.z + other.z)
 
     def __sub__(self, other):
+        """Return the difference of the 3D vectors self and other."""
+        Vector3._chkv(other)
         return Vector3(self.x - other.x, self.y - other.y, 
                        self.z - other.z)
 
     def __mul__(self, scalar):
+        """Return the 3D vector self multiplied with a scalar."""
         if isinstance(scalar, Vector3):
             raise NotImplementedError
         s = float(scalar)
@@ -58,13 +71,15 @@ class Vector3(object):
         return Vector3(self.x*s, self.y*s, self.z*s)
 
     def cross(self, other):
-        '''Returns the cross product.'''
+        '''Returns the cross product of two vectors.'''
+        Vector3._chkv(other)
         return Vector3(self.y * other.z - self.z * other.y, 
                       self.z * other.x - self.x * other.z, 
                       self.x * other.y - self.y * other.x)
 
     def dot(self, other):
         '''Returns the dot- or scalar product.'''
+        Vector3._chkv(other)
         return (self.x * other.x + self.y * other.y + self.z * other.z)
 
     def __div__(self, scalar):
@@ -76,15 +91,21 @@ class Vector3(object):
         return Vector3(self.x/s, self.y/s, self.z/s)
     
     def __eq__(self, other):
+        Vector3._chkv(other)
         return (self.x == other.x and self.y == other.y and 
                 self.z == other.z) 
 
     def __ne__(self, other):
+        Vector3._chkv(other)
         return (self.x != other.x or self.y != other.y or 
                 self.z != other.z) 
 
-    def __len__(self):
+    def length(self):
         return (self.x**2 + self.y**2 + self.z**2)**0.5
+
+    def t(self):
+        '''Returns a tuple of the Vector3 coordinates.'''
+        return (self.x, self.y, self.z)
 
 
 def normal(a, b, c):
@@ -99,7 +120,7 @@ def normal(a, b, c):
     u = b - a
     v = c - b
     n = u * v # Calculate the normal vector
-    L = len(n)
+    L = n.length()
     if L == 0.0:
         n = None
     else:

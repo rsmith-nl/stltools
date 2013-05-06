@@ -80,11 +80,10 @@ class Zpar:
         return False
 
 
-_LIMIT = 1e-7
-
-
 class Xform:
     """Class for coordinate transformations in 3D space."""
+
+    _LIMIT = 1e-7
 
     @staticmethod
     def _unitmatrix():
@@ -101,9 +100,14 @@ class Xform:
             for j in xrange(4):
                 r[i][j] = (m1[i][0]*m2[0][j] + m1[i][1]*m2[1][j] + 
                            m1[i][2]*m2[2][j] + m1[i][3]*m2[3][j])
-                if math.fabs(r[i][j]) < _LIMIT: 
+                if math.fabs(r[i][j]) < Xform._LIMIT: 
                     r[i][j] = 0.0
         return r
+
+    @staticmethod
+    def _chkt(v):
+        if not isinstance(v, Xform):
+            raise ValueError('argument is not an Xform')
 
     def __init__(self):
         """Initialize the transformation to the unity transform.
@@ -112,9 +116,10 @@ class Xform:
 
     def __eq__(self, other):
         """Check if two transformations are equal."""
+        Xform._chkt(other)
         for i in range(3):
             for j in range(3):
-                if math.fabs(self.m[i][j] - other.m[i][j]) > _LIMIT:
+                if math.fabs(self.m[i][j] - other.m[i][j]) > Xform._LIMIT:
                     return False
         return True
 
@@ -189,4 +194,3 @@ class Xform:
         yr += self.m[1][3]
         zr += self.m[2][3]
         return (xr, yr, zr)
-

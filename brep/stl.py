@@ -31,15 +31,18 @@ __version__ = '$Revision$'[11:-2]
 
 import struct
 from os.path import basename
-from . import vector
+from collections import namedtuple
+from .vector import *
 
-class Facets(object): # pylint: disable=R0924
+Facet = namedtuple('Facet', ['a', 'b', 'c', 'n', 'l'])
+
+class FacetMesh(object): # pylint: disable=R0924
     """The Facets class is designed to hold raw data read from an STL
     file. Instances are generally created by the fromfile() function
     """
 
     def __init__(self, name):
-        """Creates an empty Facets instance.
+        """Creates an empty FacetMesh instance.
 
         Arguments:
         name -- string containing the name of the object
@@ -48,59 +51,59 @@ class Facets(object): # pylint: disable=R0924
         self.facets = []
         self.degenerate_facets = []
 
-    def __len__(self): 
+    def length(self): 
         return len(self.facets)
 
-    def extents(self):
-        """Calculate the extents of a Facet.
+    def bbox(self):
+        """Calculate the bounding box of a FacetMesh.
 
         Returns:
-        a 6-tuple containing the minimal and maximal value in x, y and
-        z direction of all points.
+        A vector.BoundingBox containing the minimal and maximal value
+        in x, y and z direction of all points.
         """
         if not self.facets:
-            raise ValueError('empty Facets object')
-        points  = [p for fct in self.facets for p in fct[0:3]]
-        x = [p[0] for p in points]
-        y = [p[1] for p in points]
-        z = [p[2] for p in points]
-        return (min(x), max(x), min(y), max(y), min(z), max(z))
+            raise ValueError('empty Facet list')
+        points  = [p for fct in self.facets for p in (fct.a, fct.b, fct.c)]
+        x = [p.x for p in points]
+        y = [p.y for p in points]
+        z = [p.z for p in points]
+        return vector.BoundingBox(min(x), max(x), min(y), max(y),
+                                  min(z), max(z))
 
     def addfacet(self, f):
-        """Add a facet to the Facets object. Mainly for use in the
-        fromfile() function. A facet is a 4-tuple (a,b,c,n) where a, b
-        and c are vertices and n is the normalized normal vector.
+        """Add a facet to the FacetMesh object. Mainly for use in the
+        fromfile() function. 
 
         Arguments:
-        f -- a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
+        f -- a 3-tuple of Vectors
         """
         a, b, c = f
         n = vector.normal(a, b, c)
         if n:
-            self.facets.append((a, b, c, n))
+            self.facets.append(Facet(a, b, c, n, None))
         else:
             self.degenerate_facets.append(f)
 
     def stats(self, prefix=''):
         """Produces a string containing statistics about the object.
         """
-        minx, maxx, miny, maxy, minz, maxz = self.extents() 
+        bb = self.bbox() 
         outs = prefix + 'Model name: "{}"\n'.format(self.name)
         outs += prefix + '{} facets\n'.format(len(self.facets))
         dft = '{} degenerate facets\n'
         outs += prefix + dft.format(len(self.degenerate_facets))
         outs += prefix + "3D Extents of the model (in STL units):\n"
-        outs += prefix + "{} ≤ x ≤ {},\n".format(minx, maxx)
-        outs += prefix + "{} ≤ y ≤ {},\n".format(miny, maxy)
-        outs += prefix + "{} ≤ z ≤ {}.\n".format(minz, maxz)
+        outs += prefix + "{} ≤ x ≤ {},\n".format(bb.minx, bb.maxx)
+        outs += prefix + "{} ≤ y ≤ {},\n".format(bb.miny, bb.maxy)
+        outs += prefix + "{} ≤ z ≤ {}.\n".format(bb.minz, bb.maxz)
         s = "3D center (midpoint of extents, STL units): <{0}, {1}, {2}>.\n"
-        outs += prefix + s.format((minx + maxx)/2.0, 
-                                  (miny + maxy)/2.0, 
-                                  (minz + maxz)/2.0)
+        outs += prefix + s.format((bb.minx + bb.maxx)/2.0, 
+                                  (bb.miny + bb.maxy)/2.0, 
+                                  (bb.minz + bb.maxz)/2.0)
         s = "3D mean (mean of all vertices, STL units): <{0}, {1}, {2}>."
-        points = [f[0] for f in self.facets]
-        points += [f[1] for f in self.facets]
-        points += [f[2] for f in self.facets]
+        points = [f.a for f in self.facets]
+        points += [f.b for f in self.facets]
+        points += [f.c for f in self.facets]
         x, y, z = vector.mean(points)
         outs += prefix + s.format(x, y, z)
         return outs
@@ -111,8 +114,9 @@ class Facets(object): # pylint: disable=R0924
         Arguments:
         t -- Xform object.
         """
-        self.facets = [(t.apply(f[0]), t.apply(f[1]), t.apply(f[2]),
-                        t.applyrot(f[3])) for f in self.facets]
+        #TODO: should this return a copy?
+        self.facets = [Facet(t.apply(f.a), t.apply(f.b), t.apply(f.c),
+                             t.applyrot(f.n)) for f in self.facets]
 
     def projected_facets(self, pr):
         """Generates visible projected facets
@@ -126,9 +130,9 @@ class Facets(object): # pylint: disable=R0924
         and the z-value of the normal vector.
         """        
         for f in self.facets:
-            if pr.isvisible(f[3]):
-                yield (pr.point(f[0]), pr.point(f[1]), pr.point(f[2]),
-                       (f[0][2], f[1][2], f[2][2]), f[3][2])
+            if pr.isvisible(f.n):
+                yield (pr.point(f.a), pr.point(f.b), pr.point(f.c),
+                       (f.a.z, f.b.z, f.c.z), f.n.z)
 
 
 class IndexedMesh(object): # pylint: disable=R0924
@@ -148,39 +152,34 @@ class IndexedMesh(object): # pylint: disable=R0924
             self.name = a
             self.points = []
             self.normals = []
+            self.ilines = []
             self.ifacets = []
-            self.xmin = self.xmax = None
-            self.ymin = self.ymax = None
-            self.zmin = self.zmax = None
-        elif isinstance(a, Facets):
+            self.bb = None
+        elif isinstance(a, FacetMesh):
             c = make_indexed_mesh(a)
             self.name = c.name
             self.points = c.points
             self.normals = c.normals
+            self.ifacets = c.ilines
             self.ifacets = c.ifacets
-            self.xmin = c.xmin
-            self.xmax = c.xmax
-            self.ymin = c.ymin
-            self.ymax = c.ymax
-            self.zmin = c.zmin
-            self.zmax = c.zmax
+            self.bb = c.bb
         else:
-            raise ValueError('a must be a string or a Facets instance')
+            raise ValueError('a must be a string or a FacetMesh instance')
 
     def __str__(self):
         outs = "solid {}\n".format(self.name)
         for (v, n, l) in self.ifacets: # pylint: disable=W0612
             nv = self.normals[n]
-            outs +=  '  facet normal {} {} {}\n'.format(nv[0], nv[1], nv[2])
+            outs +=  '  facet normal {} {} {}\n'.format(nv.x, nv.y, nv.z)
             outs += '    outer loop\n'
             for i in v:
                 p = self.points[i]
-                outs += '      vertex {} {} {}\n'.format(p[0], p[1], p[2])
+                outs += '      vertex {} {} {}\n'.format(p.x, p.y, p.z)
             outs += '    endloop\n  endfacet\n'
         outs += 'endsolid\n'
         return outs
 
-    def __len__(self):
+    def length(self):
         return len(self.ifacets)
 
     def xform(self, t):
@@ -189,6 +188,7 @@ class IndexedMesh(object): # pylint: disable=R0924
         Arguments:
         t -- Xform object.
         """
+        #TODO: should this return a copy?
         self.points = [t.apply(p)  for p in self.points]
         self.normals = [t.applyrot(n)  for n in self.normals]
 
@@ -198,7 +198,7 @@ class IndexedMesh(object): # pylint: disable=R0924
         should be used to convert a Facets object into an IndexedMesh.
 
         Arguments:
-        f -- a nested tuple (a,b,c,n) or (a,b,c)
+        f -- a tuple of Vectors (a,b,c,n) or (a,b,c)
         """
         if len(f) == 4:
             a, b, c, n = f
@@ -211,30 +211,27 @@ class IndexedMesh(object): # pylint: disable=R0924
             return 'Skipped degenerate facet.'
         stat = ''
         # Normal vector
-        try:
-            ni = self.normals.index(n)
-        except ValueError:
-            ni = len(self.normals)
-            self.normals.append(n)
+        ni = vector.lstindex(self.normals, n)
+        if ni == len(self.normals) - 1:
             stat += 'Found 1 new normal, index {}. '.format(ni)
         # Vertices:
-        pi = []
-        nnp = []
-        for x in a, b, c:
-            try:
-                pi.append(self.points.index(x))
-            except ValueError:
-                i = len(self.points)
-                pi.append(i)
-                self.points.append(x)
-                nnp.append(i)
+        pi = vector.lstindex(self.points, [a,b,c])
+        nnp = [i for i in pi if i>ol]
         if nnp:
             stat += 'Found {} new points; {}. '.format(len(nnp), str(nnp))
         # Lines
-        li = ((pi[0], pi[1]), (pi[1], pi[2]), 
-              (pi[2], pi[0]))
+        nl = [sorted(i) for i in [(pi[0], pi[1]), (pi[1], pi[2]), 
+                                  (pi[2], [pi[0]])]]
+        li = []
+        for l in nl:
+            try:
+                li.append(self.ilines.index(l))
+            except ValueError:
+                li.append(len(self.ilines))
+                self.ilines.append(l)
         # Facet
-        self.ifacets.append((tuple(pi), ni, li))
+        nf = Facet(pi[0], pi[1], pi[2], ni, li)
+        self.ifacets.append(nf)
         return stat
 
     def stats(self, prefix=''):
@@ -259,15 +256,11 @@ class IndexedMesh(object): # pylint: disable=R0924
         return outs
 
     def update_extents(self):
-        x = [p[0] for p in self.points]
-        y = [p[1] for p in self.points]
-        z = [p[2] for p in self.points]
-        self.xmin = min(x)
-        self.xmax = max(x)
-        self.ymin = min(y)
-        self.ymax = max(y)
-        self.zmin = min(z)
-        self.zmax = max(z)
+        x = [p.x for p in self.points]
+        y = [p.y for p in self.points]
+        z = [p.z for p in self.points]
+        self.bb = vector.BoundingBox(min(x), max(x), min(y), max(y),
+                                     min(z), max(z))
 
     def projected_facets(self, pr):
         """Generates visible projected facets
@@ -307,15 +300,15 @@ def fromfile(fname):
         items -- file data minus header split into 50-byte blocks.
 
         Yields:
-        a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
+        a 3-tuple of Vectors
         """
         # Process the items
         for i in items:
             f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
             struct.unpack("=12x9f2x", i)
-            a = (f1x, f1y, f1z)
-            b = (f2x, f2y, f2z)
-            c = (f3x, f3y, f3z)
+            a = vector.Vector(f1x, f1y, f1z)
+            b = vector.Vector(f2x, f2y, f2z)
+            c = vector.Vector(f3x, f3y, f3z)
             yield (a, b, c)
 
     def _readtext(items=None):
@@ -330,9 +323,12 @@ def fromfile(fname):
         """
         # Items now begins with "facet"
         while items[0] == "facet":
-            a = (float(items[8]), float(items[9]), float(items[10]))
-            b = (float(items[12]), float(items[13]), float(items[14]))
-            c = (float(items[16]), float(items[17]), float(items[18]))
+            a = vector.Vector(float(items[8]), float(items[9]),
+                              float(items[10])) 
+            b = vector.Vector(float(items[12]), float(items[13]),
+                              float(items[14]))
+            c = vector.Vector(float(items[16]), float(items[17]),
+                              float(items[18]))
             del items[:21]
             yield (a, b, c)
 
@@ -365,7 +361,7 @@ def fromfile(fname):
         nf1 = items.count('facet')
         del items[0:en]
         reader = _readtext(items)
-    fl = Facets(name)
+    fl = FacetMesh(name)
     for f in reader:
         fl.addfacet(f)
     return fl
@@ -384,20 +380,16 @@ def make_indexed_mesh(f):
         """Find all unique points in the facets.
 
         Arguments:
-        facets -- a list of 4-tuples (a,b,c,n) where the first three are
-        3-tuples containing vertex coordinates and the last is is a
-        3-tuple containing a normalized normal vector.
+        facets -- a list of Facets
 
         Returns:
         A tuple (upoints, ifacets) where
-        upoints -- a list of unique 3-tuples each containing vertex
-        coordinates
-        ifacets -- a list of facets as 3-tuples of integers which are
-        indexes into the upoints list.
+        upoints -- a list of unique points
+        ifacets -- a list of facets 
         """
-        points = [p for fct in facets for p in fct[0:3]]
-        indexes = range(len(points))
-        todo = range(len(points))
+        points = [p for fct in facets for p in (fct.a, fct.b, fct.c)]
+        indexes = todo = range(len(points))
+#        todo = range(len(points))
         for j in todo:
             # with every list comprehension, m becomes smaller so
             # don't try and fit it in a single one. It will most
@@ -458,8 +450,7 @@ def make_indexed_mesh(f):
     s.ifacets = zip(fi, ni, li)
     return s
 
-
-def box(name, dx, dy, dz):
+def box(name, dx=1.0, dy=1.0, dz=1.0):
     """Creates a box-shaped IndexedMesh object of dimensions dx, dy,
     dz centered on (0,0,0)"""
     b = IndexedMesh(name)
@@ -483,4 +474,9 @@ def box(name, dx, dy, dz):
     b.addfacet((p[3], p[4], p[7]))
     b.update_extents()
     return b
+
+def cylinder(name, r, h, n=32):
+    """Creates a cylindrical IndexedMesh object with radius r, height
+    h and each circle divided into n segments. """
+    pass
 
