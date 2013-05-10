@@ -64,11 +64,7 @@ class FacetMesh(object): # pylint: disable=R0924
         if not self.facets:
             raise ValueError('empty Facet list')
         points  = [p for fct in self.facets for p in (fct.a, fct.b, fct.c)]
-        x = [p.x for p in points]
-        y = [p.y for p in points]
-        z = [p.z for p in points]
-        return vector.BoundingBox(min(x), max(x), min(y), max(y),
-                                  min(z), max(z))
+        return vector.BoundingBox(points)
 
     def addfacet(self, f):
         """Add a facet to the FacetMesh object. Mainly for use in the

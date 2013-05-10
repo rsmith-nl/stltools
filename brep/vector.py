@@ -31,8 +31,58 @@ __version__ = '$Revision$'[11:-2]
 
 from collections import namedtuple
 
-BoundingBox = namedtuple('BoundingBox', ['minx', 'maxx', 'miny',
-                                         'maxy', 'minz', 'maxz'])
+class BoundingBox(object):
+
+    def __init__(self, pnts):
+        """Create a BoundingBox from a list of Vector3."""
+        x = [p.x for p in pnts]
+        y = [p.y for p in pnts]
+        z = [p.z for p in pnts]
+        self._minx, self._maxx = min(x), max(x)
+        self._miny, self._maxy = min(y), max(y)
+        self._minz, self._maxz = min(z), max(z)
+
+    @property
+    def minx(self):
+        return self._minx
+
+    @property
+    def maxx(self):
+        return self._maxx
+
+    @property
+    def miny(self):
+        return self._miny
+
+    @property
+    def maxy(self):
+        return self._maxy
+
+    @property
+    def minz(self):
+        return self._minz
+
+    @property
+    def maxz(self):
+        return self._maxz
+
+    def center(self):
+        return Vector3((self._minx + self._maxx)/2.0, 
+                       (self._miny + self._maxy)/2.0,
+                       (self._minz + self._maxz)/2.0)
+
+    def length(self):
+        return abs(self._maxx - self._minx)
+
+    def width(self):
+        return abs(self._maxy - self._miny)
+
+    def height(self):
+        return abs(self._maxz - self._minz)
+
+    def volume(self):
+        return self.length() * self.width() * self.height()
+
 
 class Vector3(object):
 
@@ -45,21 +95,33 @@ class Vector3(object):
         """Create a 3D vector."""
         if ((isinstance(x, list) or isinstance(x, tuple)) 
             and len(x) == 3):
-            self.x, self.y, self.z = float(x[0]), float(x[1]), float(x[2])
+            self._x, self._y, self._z = float(x[0]), float(x[1]), float(x[2])
         else:
-            self.x, self.y, self.z = float(x), float(y), float(z)
+            self._x, self._y, self._z = float(x), float(y), float(z)
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def z(self):
+        return self._z
 
     def __add__(self, other):
         """Return the sum of the 3D vectors self and other."""
         Vector3._chkv(other)
-        return Vector3(self.x + other.x, self.y + other.y, 
-                       self.z + other.z)
+        return Vector3(self._x + other.x, self._y + other.y, 
+                       self._z + other.z)
 
     def __sub__(self, other):
         """Return the difference of the 3D vectors self and other."""
         Vector3._chkv(other)
-        return Vector3(self.x - other.x, self.y - other.y, 
-                       self.z - other.z)
+        return Vector3(self._x - other.x, self._y - other.y, 
+                       self._z - other.z)
 
     def __mul__(self, scalar):
         """Return the 3D vector self multiplied with a scalar."""
@@ -68,19 +130,19 @@ class Vector3(object):
         s = float(scalar)
         if s == 0:
             raise ValueError('would create a 0-length vector')
-        return Vector3(self.x*s, self.y*s, self.z*s)
+        return Vector3(self._x*s, self._y*s, self._z*s)
 
     def cross(self, other):
         '''Returns the cross product of two vectors.'''
         Vector3._chkv(other)
-        return Vector3(self.y * other.z - self.z * other.y, 
-                      self.z * other.x - self.x * other.z, 
-                      self.x * other.y - self.y * other.x)
+        return Vector3(self._y * other.z - self._z * other.y, 
+                      self._z * other.x - self._x * other.z, 
+                      self._x * other.y - self._y * other.x)
 
     def dot(self, other):
         '''Returns the dot- or scalar product.'''
         Vector3._chkv(other)
-        return (self.x * other.x + self.y * other.y + self.z * other.z)
+        return (self._x * other.x + self._y * other.y + self._z * other.z)
 
     def __div__(self, scalar):
         if isinstance(scalar, Vector3):
@@ -88,24 +150,24 @@ class Vector3(object):
         s = float(scalar)
         if s == 0:
             raise ValueError('division by 0')
-        return Vector3(self.x/s, self.y/s, self.z/s)
+        return Vector3(self._x/s, self._y/s, self._z/s)
     
     def __eq__(self, other):
         Vector3._chkv(other)
-        return (self.x == other.x and self.y == other.y and 
-                self.z == other.z) 
+        return (self._x == other.x and self._y == other.y and 
+                self._z == other.z) 
 
     def __ne__(self, other):
         Vector3._chkv(other)
-        return (self.x != other.x or self.y != other.y or 
-                self.z != other.z) 
+        return (self._x != other.x or self._y != other.y or 
+                self._z != other.z) 
 
     def length(self):
-        return (self.x**2 + self.y**2 + self.z**2)**0.5
+        return (self._x**2 + self._y**2 + self._z**2)**0.5
 
     def t(self):
         '''Returns a tuple of the Vector3 coordinates.'''
-        return (self.x, self.y, self.z)
+        return (self._x, self._y, self._z)
 
 
 def normal(a, b, c):
@@ -126,21 +188,6 @@ def normal(a, b, c):
     else:
         n = n/L
     return n
-
-
-def bbox(pnts):
-    """Calculate the bounding box of all pnts.
-
-    Arguments:
-    pnts -- list of Vector3 holding the point coordinates
-
-    Returns
-    A tuple (xmin, xmax, ymin, ymax, zmin, zmax)
-    """
-    x = [p.x for p in pnts]
-    y = [p.y for p in pnts]
-    z = [p.z for p in pnts]
-    return BoundingBox(min(x), max(x), min(y), max(y), min(z), max(z))
 
 
 def mean(pnts):
