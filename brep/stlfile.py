@@ -29,7 +29,6 @@
 
 __version__ = '$Revision$'[11:-2]
 
-
 import vector
 from os.path import basename
 import struct
@@ -142,6 +141,6 @@ if __name__ == '__main__':
     print 'Type:', r.filetype
     print 'Number of facets:', r.numfacets
     print 'Facet data:'
-    for a,b,c in r:
-        print '  ', a, b, c
+    for va, vb, vc in r:
+        print '  ', va, vb, vc
 

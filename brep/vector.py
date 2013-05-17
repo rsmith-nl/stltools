@@ -71,7 +71,7 @@ class Vector3(object):
     def __add__(self, other):
         """Return the sum of the 3D vectors self and other."""
         Vector3._chkv(other)
-        return Vector3(self._x + other.x, self._y + other.y, 
+        return Vector3(self._x + other.x, self._y + other.y,
                        self._z + other.z)
 
     def __sub__(self, other):
@@ -80,22 +80,19 @@ class Vector3(object):
         return Vector3(self._x - other.x, self._y - other.y, 
                        self._z - other.z)
 
-    def __mul__(self, scalar):
+    def __mul__(self, other):
         """Return the 3D vector self multiplied with a scalar."""
-        if isinstance(scalar, Vector3):
-            raise ValueError
-        s = float(scalar)
-        if s == 0:
-            raise ValueError('would create a 0-length vector')
+        s = float(other)
         return Vector3(self._x*s, self._y*s, self._z*s)
 
     def cross(self, other):
         '''Returns the cross product of two vectors.'''
         Vector3._chkv(other)
-        return Vector3(self._y * other.z - self._z * other.y, 
-                      self._z * other.x - self._x * other.z, 
-                      self._x * other.y - self._y * other.x)
-
+        r = Vector3(self._y * other.z - self._z * other.y,
+                    self._z * other.x - self._x * other.z,
+                    self._x * other.y - self._y * other.x)
+        return r
+        
     def dot(self, other):
         '''Returns the dot- or scalar product.'''
         Vector3._chkv(other)
@@ -178,71 +175,8 @@ class BoundingBox(object):
         return abs(self._maxz - self._minz)
 
     @property
-     def volume(self):
+    def volume(self):
         return self.length() * self.width() * self.height()
-
-
-def normal(a, b, c):
-    """Calculate and return the normalized normal vector for the
-    triangle defined by the vertices a, b and c.
-    
-    Arguments
-    a -- Vector3
-    b -- Vector3
-    v -- Vector3
-    """
-    u = b - a
-    v = c - b
-    n = u * v # Calculate the normal vector
-    L = n.length()
-    if L == 0.0:
-        n = None
-    else:
-        n = n/L
-    return n
-
-
-def mean(pnts):
-    """Calculate the mean of all pnts.
-
-    Arguments:
-    pnts -- list of Vector3 holding the point coordinates
-
-    Returns
-    A tuple (x,y,z)
-    """
-    L = len(pnts)
-    x = [p.x for p in pnts]
-    y = [p.y for p in pnts]
-    z = [p.z for p in pnts]
-    return Vector3(sum(x)/L, sum(y)/L, sum(z)/L)
-
-
-def lstindex(plst, p):
-    """Check if points are in a list of points. If not, add them to the
-    list. Return the indices of the found or added points.
-
-    Arguments:
-    plst -- list of Vectors holding the point coordinates
-    p  -- Vector, or a list/tuple of them
-
-    Returns
-    a list of point indices.
-    """
-    if isinstance(p, Vector3): # single point
-        p = [p]
-    elif isinstance(p, tuple) or isinstance(p, list):
-        pass
-    else:
-        raise ValueError('p should be a Vector3 or a list/tuple of them')
-    ri = []
-    for f in p:
-        try:
-            ri.append(plst.index(f))
-        except ValueError:
-            ri.append(len(plst))
-            plst.append(f)
-    return ri
 
 if __name__ == '__main__':
     pass
