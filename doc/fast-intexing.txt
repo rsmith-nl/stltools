@@ -1,0 +1,31 @@
+from brep.stlfile import StlReader
+r = StlReader('test/BaseABS.stl')
+facets = [f for f in r]
+
+n [9]: %timeit vertices = [i.coords for f in facets for i in f]
+10 loops, best of 3: 17.4 ms per loop
+
+n [13]: len(vertices)
+Out[13]: 18426
+
+In [15]: %timeit indices = [vertices.index(v) for v in vertices]
+1 loops, best of 3: 6.41 s per loop
+
+In [16]: %timeit vset = set(vertices)
+100 loops, best of 3: 5.01 ms per loop
+
+In [22]: %timeit vd = {v: vertices.index(v) for v in vset}
+1 loops, best of 3: 1.02 s per loop
+
+In [25]: %timeit indices = [vd[v] for v in vertices]
+100 loops, best of 3: 6.83 ms per loop
+
+def find_unique_vertices(facets):
+    vertices = [i.coords for f in facets for i in f]
+    uniquevertices = sorted(set(vertices))
+    vertexdict = {v: n for n,v in enumerate(uniquevertices)}
+    indices = [vertexdict[v] for v in vertices]
+    indexedfacets = [indices[i:i+3] for i in range(0, len(indices), 3)]
+    return indexedfacets, uniquevertices
+
+
