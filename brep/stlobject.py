@@ -27,9 +27,14 @@
 
 """Manipulate STL models."""
 
+from vector import normal
+
 __version__ = '$Revision$'[11:-2]
 
 class StlObject(object):
+    """A data representation of a raw STL file. Contains a combined list of
+    facet vertices and normal vectors.
+    """
     __slots__ = ['name', '_facets']
 
     def __init__(self, name):
@@ -43,6 +48,11 @@ class StlObject(object):
         return len(self._facets)
 
     def __iter__(self):
+        """Iterate over the facets of the StlObject.
+        Each iteration receives a tuple (f,n) where f is a 3-tuple of Vector3
+        objects contaiting the points of the facet, while n is the normal
+        Vector3 of the facet.
+        """
         return self._facets
 
     def addfacet(self, f):
@@ -52,33 +62,50 @@ class StlObject(object):
         f -- a 3-tuple of Vector3 objects
 
         Exceptions:
-        ValueError when a degenerate facet is found.
+        ValueError is raised (by vector.normal) when a degenerate facet is
+        found.
         """
         assert isinstance(f, tuple) and len(f) == 3
         n = normal(f)
-        a, b, c = f
-        self._facets.append((a, b, c, n))
+        self._facets.append((f, n))
 
-def normal(f):
-    """Calculate and return the normalized normal vector for the
-    triangle defined by the vertices in the 3-tuple f.
-    
-    Arguments
-    f -- 3-tuple of Vector3 objects
 
-    Returns:
-    The normal vector of the triangle formed by f
-
-    Raises:
-    ValueError when a 0-length normal is found.
+class IndexedStlObject(object):
+    """In this representation, all the vertices and normal vectors are uniqu,
+    and the facet list is a list of indices into the vertex and normal lists.
     """
-    a, b, c = f
-    u = b - a
-    v = c - b
-    n = u.cross(v)
-    L = n.length
-    if L == 0:
-        raise ValueError('degenerate facet')
-    n = n/L
-    return n
+    __slots__ = ['name', '_v', '_n', '_facets']
+
+    def __init__(self, name=''):
+        self.name = name
+        self._v = []
+        self._n = []
+        self._facets = []
+
+    @property
+    def numfacets(self):
+        return len(self._facets)
+
+    def addfacet(self, f, n=None):
+        """Add a facet to an IndexedStlObject.
+
+        Arguments:
+        f -- a 3-tuple of Vector3 objects
+
+        Exceptions:
+        ValueError is raised (by vector.normal) when a degenerate facet is
+        found.
+        """
+        assert isinstance(f, tuple) and len(f) == 3
+        if not n:
+            n = normal(f)
+        self._facets.append((f, n))
+
+def find_unique_vertices(facets):
+    vertices = [i.coords for f in facets for i in f]
+    uniquevertices = sorted(set(vertices))
+    vertexdict = {v: n for n, v in enumerate(uniquevertices)}
+    indices = [vertexdict[v] for v in vertices]
+    indexedfacets = [indices[i:i+3] for i in range(0, len(indices), 3)]
+    return indexedfacets, uniquevertices
 

@@ -25,11 +25,84 @@
 
 # Check this code with 'pylint -r n vector.py'
 
-"""Vector manipulation functions. Vectors are 3-tuples of floats."""
+"""2D and 3D Vector coordinate objects."""
 
 __version__ = '$Revision$'[11:-2]
 
+class Vector2(object):
+    """Contains a coordinate in 2D space."""
+    __slots__ = ['_x', '_y']
+
+    @staticmethod
+    def _chkv(v):
+        if not isinstance(v, Vector2):
+            raise ValueError('argument must be a Vector2')
+
+    def __init__(self, x, y=0.0):
+        """Create a 2D vector."""
+        if ((isinstance(x, list) or isinstance(x, tuple))
+            and len(x) == 32):
+            self._x, self._y = float(x[0]), float(x[1])
+        else:
+            self._x, self._y, self._z = float(x), float(y)
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def coords(self):
+        """Returns a 2-tuple of the Vector2's coordinates"""
+        return (self._x, self._y)
+
+    @property
+    def length(self):
+        """Returns the length of the Vector2"""
+        return (self._x**2 + self._y**2)**0.5
+
+    def __str__(self):
+        return '({}, {})'.format(self._x, self._y)
+
+    def __add__(self, other):
+        """Return the sum of the 3D vectors self and other."""
+        Vector2._chkv(other)
+        return Vector2(self._x + other.x, self._y + other.y)
+
+    def __sub__(self, other):
+        """Return the difference of the 3D vectors self and other."""
+        Vector2._chkv(other)
+        return Vector2(self._x - other.x, self._y - other.y)
+
+    def __mul__(self, other):
+        """Return the product of the 3D vector with a scalar."""
+        s = float(other)
+        return Vector2(self._x*s, self._y*s)
+
+    def __div__(self, scalar):
+        """Returns the Vector2 divided by a scalar"""
+        s = float(scalar)
+        if s == 0:
+            raise ValueError('division by 0')
+        return Vector2(self._x/s, self._y/s)
+    
+    def __eq__(self, other):
+        Vector2._chkv(other)
+        return (self._x == other.x and self._y == other.y) 
+
+    def __ne__(self, other):
+        Vector2._chkv(other)
+        return (self._x != other.x or self._y != other.y) 
+
+    def __hash__(self):
+        return hash(self._x)^hash(self._y)^hash(self._z)
+
+
 class Vector3(object):
+    """Contains a coordinate in 3D space."""
     __slots__ = ['_x', '_y', '_z']
 
     @staticmethod
@@ -59,10 +132,12 @@ class Vector3(object):
 
     @property
     def coords(self):
+        """Returns a 3-tuple of the Vector3's coordinates"""
         return (self._x, self._y, self._z)
 
     @property
     def length(self):
+        """Returns the length of the Vector3"""
         return (self._x**2 + self._y**2 + self._z**2)**0.5
 
     def __str__(self):
@@ -81,7 +156,7 @@ class Vector3(object):
                        self._z - other.z)
 
     def __mul__(self, other):
-        """Return the 3D vector self multiplied with a scalar."""
+        """Return the product of the 3D vector with a scalar."""
         s = float(other)
         return Vector3(self._x*s, self._y*s, self._z*s)
 
@@ -99,8 +174,7 @@ class Vector3(object):
         return (self._x * other.x + self._y * other.y + self._z * other.z)
 
     def __div__(self, scalar):
-        if isinstance(scalar, Vector3):
-            raise ValueError
+        """Returns the Vector3 divided by a scalar"""
         s = float(scalar)
         if s == 0:
             raise ValueError('division by 0')
@@ -116,6 +190,9 @@ class Vector3(object):
         return (self._x != other.x or self._y != other.y or 
                 self._z != other.z) 
 
+    def __hash__(self):
+        return hash(self._x)^hash(self._y)^hash(self._z)
+
 
 class BoundingBox(object):
 
@@ -125,13 +202,18 @@ class BoundingBox(object):
             pnts = [pnts]
         if not type(pnts) in [list, tuple]:
             raise ValueError('pnts must be a Vector3, list or tuple')
-        x = [p.x for p in pnts]
-        y = [p.y for p in pnts]
-        z = [p.z for p in pnts]
-        self._minx, self._maxx = min(x), max(x)
-        self._miny, self._maxy = min(y), max(y)
-        self._minz, self._maxz = min(z), max(z)
-
+        if pnts:
+            x = [p.x for p in pnts]
+            y = [p.y for p in pnts]
+            z = [p.z for p in pnts]
+            self._minx, self._maxx = min(x), max(x)
+            self._miny, self._maxy = min(y), max(y)
+            self._minz, self._maxz = min(z), max(z)
+        else:
+            self._minx, self._maxx = None, None
+            self._miny, self._maxy = None, None
+            self._minz, self._maxz = None, None
+ 
     @property
     def minx(self):
         return self._minx
@@ -177,6 +259,31 @@ class BoundingBox(object):
     @property
     def volume(self):
         return self.length() * self.width() * self.height()
+
+
+def normal(f):
+    """Calculate and return the normalized normal vector for the
+    triangle defined by the vertices in the 3-tuple f.
+    
+    Arguments
+    f -- 3-tuple of Vector3 objects
+
+    Returns:
+    The normal vector of the triangle formed by f
+
+    Raises:
+    ValueError when a 0-length normal is found.
+    """
+    a, b, c = f
+    u = b - a
+    v = c - b
+    n = u.cross(v)
+    L = n.length
+    if L == 0:
+        raise ValueError('degenerate facet')
+    n = n/L
+    return n
+
 
 if __name__ == '__main__':
     pass

@@ -34,6 +34,7 @@ from os.path import basename
 import struct
 
 class StlReader(object):
+    """Object for reading STL files."""
     __slots__ = ['_fname', '_n', '_type', 'name', '_reader']
 
     @staticmethod
@@ -90,6 +91,8 @@ class StlReader(object):
             name = name.strip('\x00 \t\n\r')
             if len(name) == 0:
                 self.name = basename(name)[:-4]
+            else:
+                self.name = name
             data = data[84:]
             facetsz = len(data)
             nf2 = int(facetsz/50)
@@ -108,7 +111,7 @@ class StlReader(object):
             except:
                 raise ValueError("Not an STL file.")
             if sn == en:
-                self._name = 'unknown'
+                self.name = 'unknown'
             else:
                 self.name = ' '.join(items[sn:en])
             nf1 = items.count('facet')
@@ -132,6 +135,7 @@ class StlReader(object):
         return self._type
 
     def __iter__(self):
+        """Iterates over the facets from the STL file."""
         return self._reader
 
 
