@@ -27,6 +27,8 @@
 
 """2D and 3D Vector coordinate objects."""
 
+from __future__ import print_function
+
 __version__ = '$Revision$'[11:-2]
 
 class Vector2(object):
@@ -195,6 +197,9 @@ class Vector3(object):
 
 
 class BoundingBox(object):
+    """The bounding box and some other properties of a point of clouds."""
+    __slots__ = ['_minx', '_maxx', '_miny', '_maxy', '_minz', '_maxz',
+                 '_meanx', '_meany', '_meanz']
 
     def __init__(self, pnts):
         """Create a BoundingBox from a list of Vector3."""
@@ -206,14 +211,27 @@ class BoundingBox(object):
             x = [p.x for p in pnts]
             y = [p.y for p in pnts]
             z = [p.z for p in pnts]
+            self._meanx = sum(x)/len(x)
+            self._meany = sum(y)/len(y)
+            self._meanz = sum(z)/len(z)
             self._minx, self._maxx = min(x), max(x)
             self._miny, self._maxy = min(y), max(y)
             self._minz, self._maxz = min(z), max(z)
         else:
-            self._minx, self._maxx = None, None
-            self._miny, self._maxy = None, None
-            self._minz, self._maxz = None, None
- 
+            raise ValueError('No points given')
+
+    def __str__(self):
+        lines = ['Bounding box:']
+        t = '{} ≤ {} ≤ {},'
+        lines.append(t.format(self._minx, 'x', self._maxx))
+        lines.append(t.format(self._miny, 'y', self._maxy))
+        lines.append(t.format(self._minz, 'z', self._maxz)[:-1])
+        lines.append('Center point:')
+        lines.append(str(self.center))
+        lines.append('Mean point:')
+        lines.append(str(self.mean))
+        return '\n'.join(lines)
+
     @property
     def minx(self):
         return self._minx
@@ -245,6 +263,10 @@ class BoundingBox(object):
                        (self._minz + self._maxz)/2.0)
 
     @property
+    def mean(self):
+        return Vector3(self._meanx, self._meany, self._meanz)
+
+    @property
     def length(self):
         return abs(self._maxx - self._minx)
 
@@ -258,7 +280,7 @@ class BoundingBox(object):
 
     @property
     def volume(self):
-        return self.length() * self.width() * self.height()
+        return self.length * self.width * self.height
 
 
 def normal(f):
@@ -282,5 +304,9 @@ def normal(f):
 
 
 if __name__ == '__main__':
-    pass
-
+    from random import random
+    points = [Vector3(random(), random(), random()) for j in range(30)]
+    bb = BoundingBox(points)
+    for num, q in enumerate(points):
+        print('point', num, ':', q)
+    print(bb)
