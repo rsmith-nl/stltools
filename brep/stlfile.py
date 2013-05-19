@@ -138,6 +138,10 @@ class StlReader(object):
         """Iterates over the facets from the STL file."""
         return self._reader
 
+    def readall(self):
+        """Read all facets and return them in a list of Vector3 3-tuples.
+        """
+        return [f for f in self._reader]
 
 if __name__ == '__main__':
     r = StlReader('../test/cube.stl')

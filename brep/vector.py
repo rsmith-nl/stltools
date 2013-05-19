@@ -270,18 +270,14 @@ def normal(f):
 
     Returns:
     The normal vector of the triangle formed by f
-
-    Raises:
-    ValueError when a 0-length normal is found.
     """
     a, b, c = f
     u = b - a
     v = c - b
     n = u.cross(v)
     L = n.length
-    if L == 0:
-        raise ValueError('degenerate facet')
-    n = n/L
+    if L:
+        n = n/L
     return n
 
 
