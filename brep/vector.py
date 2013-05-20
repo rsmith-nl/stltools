@@ -221,7 +221,11 @@ class BoundingBox(object):
             raise ValueError('No points given')
 
     def __str__(self):
-        lines = ['Bounding box:']
+        return self.stats()
+        
+    def stats(self, prefix=''):
+        lines = [prefix + 'Bounding box:']
+        infix = '\n' + prefix
         t = '{} ≤ {} ≤ {},'
         lines.append(t.format(self._minx, 'x', self._maxx))
         lines.append(t.format(self._miny, 'y', self._maxy))
@@ -230,7 +234,7 @@ class BoundingBox(object):
         lines.append(str(self.center))
         lines.append('Mean point:')
         lines.append(str(self.mean))
-        return '\n'.join(lines)
+        return infix.join(lines)
 
     @property
     def minx(self):
@@ -309,4 +313,4 @@ if __name__ == '__main__':
     bb = BoundingBox(points)
     for num, q in enumerate(points):
         print('point', num, ':', q)
-    print(bb)
+    print(bb.stats('>> '))

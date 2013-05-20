@@ -46,20 +46,15 @@ class RawStl(object):
 
     @property
     def facets(self):
-        """Return the facets as a tuple."""
+        """Return the facets as a tuple. Each facet is a tuple (f,n) where f
+        is a 3-tuple of vector.Vector3 objects containing the points of the
+        facet, while n is the normal vector.Vector3 of the facet.
+        """
         return tuple(self._facets)
 
     @property
     def numfacets(self):
         return len(self._facets)
-
-    def __iter__(self):
-        """Iterate over the facets of the RawStl.  Each iteration receives a
-        tuple (f,n) where f is a 3-tuple of vector.Vector3 objects contaiting
-        the points of the facet, while n is the normal vector.Vector3 of the
-        facet.
-        """
-        return self._facets
 
     def addfacet(self, f):
         """Add a single facet to a RawStl.
@@ -93,6 +88,7 @@ class RawStl(object):
         """Return the BoundingBox of the object."""
         return vector.BoundingBox([p for f, _ in self._facets for p in f])
 
+
 class IndexedStl(object):
     """In this representation, all the vertices and normal vectors are unique,
     and the facet list is a list of indices into the vertex and normal lists.
@@ -108,6 +104,7 @@ class IndexedStl(object):
     @staticmethod
     def fromraw(obj):
         """Create an IndexedStl from an RawStl."""
+        # pylint: disable=W0212
         nw = IndexedStl(obj.name)
         facets = obj.facets
         # Convert vertices and normals into a tuple of 3-tuples for fast
@@ -125,8 +122,8 @@ class IndexedStl(object):
         uniquenormals = sorted(set(normals))
         normaldict = {v: n for n, v in enumerate(uniquenormals)}
         inormals = [normaldict[v] for v in normals]
-        nw._normals = [vector.Vector3(*n) for n in uniquenormals]
-        nw._facets = zip(ifacets, inormals)
+        nw._normals = [vector.Vector3(*n) for n in uniquenormals] 
+        nw._facets = zip(ifacets, inormals) 
         return nw
 
     def addfacet(self, f):
