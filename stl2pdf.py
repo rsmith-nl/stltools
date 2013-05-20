@@ -29,7 +29,7 @@
 import sys
 import os
 import cairo
-from brep import stl, xform
+from brep import stlfile, stlobject, xform
 
 
 name = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
@@ -84,6 +84,15 @@ def getargs(args):
             continue
     return (infile, outfile, tr)
 
+def facetsort(f):
+    """Function for sorting facets
+
+    :f: facet
+    :returns: maximum value
+    """
+    (a, b, c), _  = f
+    return max(a.z, b.z, c.z)
+
 def main(args):
     """Main program.
 
@@ -92,35 +101,42 @@ def main(args):
     """
     infile, outfile, tr = getargs(args)
     try:
-        stlobj = stl.fromfile(infile)
-    except:
-        print "The file '{}' cannot be read or parsed. Exiting.".format(infile)
+        rf = stlfile.StlReader(infile)
+    except ValueError as e:
+        print infile + ':', e
         sys.exit(1)
+    fcts = rf.readall()
+    raw = stlobject.RawStl(rf.name)
+    raw.addfacets(fcts)
     # Apply transformations
-    stlobj.xform(tr)
+    raw.xform(tr)
     # Calculate viewport and transformation
-    xmin, xmax, ymin, ymax, zmin, zmax = stlobj.extents() #pylint: disable=W0612
-    pr = xform.Zpar(xmin, xmax, ymin, ymax)
+    b = raw.bbox()
+    pr = xform.Zpar(b.minx, b.maxx, b.miny, b.maxy)
     out = cairo.PDFSurface(outfile, pr.w, pr.h)
     ctx = cairo.Context(out)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
     # Calculate the visible facets
-    pf = [f for f in stlobj.projected_facets(pr)]
+    vf = [(f, n) for f, n in raw.facets if pr.isvisible(n)]
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices. 
-    pf.sort(None, lambda f: max([f[3][0], f[3][1], f[3][2]]))
+    vf.sort(None, facetsort)
+    # Project the facets, using the z-value of the normal vector for 80% of
+    # the light indensity. 20% is ambient.
+    pf = [(pr.point(a), pr.point(b), pr.point(c), 0.8*n.z + 0.2)
+          for (a, b, c), n in vf]
     # Draw the triangles. The transform is needed because Cairo uses a
     # different coordinate system.
     ctx.transform(cairo.Matrix(1.0, 0.0, 0.0, -1.0, 0.0, pr.h))
-    for f in pf:
+    for a, b, c, z in pf:
         ctx.new_path()
-        ctx.move_to(f[0][0], f[0][1])
-        ctx.line_to(f[1][0], f[1][1])
-        ctx.line_to(f[2][0], f[2][1])
+        ctx.move_to(a.x, a.y)
+        ctx.line_to(b.x, b.y)
+        ctx.line_to(c.x, c.y)
         ctx.close_path()
-        ctx.set_source_rgb(f[4], f[4], f[4])
+        ctx.set_source_rgb(z, z, z)
         ctx.fill_preserve()
         ctx.stroke()
     # Send output.

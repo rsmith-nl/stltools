@@ -30,8 +30,7 @@ representation of the object in the file.'''
 import argparse
 import sys
 import time
-from brep import stlfile
-from brep import stlobject
+from brep import stlfile, stlobject
 
 ver = ('stlinfo [ver. ' + '$Revision$'[11:-2] +
        '] ('+'$Date$'[7:-2]+')')

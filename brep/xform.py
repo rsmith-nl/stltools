@@ -35,6 +35,7 @@ origin."""
 __version__ = '$Revision$'[11:-2]
 
 import math
+from vector import Vector2, Vector3
 
 class Zpar:
     """Class for parallel projection along the Z-axis. Output
@@ -54,28 +55,26 @@ class Zpar:
         """Projects a point. 
 
         Arguments:
-        p -- 3-tuple containing a point
+        p -- a vector.Vector3 instance
 
         Returns:
         a 2-tuple containing the projection of that point
         """
-        x, y, z = p # pylint: disable=W0612
-        rx = (x-self.xmin)*self.s
-        ry = (y-self.ymin)*self.s
-        return (rx, ry)
+        p = Vector2((p.x-self.xmin)*self.s, (p.y-self.ymin)*self.s)
+        return p
 
     def isvisible(self, n):
         """Checks a normal vector n to see if it points toward or away
         from the viewer.
 
         Argument:
-        n -- 3-tuple containing a normal vector
+        n -- a vector.Vector3 instance
 
         Returns: 
         True if the projected vector points towards the viewer, False
         otherwise.
         """
-        if (n[2] > 0.0): 
+        if (n.z > 0.0): 
             return True
         return False
 
@@ -170,6 +169,7 @@ class Xform:
         self.m = Xform._mmul(add, self.m)
 
     def trans(self, p):
+        """Adds a translation to the transformation."""
         x, y, z = p
         add = Xform._unitmatrix()
         add[0][3] = float(x)
@@ -178,19 +178,18 @@ class Xform:
         self.m = Xform._mmul(add, self.m)
 
     def applyrot(self, p):
-        """Apply the rotation part of transformation to 3-tuple p
-           and return the transformed coordinates as a tuple."""
-        x, y, z = p
-        xr = self.m[0][0]*x + self.m[0][1]*y + self.m[0][2]*z
-        yr = self.m[1][0]*x + self.m[1][1]*y + self.m[1][2]*z
-        zr = self.m[2][0]*x + self.m[2][1]*y + self.m[2][2]*z
-        return (xr, yr, zr)
+        """Apply the rotation part of transformation to vector.Vector3 p
+        and return the transformed coordinates as a vector.Vector3 p.
+        """
+        xr = self.m[0][0]*p.x + self.m[0][1]*p.y + self.m[0][2]*p.z
+        yr = self.m[1][0]*p.x + self.m[1][1]*p.y + self.m[1][2]*p.z
+        zr = self.m[2][0]*p.x + self.m[2][1]*p.y + self.m[2][2]*p.z
+        return Vector3(xr, yr, zr)
 
-    def apply(self, p):
-        """Apply the transformation to point p and return the
-           transformed coordinates as a tuple."""
-        xr, yr, zr = self.applyrot(p)
-        xr += self.m[0][3]
-        yr += self.m[1][3]
-        zr += self.m[2][3]
-        return (xr, yr, zr)
+    def applyto(self, p):
+        """Apply the transformation to vector.Vector3 p and return the
+        transformed coordinates as a vector.Vector3.
+        """
+        r = self.applyrot(p)
+        t = Vector3(self.m[0][3], self.m[1][3], self.m[2][3])
+        return r + t

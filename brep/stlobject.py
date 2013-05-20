@@ -88,6 +88,11 @@ class RawStl(object):
         """Return the BoundingBox of the object."""
         return vector.BoundingBox([p for f, _ in self._facets for p in f])
 
+    def xform(self, m):
+        """Transforms the raw STL object."""
+        newfacets = [((m.applyto(a), m.applyto(b), m.applyto(c)),
+                       m.applyrot(n)) for (a, b, c), n in self._facets]
+        self._facets = newfacets
 
 class IndexedStl(object):
     """In this representation, all the vertices and normal vectors are unique,
@@ -161,6 +166,13 @@ class IndexedStl(object):
     def bbox(self):
         """Return the BoundingBox of the object."""
         return vector.BoundingBox([p for p in self._vertices])
+
+    def xform(self, m):
+        """Transforms the indexed STL object."""
+        newverts = [m.applyto(v) for v in self._vertices]
+        newnormals = [n.applyrot(n) for n in self._normals]
+        self._vertices = newverts
+        self._normals = newnormals
 
 
 if __name__ == '__main__':

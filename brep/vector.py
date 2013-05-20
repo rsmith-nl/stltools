@@ -46,7 +46,7 @@ class Vector2(object):
             and len(x) == 32):
             self._x, self._y = float(x[0]), float(x[1])
         else:
-            self._x, self._y, self._z = float(x), float(y)
+            self._x, self._y = float(x), float(y)
 
     @property
     def x(self):
