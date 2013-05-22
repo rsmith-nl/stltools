@@ -42,11 +42,8 @@ class StlReader(object):
         """Process the contents of a binary STL file as a
         generator.
 
-        Arguments:
-        items -- file data minus header split into 50-byte blocks.
-
-        Yields:
-        a 3-tuple of Vectors
+        :items: file data minus header split into 50-byte blocks.
+        :yields: a 3-tuple of Vectors
         """
         # Process the items
         for i in items:
@@ -62,11 +59,8 @@ class StlReader(object):
         """Process the contents of a text STL file as a
         generator.
 
-        Arguments:
-        items -- stripped lines of the text STL file
-
-        Yields:
-        a nested tuple ((x1,y1,z1),(x2,y2,z2),(x3,y3,z3))
+        :items: stripped lines of the text STL file
+        :yields: a 3-tuple of Vectors
         """
         # Items now begins with "facet"
         while items[0] == "facet":
@@ -80,7 +74,10 @@ class StlReader(object):
             yield (a, b, c)
 
     def __init__(self, name):
-        """Reads the named STL file into memory for processing."""
+        """Reads the named STL file into memory for processing.
+
+        :name: name of the file to open
+        """
         self._fname = name
         with open(name, 'r') as sf:
             data = sf.read()
@@ -135,7 +132,9 @@ class StlReader(object):
         return self._type
 
     def __iter__(self):
-        """Iterates over the facets from the STL file."""
+        """Iterates over the facets from the STL file.
+        Every iteration yields a 3-tuple of vector.Vector3.
+        """
         return self._reader
 
     def readall(self):

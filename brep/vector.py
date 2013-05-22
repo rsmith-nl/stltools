@@ -43,7 +43,7 @@ class Vector2(object):
     def __init__(self, x, y=0.0):
         """Create a 2D vector."""
         if ((isinstance(x, list) or isinstance(x, tuple))
-            and len(x) == 32):
+            and len(x) == 2):
             self._x, self._y = float(x[0]), float(x[1])
         else:
             self._x, self._y = float(x), float(y)
@@ -100,7 +100,7 @@ class Vector2(object):
         return (self._x != other.x or self._y != other.y) 
 
     def __hash__(self):
-        return hash(self._x)^hash(self._y)^hash(self._z)
+        return hash(self._x)^hash(self._y)
 
 
 class Vector3(object):
@@ -196,21 +196,114 @@ class Vector3(object):
         return hash(self._x)^hash(self._y)^hash(self._z)
 
 
+class BoundingBox2(object):
+    """The bounding box and some other properties of a cloud of 2D points."""
+    __slots__ = ['_minx', '_maxx', '_miny', '_maxy', '_meanx', '_meany']
+
+    def __init__(self, pnts):
+        """Create a BoundingBox.
+
+        :pnts: a list or tuple of Vector2 objects, or a list or tuple of
+        2-tuples
+        """
+        if isinstance(pnts, Vector2):
+            pnts = [pnts]
+        if not type(pnts) in [list, tuple]:
+            raise ValueError('pnts must be a Vector2, list or tuple')
+        if pnts:
+            if isinstance(pnts[0], Vector2):
+                x = [p.x for p in pnts]
+                y = [p.y for p in pnts]
+            elif type(pnts[0]) in [list, tuple] and len(pnts[0]==2):
+                x = [float(p[0]) for p in pnts]
+                y = [float(p[1]) for p in pnts]
+            else:
+                raise ValueError('pnts is not in a form we can recognize')
+            self._meanx = sum(x)/len(x)
+            self._meany = sum(y)/len(y)
+            self._minx, self._maxx = min(x), max(x)
+            self._miny, self._maxy = min(y), max(y)
+        else:
+            raise ValueError('No points given')
+
+    def __str__(self):
+        return self.stats()
+
+    def stats(self, prefix=''):
+        lines = [prefix + 'Bounding box:']
+        infix = '\n' + prefix
+        t = '{} ≤ {} ≤ {},'
+        lines += [t.format(self._minx, 'x', self._maxx),
+                  t.format(self._miny, 'y', self._maxy)[:-1],
+                  'Center point:', str(self.center),
+                  'Mean point:', str(self.mean)]
+        return infix.join(lines)
+
+
+    @property
+    def minx(self):
+        return self._minx
+
+    @property
+    def maxx(self):
+        return self._maxx
+
+    @property
+    def miny(self):
+        return self._miny
+
+    @property
+    def maxy(self):
+        return self._maxy
+
+    @property
+    def center(self):
+        return Vector2((self._minx + self._maxx)/2.0, 
+                       (self._miny + self._maxy)/2.0)
+
+    @property
+    def mean(self):
+        return Vector2(self._meanx, self._meany)
+
+    @property
+    def width(self):
+        return abs(self._maxx - self._minx)
+
+    @property
+    def height(self):
+        return abs(self._maxy - self._miny)
+
+    @property
+    def surface(self):
+        return self.width * self.height
+
+
 class BoundingBox(object):
-    """The bounding box and some other properties of a point of clouds."""
+    """The bounding box and some other properties of a cloud of 3D points."""
     __slots__ = ['_minx', '_maxx', '_miny', '_maxy', '_minz', '_maxz',
                  '_meanx', '_meany', '_meanz']
 
     def __init__(self, pnts):
-        """Create a BoundingBox from a list of Vector3."""
+        """Create a BoundingBox.
+
+        :pnts: a list or tuple of Vector3 objects, or a list or tuple of
+        3-tuples
+        """
         if isinstance(pnts, Vector3):
             pnts = [pnts]
         if not type(pnts) in [list, tuple]:
             raise ValueError('pnts must be a Vector3, list or tuple')
         if pnts:
-            x = [p.x for p in pnts]
-            y = [p.y for p in pnts]
-            z = [p.z for p in pnts]
+            if isinstance(pnts[0], Vector3):
+                x = [p.x for p in pnts]
+                y = [p.y for p in pnts]
+                z = [p.z for p in pnts]
+            elif type(pnts[0]) in [list, tuple] and len(pnts[0]==3):
+                x = [float(p[0]) for p in pnts]
+                y = [float(p[1]) for p in pnts]
+                z = [float(p[2]) for p in pnts]
+            else:
+                raise ValueError('pnts is not in a form we can recognize')
             self._meanx = sum(x)/len(x)
             self._meany = sum(y)/len(y)
             self._meanz = sum(z)/len(z)
@@ -227,13 +320,11 @@ class BoundingBox(object):
         lines = [prefix + 'Bounding box:']
         infix = '\n' + prefix
         t = '{} ≤ {} ≤ {},'
-        lines.append(t.format(self._minx, 'x', self._maxx))
-        lines.append(t.format(self._miny, 'y', self._maxy))
-        lines.append(t.format(self._minz, 'z', self._maxz)[:-1])
-        lines.append('Center point:')
-        lines.append(str(self.center))
-        lines.append('Mean point:')
-        lines.append(str(self.mean))
+        lines += [t.format(self._minx, 'x', self._maxx),
+                  t.format(self._miny, 'y', self._maxy),
+                  t.format(self._minz, 'z', self._maxz)[:-1],
+                  'Center point:', str(self.center),
+                  'Mean point:', str(self.mean)]
         return infix.join(lines)
 
     @property
