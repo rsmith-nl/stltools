@@ -6,7 +6,7 @@
 # them out again to refresh the keywords. Keyword expansion only works should
 # in files that have the kw filter set in .gitattibutes.
 
-FILES=`git diff-tree HEAD~1 HEAD --name-only -r`
+FILES=`ls *.py *.1`
 rm -f $FILES
 git checkout -f $FILES
 

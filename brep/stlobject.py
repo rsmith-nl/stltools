@@ -44,6 +44,14 @@ class RawStl(object):
         self.name = name
         self._facets = []
 
+    def __str__(self):
+        lines = ['name: {}'.format(self.name), 
+                 'number of facets: {}'.format(self.numfacets),
+                 str(self.bbox()), 'Facets:']
+        lines += ['vertices: {} {} {}, normal: {}'.format(a, b, c, n) 
+                  for (a, b, c), n in self._facets]
+        return '\n'.join(lines)
+
     @property
     def facets(self):
         """Return the facets as a tuple. Each facet is a tuple (f,n) where f
@@ -95,8 +103,9 @@ class RawStl(object):
         self._facets = newfacets
 
 class IndexedStl(object):
-    """In this representation, all the vertices and normal vectors are unique,
-    and the facet list is a list of indices into the vertex and normal lists.
+    """In this representation, all the vertices and normal vectors are 
+    unique, and the facet list is a list of indices into the vertex and
+    normal lists.
     """
     __slots__ = ['name', '_vertices', '_normals', '_facets']
 
@@ -105,6 +114,16 @@ class IndexedStl(object):
         self._vertices = []
         self._normals = []
         self._facets = []
+
+    def __str__(self):
+        lines = ['name: {}'.format(self.name), 
+                 'number of facets: {}'.format(self.numfacets),
+                 str(self.bbox()), 'Facets:']
+        fs = 'vertices: {} {} {}, normal: {}'
+        lines += [fs.format(self._vertices[a], self._vertices[b],
+                            self._vertices[c], self._normals[n]) 
+                  for (a, b, c), n in self._facets]
+        return '\n'.join(lines)
 
     @staticmethod
     def fromraw(obj):
@@ -193,15 +212,9 @@ if __name__ == '__main__':
     if degen:
         print(len(degen), 'degenerate facets found.')
         print(degen)
-    print(str(raw.bbox()))
-#    for num, facet in enumerate(rf):
-#        try:
-#            raw.addfacet(facet)
-#        except ValueError:
-#            print('Facet', num+1, 'is degenerate, skipping.')
+    print(str(raw))
     print('Creating indexed object...')
     indexed = IndexedStl.fromraw(raw)
-    print('number of facets:', indexed.numfacets)
     print('number of unique vertices:', indexed.numvertices)
     print('number of unique normals:', indexed.numnormals)
-    print(str(indexed.bbox()))
+    print(str(indexed))

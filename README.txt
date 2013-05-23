@@ -2,8 +2,8 @@
 STL file manipulation
 =====================
 
-The module stl.py reads both text and binary STL files and creates STL
-objects. The module xform.py handles coordinate transforms and projections.
+The brep module reads both text and binary STL files and creates STL
+objects. It also handles coordinate transforms and projections.
 
 The scripts stl2pov, stl2ps and stl2pdf use this library to convert STL files
 to POV-ray meshes, PostScript and PDF files respectively.
@@ -30,5 +30,11 @@ are not planned, but patches are welcome.
 
 stl2pdf
 -------
-This is basically a variant of stl2ps using the ReportLab toolkit to generate
+This is basically a variant of stl2ps using the Cairo library to generate
 PDF output directly.
+
+stlinfo
+-------
+This program prints some information about the STL file, like the name of the
+object, its bounding box and the number of facets. Optionally it can also list
+all facets.
