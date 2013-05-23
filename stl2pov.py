@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- python coding: utf-8 -*-
-# Copyright © 2012 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2012,2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # $Date$
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -38,50 +38,44 @@ ver = ('stl2pov [ver. ' + '$Revision$'[11:-2] +
 
 
 def mesh1(rs):
-    """Returns a string containing rf as a POV-ray mesh object.
+    """Creates a POV-ray mesh description from a stlobject.RawStl instance.
     
-    Argument:
-    rs -- a stlobject.RawStl instance
+    :rs: a stlobject.RawStl instance
+    :returns: a string representation of a POV-ray mesh object.
     """
-    ms = "# declare m_{} = mesh {{\n".format(rs.name.replace(' ', '_'))
-    sot = "  triangle {\n"
-    fc = "    <{1}, {0}, {2}>{3}\n"
+    lines = ["# declare m_{} = mesh {{".format(rs.name.replace(' ', '_'))]
+    sot = "  triangle {"
+    fc = "    <{1}, {0}, {2}>"
     for (a, b, c), _ in rs.facets:
-        ms += sot
-        ms += fc.format(a.x, a.y, a.z, '')
-        ms += fc.format(b.x, b.y, b.z, '')
-        ms += fc.format(c.x, c.y, c.z, ',')
-        ms += "  }\n"
-    ms += "}\n"
-    return ms
+        lines += [sot, fc.format(a.x, a.y, a.z,), 
+                  fc.format(b.x, b.y, b.z,),
+                  fc.format(c.x, c.y, c.z) + ',',
+                  "  }"]
+    lines += ['}']
+    return '\n'.join(lines)
 
 def mesh2(ns):
-    """Returns a string containing ns as a POV-ray mesh2 object.
+    """Creates a POV-ray mesh2 object from a stlobject.RawStl instance.
     
-    Argument:
-    ns -- a stlobject.IndexedStl instance
+    :ns: a stlobject.IndexedStl instance
     """
-    ms = "# declare m_{} = mesh2 {{\n".format(ns.name)
-    ms += '  vertex_vectors {\n'
-    ms += '    {},\n'.format(len(ns.numvertices))
-    for p in ns.vertices:
-        ms += '    <{1}, {0}, {2}>,\n'.format(p.x, p.y, p.z)
-    ms = ms[:-2]
-    ms += '\n  }\n'
-    ms += '  face_indices {\n'
-    ms += '    {},\n'.format(len(ns.numfacets))
-    for (a, b, c), _ in ns.facets:  #pylint: disable=W0612
-        ms += '    <{}, {}, {}>,\n'.format(a, b, c)
-    ms = ms[:-2]
-    ms += '\n  }\n}\n'
-    return ms
+    lines = ["# declare m_{} = mesh2 {{".format(ns.name), 
+             '  vertex_vectors {', '    {},'.format(ns.numvertices)]
+    lines += ['    <{1}, {0}, {2}>,'.format(p.x, p.y, p.z) 
+              for p in ns.vertices]
+    lines[-1] = lines[-1][:-1]
+    lines += ['  face_indices {', '    {},'.format(ns.numfacets)]
+    lines += ['    <{}, {}, {}>,'.format(a, b, c) 
+              for (a, b, c), _ in ns.facets]
+    lines[-1] = lines[-1][:-1]
+    lines += ['  }', '}']
+    return '\n'.join(lines)
 
 
 def main(argv):
     """Main program.
 
-    Keyword arguments:
-    argv -- command line arguments (without program name!)
+    :argv: command line arguments (without program name!)
     """
     parser = argparse.ArgumentParser(description=__doc__)
     argtxt = 'generate a mesh2 object (slow on big files)'
