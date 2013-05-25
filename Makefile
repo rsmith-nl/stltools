@@ -36,8 +36,7 @@ deinstall::
 		echo "You must be root to deinstall the program!"; \
 		exit 1; \
 	fi
-	rm -f ${PYSITE}/stl.py*
-	rm -f ${PYSITE}/xform.py*
+	rm -f ${PYSITE}/brep
 	rm -f $(BINDIR)/stl2ps $(BINDIR)/stl2pov $(BINDIR)/stl2pdf $(BINDIR)/stlinfo
 	rm -f $(MANDIR)/man1/stl2ps.1* $(MANDIR)/man1/stl2pdf.1*
 	rm -f $(MANDIR)/man1/stlinfo.1* $(MANDIR)/man1/stl2pov.1*
@@ -49,12 +48,12 @@ dist: ${ALL}
 	python setup.py sdist --format=zip
 	mv Makefile.org Makefile
 	rm -f MANIFEST
-	cd dist ; sha256 py-stl-* >../port/py-stl/distinfo 
-	cd dist ; ls -l py-stl-* | awk '{printf "SIZE (%s) = %d\n", $$9, $$5};' >>../port/py-stl/distinfo 
+	cd dist ; sha256 stltools-* >../port/stltools/distinfo 
+	cd dist ; ls -l stltools-* | awk '{printf "SIZE (%s) = %d\n", $$9, $$5};' >>../port/stltools/distinfo 
 
 clean::
 	rm -rf dist build backup-*.tar.gz *.pyc ${ALL} MANIFEST
-	rm -f port/py-stl/distinfo
+	rm -f port/stltools/distinfo
 
 backup::
 	sh tools/genbackup

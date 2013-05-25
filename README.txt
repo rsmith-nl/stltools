@@ -1,6 +1,8 @@
-=====================
-STL file manipulation
-=====================
+===================================
+STL file manipulation with stltools
+===================================
+
+:Author: Roland Smith
 
 The brep module reads both text and binary STL files and creates STL
 objects. It also handles coordinate transforms and projections.
@@ -11,11 +13,11 @@ to POV-ray meshes, PostScript and PDF files respectively.
 stl2pov
 -------
 This is a refactoring of the C version 2.x. Version 2 was too slow, basically
-because it tried to do too much. This version is a straight translator. It
-produces a POV-ray mesh declaration that you can use in your scenes. N.B.: you
-have to instantiate the mesh as an object, give it material properties, define
-a light and a camera &c.
-
+because it tried to do too much. This version is a straight translator.
+However, the speed of the method to create a POV-ray mesh2 object was much
+improved.  It produces a POV-ray mesh or mesh2 declaration that you can use in
+your scenes. N.B.: you still have to instantiate the mesh as an object, give
+it material properties, define a light and a camera &c.
 
 stl2ps
 ------
@@ -30,11 +32,14 @@ are not planned, but patches are welcome.
 
 stl2pdf
 -------
-This is basically a variant of stl2ps using the Cairo library to generate
-PDF output directly.
+This is basically a variant of stl2ps using the cairo library to generate
+PDF output directly. It requires the cairo library and its Python binding.
 
 stlinfo
 -------
 This program prints some information about the STL file, like the name of the
 object, its bounding box and the number of facets. Optionally it can also list
-all facets.
+an STL text version of the file. This way stlinfo can be used to convert a
+binary STL file to a text version.
+
+

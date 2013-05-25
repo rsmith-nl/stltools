@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Installation script for stl2pov and friends
+# Installation script for stltools
 #
 # R.F. Smith <rsmith@xs4all.nl>
 # $Date$
@@ -10,14 +10,14 @@ with open('README.txt') as f:
     ld = f.read()
 
 
-setup(name='py-stl',
+setup(name='stltools',
       version='$Revision$'[11:-2],
       license='BSD',
       description='Programs to read and convert STL files.',
       author='Roland Smith', author_email='rsmith@xs4all.nl',
       url='http://rsmith.home.xs4all.nl/software/',
       scripts=['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py'],
-      provides='pystl', py_modules=['stl','xform'],
+      provides='stltools', packages=['brep'],
       classifiers=['Development Status :: 5 - Production/Stable',
                    'Environment :: Console',
                    'Intended Audience :: End Users/Desktop',

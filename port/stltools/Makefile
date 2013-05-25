@@ -1,10 +1,10 @@
-# Ports collection makefile for: py-stl
+# Ports collection makefile for: stltools
 # Date created:                  28 Dec 2011
 # Whom:                          rsmith@xs4all.nl
 #
 # $FreeBSD$
 
-PORTNAME=		py-stl
+PORTNAME=		stltools
 PORTVERSION=		3.1
 CATEGORIES=		graphics python
 MASTER_SITES=		http://rsmith.home.xs4all.nl/software/
@@ -16,7 +16,7 @@ COMMENT=		Converts STL models to POV-Ray meshes or PostScript/PDF images
 LICENSE=		BSD
 
 # bypass infrastructure bug
-OPTIONSFILE=    ${PORT_DBDIR}/py27-${PORTNAME}/options
+OPTIONSFILE=    ${PORT_DBDIR}/py${PYTHON_SUFFIX}-${PORTNAME}/options
 
 USE_ZIP=		YES
 USE_PYTHON=		2.5+
@@ -55,6 +55,6 @@ post-install:
 	@${MV} ${PREFIX}/bin/stl2ps.py  ${PREFIX}/bin/stl2ps
 	@${MV} ${PREFIX}/bin/stl2pov.py ${PREFIX}/bin/stl2pov
 	@${MV} ${PREFIX}/bin/stlinfo.py ${PREFIX}/bin/stlinfo
-	@${MV} ${PYTHON_SITELIBDIR}/py_stl-${PORTVERSION}-py${PYTHON_VER}.egg-info ${PYTHON_SITELIBDIR}/${PYDISTUTILS_EGGINFO}
+	@${MV} ${PYTHON_SITELIBDIR}/stltools-${PORTVERSION}-py${PYTHON_VER}.egg-info ${PYTHON_SITELIBDIR}/${PYDISTUTILS_EGGINFO}
 
 .include <bsd.port.mk>

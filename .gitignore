@@ -10,6 +10,6 @@ stl2pov.1.pdf
 stlinfo.1.pdf
 MANIFEST
 tools/replace.sed
-port/py-stl/Makefile
-port/py-stl/work
-port/py-stl/distinfo
+port/stltools/Makefile
+port/stltools/work
+port/stltools/distinfo
