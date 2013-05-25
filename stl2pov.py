@@ -45,11 +45,11 @@ def mesh1(rs):
     """
     lines = ["# declare m_{} = mesh {{".format(rs.name.replace(' ', '_'))]
     sot = "  triangle {"
-    fc = "    <{1}, {0}, {2}>"
+    fc = "    <{1}, {0}, {2}>," # POV-ray has a different coordinate system.
     for (a, b, c), _ in rs.facets:
         lines += [sot, fc.format(a.x, a.y, a.z,), 
                   fc.format(b.x, b.y, b.z,),
-                  fc.format(c.x, c.y, c.z) + ',',
+                  fc.format(c.x, c.y, c.z)[:-1],
                   "  }"]
     lines += ['}']
     return '\n'.join(lines)

@@ -67,7 +67,7 @@ class Vector2(object):
         return (self._x**2 + self._y**2)**0.5
 
     def __str__(self):
-        return '({}, {})'.format(self._x, self._y)
+        return '{} {}'.format(self._x, self._y)
 
     def __add__(self, other):
         """Return the sum of the 3D vectors self and other."""
@@ -143,7 +143,7 @@ class Vector3(object):
         return (self._x**2 + self._y**2 + self._z**2)**0.5
 
     def __str__(self):
-        return '({}, {}, {})'.format(self._x, self._y, self._z)
+        return '{} {} {}'.format(self._x, self._y, self._z)
 
     def __add__(self, other):
         """Return the sum of the 3D vectors self and other."""

@@ -36,7 +36,6 @@ class RawStl(object):
     """A data representation of a raw STL file. Contains a combined list of
     facet vertices and normal vectors.
     """
-    __slots__ = ['name', '_facets']
 
     def __init__(self, name):
         if name == None or len(name) == 0:
@@ -45,11 +44,16 @@ class RawStl(object):
         self._facets = []
 
     def __str__(self):
-        lines = ['name: {}'.format(self.name), 
-                 'number of facets: {}'.format(self.numfacets),
-                 str(self.bbox()), 'Facets:']
-        lines += ['vertices: {} {} {}, normal: {}'.format(a, b, c, n) 
-                  for (a, b, c), n in self._facets]
+        fs = '''  facet normal {}
+    outer loop
+      vertex {}
+      vertex {}
+      vertex {}
+    endloop
+  endfacet'''
+        lines = ['solid {}'.format(self.name)] 
+        lines += [fs.format(n, a, b, c) for (a, b, c), n in self._facets]
+        lines += ['endsolid']
         return '\n'.join(lines)
 
     @property
@@ -107,7 +111,6 @@ class IndexedStl(object):
     unique, and the facet list is a list of indices into the vertex and
     normal lists.
     """
-    __slots__ = ['name', '_vertices', '_normals', '_facets']
 
     def __init__(self, name=''):
         self.name = name
@@ -116,13 +119,18 @@ class IndexedStl(object):
         self._facets = []
 
     def __str__(self):
-        lines = ['name: {}'.format(self.name), 
-                 'number of facets: {}'.format(self.numfacets),
-                 str(self.bbox()), 'Facets:']
-        fs = 'vertices: {} {} {}, normal: {}'
-        lines += [fs.format(self._vertices[a], self._vertices[b],
-                            self._vertices[c], self._normals[n]) 
+        fs = '''  facet normal {}
+    outer loop
+      vertex {}
+      vertex {}
+      vertex {}
+    endloop
+  endfacet'''
+        lines = ['solid {}'.format(self.name)] 
+        lines += [fs.format(self._normals[n], self._vertices[a], 
+                            self._vertices[b],self._vertices[c]) 
                   for (a, b, c), n in self._facets]
+        lines += ['endsolid']
         return '\n'.join(lines)
 
     @staticmethod
@@ -212,9 +220,11 @@ if __name__ == '__main__':
     if degen:
         print(len(degen), 'degenerate facets found.')
         print(degen)
-    print(str(raw))
+    print('----- begin RawSTL -----', raw, '----- end RawSTL -----', 
+          sep = '\n')
     print('Creating indexed object...')
     indexed = IndexedStl.fromraw(raw)
     print('number of unique vertices:', indexed.numvertices)
     print('number of unique normals:', indexed.numnormals)
-    print(str(indexed))
+    print('----- begin IndexedSTL -----', indexed, 
+          '----- end IndexedSTL -----', sep = '\n')
