@@ -28,7 +28,8 @@
 """STL models."""
 
 from __future__ import print_function
-import vector
+import vecops
+import bbox
 
 __version__ = '$Revision$'[11:-2]
 
@@ -41,6 +42,7 @@ class RawStl(object):
         if name == None or len(name) == 0:
             name = 'unknown'
         self.name = name
+        # normal vector. 
         self._facets = []
 
     def __str__(self):
@@ -52,15 +54,16 @@ class RawStl(object):
     endloop
   endfacet'''
         lines = ['solid {}'.format(self.name)] 
-        lines += [fs.format(n, a, b, c) for (a, b, c), n in self._facets]
+        lines += [fs.format(vecops.mkstr(n), vecops.mkstr(a), vecops.mkstr(b),
+                            vecops.mkstr(c)) for a, b, c, n in self._facets]
         lines += ['endsolid']
         return '\n'.join(lines)
 
     @property
     def facets(self):
-        """Return the facets as a tuple. Each facet is a tuple (f,n) where f
-        is a 3-tuple of vector.Vector3 objects containing the points of the
-        facet, while n is the normal vector.Vector3 of the facet.
+        """Return the facets as a tuple. Each facet is a 4-tuple (a, b, c, n) 
+        of 3-tuples. The first three are the facet's points, the last is the
+        normal vector.
         """
         return tuple(self._facets)
 
@@ -72,16 +75,17 @@ class RawStl(object):
         """Add a single facet to a RawStl.
 
         Arguments:
-        f -- a 3-tuple of vector.Vector3 objects
+        f -- a 3-tuple of 3-tuples
 
         Exceptions:
         ValueError -- when a degenerate facet is found.
         """
         assert isinstance(f, tuple) and len(f) == 3
-        n = vector.normal(f)
-        if n.length == 0:
-            raise ValueError('Degenerate facet found.')
-        self._facets.append((f, n))
+        a, b, c, = f
+        n = vecops.normal(a, b, c)
+        if vecops.length(n) == 0:
+            raise ValueError('degenerate facet')
+        self._facets.append((a, b, c, n))
 
     def addfacets(self, lf):
         """Add a list of facets to a RawStl. Degenerate facets (with a
@@ -91,20 +95,23 @@ class RawStl(object):
         Arguments:
         lf -- a list of 3-tuples of vector.Vector3 objects
         """
-        comb = [(f, vector.normal(f)) for f in lf]
-        degenerates = [n for n, c in enumerate(comb) if c[1].length == 0]
-        self._facets += [c for c in comb if c[1].length > 0]
+        comb = [(a, b, c, vecops.normal(a, b, c)) for a, b, c in lf]
+        degenerates = [n for n, c in enumerate(comb) 
+                       if vecops.length(c[3]) == 0]
+        self._facets += [(a, b, c, vecops.normalize(n)) for a, b, c, n 
+                         in comb if vecops.length(n) > 0]
         return degenerates
 
     def bbox(self):
         """Return the BoundingBox of the object."""
-        return vector.BoundingBox([p for f, _ in self._facets for p in f])
+        return bbox.make([p for a, b, c, _ in self._facets for p in a, b, c])
 
     def xform(self, m):
         """Transforms the raw STL object."""
         newfacets = [((m.applyto(a), m.applyto(b), m.applyto(c)),
-                       m.applyrot(n)) for (a, b, c), n in self._facets]
+                       m.applyrot(n)) for a, b, c, n in self._facets]
         self._facets = newfacets
+
 
 class IndexedStl(object):
     """In this representation, all the vertices and normal vectors are 
@@ -127,9 +134,11 @@ class IndexedStl(object):
     endloop
   endfacet'''
         lines = ['solid {}'.format(self.name)] 
-        lines += [fs.format(self._normals[n], self._vertices[a], 
-                            self._vertices[b],self._vertices[c]) 
-                  for (a, b, c), n in self._facets]
+        lines += [fs.format(vecops.mkstr(self._normals[n]),
+                            vecops.mkstr(self._vertices[a]), 
+                            vecops.mkstr(self._vertices[b]),
+                            vecops.mkstr(self._vertices[c])) 
+                  for a, b, c, n in self._facets]
         lines += ['endsolid']
         return '\n'.join(lines)
 
@@ -138,31 +147,29 @@ class IndexedStl(object):
         """Create an IndexedStl from an RawStl."""
         # pylint: disable=W0212
         nw = IndexedStl(obj.name)
-        facets = obj.facets
         # Convert vertices and normals into a tuple of 3-tuples for fast
         # handling.
-        vertices = tuple(i.coords for f in facets for i in f[0])
-        normals = tuple(f[1].coords for f in facets)
-        del facets
+        vertices = tuple(i for a, b, c, _ in obj.facets for i in (a, b, c))
+        normals = tuple(n for _, _, _, n in obj.facets)
         # Get the unique vertices and the indexed facets
         uniquevertices = sorted(set(vertices))
         vertexdict = {v: n for n, v in enumerate(uniquevertices)}
         vindices = tuple(vertexdict[v] for v in vertices)
         ifacets = [tuple(vindices[i:i+3]) for i in range(0, len(vindices), 3)]
-        nw._vertices = [vector.Vector3(*v) for v in uniquevertices]
+        nw._vertices = list(uniquevertices)
         # Get the unique normals and all normal indices.
         uniquenormals = sorted(set(normals))
         normaldict = {v: n for n, v in enumerate(uniquenormals)}
         inormals = [normaldict[v] for v in normals]
-        nw._normals = [vector.Vector3(*n) for n in uniquenormals] 
-        nw._facets = zip(ifacets, inormals) 
+        nw._normals = list(uniquenormals)
+        nw._facets = [(a, b, c, n) for (a, b, c), n in zip(ifacets, inormals)]
         return nw
 
     def addfacet(self, f):
         """Add a facet to an IndexedStl.
         
         Argument:
-        f -- a 3-tuple of vector.Vector3
+        f -- a 3-tuple of 3-tuples
         """
         pass
 
@@ -192,7 +199,7 @@ class IndexedStl(object):
 
     def bbox(self):
         """Return the BoundingBox of the object."""
-        return vector.BoundingBox([p for p in self._vertices])
+        return bbox.make([p for p in self._vertices])
 
     def xform(self, m):
         """Transforms the indexed STL object."""

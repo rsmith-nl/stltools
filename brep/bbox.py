@@ -23,7 +23,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-"""Operations of two or three dimensional bounding boxes."""
+"""Operations on two or three dimensional bounding boxes."""
 
 
 def make(lv):

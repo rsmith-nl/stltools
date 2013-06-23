@@ -35,7 +35,7 @@ origin."""
 __version__ = '$Revision$'[11:-2]
 
 import math
-from vector import Vector2, Vector3
+import vecops
 
 class Zpar:
     """Class for parallel projection along the Z-axis. Output
@@ -55,12 +55,13 @@ class Zpar:
         """Projects a point. 
 
         Arguments:
-        p -- a vector.Vector3 instance
+        p -- a 3-tuple
 
         Returns:
         a 2-tuple containing the projection of that point
         """
-        p = Vector2((p.x-self.xmin)*self.s, (p.y-self.ymin)*self.s)
+        x, y, _ = p
+        p = ((x-self.xmin)*self.s, (y-self.ymin)*self.s)
         return p
 
     def isvisible(self, n):
@@ -68,13 +69,13 @@ class Zpar:
         from the viewer.
 
         Argument:
-        n -- a vector.Vector3 instance
+        n -- a a 3-tuple 
 
         Returns: 
         True if the projected vector points towards the viewer, False
         otherwise.
         """
-        if (n.z > 0.0): 
+        if (n[2] > 0.0): 
             return True
         return False
 
@@ -178,18 +179,19 @@ class Xform:
         self.m = Xform._mmul(add, self.m)
 
     def applyrot(self, p):
-        """Apply the rotation part of transformation to vector.Vector3 p
-        and return the transformed coordinates as a vector.Vector3 p.
+        """Apply the rotation part of transformation to 3-tuple p
+        and return the transformed coordinates as a 3-tuple.
         """
-        xr = self.m[0][0]*p.x + self.m[0][1]*p.y + self.m[0][2]*p.z
-        yr = self.m[1][0]*p.x + self.m[1][1]*p.y + self.m[1][2]*p.z
-        zr = self.m[2][0]*p.x + self.m[2][1]*p.y + self.m[2][2]*p.z
-        return Vector3(xr, yr, zr)
+        x, y, z = p
+        xr = self.m[0][0]*x + self.m[0][1]*y + self.m[0][2]*z
+        yr = self.m[1][0]*x + self.m[1][1]*y + self.m[1][2]*z
+        zr = self.m[2][0]*x + self.m[2][1]*y + self.m[2][2]*z
+        return (xr, yr, zr)
 
     def applyto(self, p):
-        """Apply the transformation to vector.Vector3 p and return the
-        transformed coordinates as a vector.Vector3.
+        """Apply the transformation to 3-tuple p and return the
+        transformed coordinates as a 3-tuple.
         """
         r = self.applyrot(p)
-        t = Vector3(self.m[0][3], self.m[1][3], self.m[2][3])
-        return r + t
+        t = (self.m[0][3], self.m[1][3], self.m[2][3])
+        return vecops.add(r, t)

@@ -29,7 +29,6 @@
 
 __version__ = '$Revision$'[11:-2]
 
-import vector
 from os.path import basename
 import struct
 
@@ -49,9 +48,9 @@ class StlReader(object):
         for i in items:
             f1x, f1y, f1z, f2x, f2y, f2z, f3x, f3y, f3z = \
             struct.unpack("=12x9f2x", i)
-            a = vector.Vector3(f1x, f1y, f1z)
-            b = vector.Vector3(f2x, f2y, f2z)
-            c = vector.Vector3(f3x, f3y, f3z)
+            a = (f1x, f1y, f1z)
+            b = (f2x, f2y, f2z)
+            c = (f3x, f3y, f3z)
             yield (a, b, c)
 
     @staticmethod
@@ -64,12 +63,9 @@ class StlReader(object):
         """
         # Items now begins with "facet"
         while items[0] == "facet":
-            a = vector.Vector3(float(items[8]), float(items[9]),
-                               float(items[10])) 
-            b = vector.Vector3(float(items[12]), float(items[13]),
-                               float(items[14]))
-            c = vector.Vector3(float(items[16]), float(items[17]),
-                               float(items[18]))
+            a = (float(items[8]), float(items[9]), float(items[10])) 
+            b = (float(items[12]), float(items[13]), float(items[14]))
+            c = (float(items[16]), float(items[17]), float(items[18]))
             del items[:21]
             yield (a, b, c)
 
@@ -133,7 +129,7 @@ class StlReader(object):
 
     def __iter__(self):
         """Iterates over the facets from the STL file.
-        Every iteration yields a 3-tuple of vector.Vector3.
+        Every iteration yields a 3-tuple of 3-tuples of floats
         """
         return self._reader
 
@@ -143,7 +139,11 @@ class StlReader(object):
         return [f for f in self._reader]
 
 if __name__ == '__main__':
-    r = StlReader('../test/cube.stl')
+    from sys import argv
+    if len(argv) < 2:
+        print('usage: python', argv[0], 'filename')
+        exit(1)
+    r = StlReader(argv[1])
     print 'Filename', r.filename
     print 'Type:', r.filetype
     print 'Number of facets:', r.numfacets

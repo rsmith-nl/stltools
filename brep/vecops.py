@@ -53,6 +53,11 @@ def length(v):
     return sum(j*j for j in v)**0.5
 
 
+def normalize(v):
+    l = length(v)
+    return div(v, l)
+
+
 def cross(a, b):
     if len(a) == 3 and len(b) == 3:
         ax, ay, az = a
@@ -69,3 +74,19 @@ def dot(a, b):
 def mkstr(v):
     return ', '.join(str(j) for j in v)
 
+
+def normal(a, b, c):
+    """Calculate the normal vector for the triangle defined by a, b and c.
+
+    :a: 3-tuple of floats
+    :b: 3-tuple of floats
+    :c: 3-tuple of floats
+    :returns: a vector normal to the plane formed by a, b and c.
+    """
+    u = sub(b, a)
+    v = sub(c, b)
+    n = cross(u, v)
+    l = length(c)
+    if l:
+        return div(n, l)
+    return n
