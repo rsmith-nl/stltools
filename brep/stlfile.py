@@ -31,6 +31,71 @@ __version__ = '$Revision$'[11:-2]
 
 from os.path import basename
 import struct
+import mmap
+
+def _istxt(mm):
+    first = mm.readline()
+    name = None
+    points = None
+    if (first.startswith('solid') and
+        'facet normal' in mm.readline()):
+        name = first.strip().split(maxsplit=1)[1]
+        vlines = [l.split() for l in _striplines(mm) if l.startswith('vertex')]
+        points = [tuple(float(k) for k in j[1:]) for j in vlines]
+    mm.seek(0)
+    return points, name
+
+
+def _isbinary(mm):
+    data = mm.read(84)
+    mm.seek(0)
+    name = None
+    points = None
+    if not 'facet normal' in data:
+        name, _ = struct.unpack("=80sI", data[0:84])
+        name = name.replace("solid ", "")
+        name = name.strip('\x00 \t\n\r')
+        points = [p for p in _getbp(mm)] 
+    return points, name
+
+
+def _striplines(m):
+    while True:
+        v = m.readline()
+        if v:
+            yield v.strip()
+        else:
+            break
+
+
+def _getbp(m):
+    while True:
+        v = m.read(50)
+        if v:
+            p = struct.unpack('=12x9f2x', v)
+            yield tuple(p[0:2])
+            yield tuple(p[3:5])
+            yield tuple(p[6:])
+        else:
+            break
+
+
+def readfile(name):
+    with open(name, 'rb') as f:
+        mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        points, name = _isbinary(mm)
+        if not points:
+            points, name = _istxt(mm)
+        mm.close()
+    if not points:
+        raise ValueError('not a valid STL file.')
+    vd = {}
+    ix = [vd.setdefault(p, len(vd)) for p in points]
+    ix = zip(ix[::3], ix[1::3], ix[2::3])
+    vm = sorted([(v, k) for k, v in vd.iteritems()], key=lambda x: x[0])
+    sp = [i[1] for i in vm]
+    return ix, sp, name
+
 
 class StlReader(object):
     """Object for reading STL files."""
