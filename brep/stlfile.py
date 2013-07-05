@@ -39,7 +39,7 @@ def _istxt(mm):
     points = None
     if (first.startswith('solid') and
         'facet normal' in mm.readline()):
-        name = first.strip().split(maxsplit=1)[1]
+        name = first.strip().split(None, 1)[1]
         vlines = [l.split() for l in _striplines(mm) if l.startswith('vertex')]
         points = [tuple(float(k) for k in j[1:]) for j in vlines]
     mm.seek(0)
@@ -71,13 +71,12 @@ def _striplines(m):
 def _getbp(m):
     while True:
         v = m.read(50)
-        if v:
-            p = struct.unpack('=12x9f2x', v)
-            yield tuple(p[0:2])
-            yield tuple(p[3:5])
-            yield tuple(p[6:])
-        else:
+        if len(v) != 50:
             break
+        p = struct.unpack('=12x9f2x', v)
+        yield tuple(p[0:2])
+        yield tuple(p[3:5])
+        yield tuple(p[6:])
 
 
 def readfile(name):
