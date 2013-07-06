@@ -38,7 +38,7 @@ def makebb(pnts):
     elif len(pnts[0]) == 2:
         x, y = zip(*pnts)
         return min(x), max(x), min(y), max(y)
-
+    raise ValueError('pnts must be a list of 2-tuples or 3-tuples')
 
 def inside(bb, v):
     """Test if a point is inside a bounding box.

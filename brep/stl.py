@@ -23,9 +23,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-# Check this code with 'pylint -r n vector.py'
+# Check this code with 'pylint -r n stl.py'
 
-"""Reading and writing STL files."""
+"""Handling STL files and brep datasets."""
 
 __version__ = '$Revision$'[11:-2]
 
@@ -74,7 +74,6 @@ def _parsebinary(m):
     from the file.
     """
     data = m.read(84)
-    m.seek(0)
     name = None
     points = None
     if not 'facet normal' in data:
@@ -96,8 +95,8 @@ def _getbp(m):
         if len(v) != 50:
             break
         p = struct.unpack('=12x9f2x', v)
-        yield tuple(p[0:2])
-        yield tuple(p[3:5])
+        yield tuple(p[0:3])
+        yield tuple(p[3:6])
         yield tuple(p[6:])
 
 
@@ -114,6 +113,7 @@ def readstl(name):
         mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
         points, name = _parsebinary(mm)
         if not points:
+            mm.seek(0)
             points, name = _parsetxt(mm)
         mm.close()
     if not points:
@@ -155,6 +155,7 @@ def text(name, ifacets, points, inormals, vectors):
             ln.append('      vertex ' + vecops.mkstr(points[v], sep=' '))
         ln.append('    endloop')
         ln.append('  endfacet')
+    ln.append('endsolid')
     return '\n'.join(ln)
 
 

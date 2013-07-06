@@ -30,7 +30,7 @@ representation of the object in the file.'''
 import argparse
 import sys
 import time
-from brep import stlfile, bbox
+from brep import stl, bbox
 
 ver = ('stlinfo [ver. ' + '$Revision$'[11:-2] + ']')
 
@@ -50,8 +50,9 @@ def main(argv):
         sys.exit(0)
     for fn in args.file:
         try:
-            facets, points, name = stlfile.readstl(fn)
-#            normals, vectors = stlfile.normals(facets, points)
+            facets, points, name = stl.readstl(fn)
+            if args.text:
+                normals, vectors = stl.normals(facets, points)
         except ValueError as e:
             print fn + ':', e
             sys.exit(1)
@@ -65,6 +66,9 @@ def main(argv):
         print '#   {} ≤ x ≤ {}'.format(minx, maxx)
         print '#   {} ≤ y ≤ {}'.format(miny, maxy)
         print '#   {} ≤ z ≤ {}'.format(minz, maxz)
+        if args.text:
+            print "# Text representation:"
+            print stl.text(name, facets, points, normals, vectors)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
