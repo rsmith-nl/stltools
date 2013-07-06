@@ -26,16 +26,29 @@
 """Operations on two or three dimensional bounding boxes."""
 
 
-def make(lv):
-    if len(lv[0]) == 3:
-        x, y, z = zip(*lv)
+def makebb(pnts):
+    """Find the bound for a list of points
+
+    :pnts: list of 2-tuples or 3-tuples of numbers
+    :returns: a tuple (minx, maxx, miny, maxy[, minz, maxz])
+    """
+    if len(pnts[0]) == 3:
+        x, y, z = zip(*pnts)
         return min(x), max(x), min(y), max(y), min(z), max(z)
-    elif len(lv[0]) == 2:
-        x, y = zip(*lv)
+    elif len(pnts[0]) == 2:
+        x, y = zip(*pnts)
         return min(x), max(x), min(y), max(y)
 
 
 def inside(bb, v):
+    """Test if a point is inside a bounding box.
+
+    :bb: bounding box, a 4-tuple or 6-tuple
+    :v: point to test
+    :returns: True if v is inside the bounding box, false otherwise.
+    :raises: ValueError if the number of dimensions of the point and bounding
+    box don't match.
+    """
     if len(bb) == 6 and len(v) == 3:
         vx, vy, vz = v
         minx, maxx, miny, maxy, minz, maxz = bb
@@ -46,4 +59,3 @@ def inside(bb, v):
         minx, maxx, miny, maxy = bb
         return minx <= vx <= maxx and miny <= vy <= maxy
     raise ValueError('wrong box/vector combo')
-
