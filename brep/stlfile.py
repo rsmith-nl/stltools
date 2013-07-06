@@ -25,19 +25,20 @@
 
 # Check this code with 'pylint -r n vector.py'
 
-"""Reading an STL file."""
+"""Reading and writing STL files."""
 
 __version__ = '$Revision$'[11:-2]
 
 import struct
 import mmap
-
+import vecops
 
 def _parsetxt(m):
     """Parses the file if it is an text STL file.
 
-    :m: memory mapped file
-    :returns: the vertices as a list of 3-tuples, and the name of the object.
+    :m: A memory mapped file.
+    :returns: The vertices as a list of 3-tuples, and the name of the 
+    object from the file.
     """
     first = m.readline()
     name = None
@@ -54,8 +55,8 @@ def _parsetxt(m):
 def _striplines(m):
     """Generator to yield stripped lines from a memmapped text file.
 
-    :m: memory mapped file
-    :yields: the stripped lines of the file
+    :m: A memory mapped file.
+    :yields: The stripped lines of the file, one at a time.
     """
     while True:
         v = m.readline()
@@ -68,8 +69,9 @@ def _striplines(m):
 def _parsebinary(m):
     """Parses the file if it is a binary STL file.
 
-    :m: memory mapped file
-    :returns: the vertices as a list of 3-tuples, and the name of the object.
+    :m: A memory mapped file.
+    :returns: The vertices as a list of 3-tuples, and the name of the object
+    from the file.
     """
     data = m.read(84)
     m.seek(0)
@@ -86,8 +88,8 @@ def _parsebinary(m):
 def _getbp(m):
     """Generator to yield points from a binary STL file.
 
-    :m: memory mapped file
-    :yields: the vertices as 3-tuple of floats
+    :m: A memory mapped file.
+    :yields: The vertices as 3-tuple of floats.
     """
     while True:
         v = m.read(50)
@@ -102,11 +104,11 @@ def _getbp(m):
 def readstl(name):
     """Reads an STL file
 
-    :name: path of the STL file to read
-    :returns: (facets, points, name) Where facets is a list of 3-tuples
-    which contain indices into the points list. Points is a list of 3-tuples
-    containing the vertex coordinates. Name is the name of the object given in
-    the STL fil
+    :name: Path of the STL file to read.
+    :returns: A tuple (facets, points, name). Where facets is a list of
+    3-tuples which contain indices into the points list. Points is a list of
+    3-tuples containing the vertex coordinates. Name is the name of the object
+    given in the STL file.
     """
     with open(name, 'rb') as f:
         mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
@@ -116,12 +118,45 @@ def readstl(name):
         mm.close()
     if not points:
         raise ValueError('not a valid STL file.')
-    vd = {}
-    ix = [vd.setdefault(p, len(vd)) for p in points]
+    ix, points = vecops.indexate(points)
     facets = zip(ix[::3], ix[1::3], ix[2::3])
-    vm = sorted([(v, k) for k, v in vd.iteritems()], key=lambda x: x[0])
-    points = [i[1] for i in vm]
     return facets, points, name
+
+
+def normals(facets, points):
+    """Calculate normal vectors of facets
+
+    :facets: List of facets. Each facet is a 3-tuple of indices in points
+    :points: List of points.
+    :returns: A tuple containing a list of normal vector indices for each
+    facet and a list of unique normals.
+    """
+    nv = [vecops.normal(points[i], points[j], points[k])
+          for i, j, k in facets]
+    return vecops.indexate(nv)
+
+
+def text(name, ifacets, points, inormals, vectors):
+    """Make an STL text representation of a brep.
+
+    :name: A string containing the name of the object.
+    :ifacets: List of indices into the points list.
+    :points: List of point coordinates.
+    :inormals: List of indices into the vectors list.
+    :vectors: List of normal vectors
+    :returns: A string containing a text representation of the brep.
+    """
+    fcts = zip(ifacets, inormals)
+    ln = ['solid {}'.format(name)]
+    for f, n in fcts:
+        ln.append('  facet normal ' + vecops.mkstr(vectors[n], sep=' '))
+        ln.append('    outer loop')
+        for v in f:
+            ln.append('      vertex ' + vecops.mkstr(points[v], sep=' '))
+        ln.append('    endloop')
+        ln.append('  endfacet')
+    return '\n'.join(ln)
+
 
 def _test(args):
     """Test function
@@ -131,12 +166,14 @@ def _test(args):
     if len(args) < 1:
         print('usage: python stlfile.py filename')
     f, p, nm = readstl(argv[1])
+    n, nv = normals(f, p)
     print 'Filename: "{}"'.format(args[0])
     print 'Object name: "{}"'.format(nm)
     print 'Number of facets:', len(f)
     print 'Facet data:'
-    for j in f:
-        print ' ', p[j[0]], p[j[1]], p[j[2]]
+    for j, k in zip(f, n):
+        print ' vertices:', p[j[0]], p[j[1]], p[j[2]]
+        print ' normal:', nv[k]
 
 if __name__ == '__main__':
     from sys import argv
