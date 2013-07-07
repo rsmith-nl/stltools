@@ -1,14 +1,21 @@
 .PHONY: all install dist clean backup deinstall check
-.SUFFIXES: .ps .pdf .py
+.SUFFIXES: .py
 
-#beginskip
-ALL = stl2pov.1.pdf stl2ps.1.pdf stl2pdf.1.pdf stlinfo.1.pdf 
-all: ${ALL} .git/hooks/post-commit
-#endskip
 BASE=/usr/local
 MANDIR=$(BASE)/man
 BINDIR=$(BASE)/bin
 PYSITE!=python -c 'import site; print site.getsitepackages()[0]'
+
+help::
+	@echo "You can use one of the following commands:"
+	@echo "  install -- install the package system-wide"
+	@echo "  deinstall -- remove the system-wide installation"
+#beginskip
+	@echo "  dist -- create a distribution file"
+	@echo "  clean -- remove all generated files"
+	@echo "  backup -- make a complete backup"
+#endskip
+
 
 install: ${ALL}
 	@if [ `id -u` != 0 ]; then \
@@ -23,13 +30,6 @@ install: ${ALL}
 	mv $(BINDIR)/stl2pdf.py $(BINDIR)/stl2pdf
 	mv $(BINDIR)/stlinfo.py $(BINDIR)/stlinfo
 	rm -rf build
-#Install the manual pages.
-	gzip -c stl2ps.1 >stl2ps.1.gz
-	gzip -c stl2pov.1 >stl2pov.1.gz
-	gzip -c stl2pdf.1 >stl2pdf.1.gz
-	gzip -c stlinfo.1 >stlinfo.1.gz
-	install -m 644 stl2ps.1.gz stl2pov.1.gz stl2pdf.1.gz stlinfo.1.gz $(MANDIR)/man1
-	rm -f stl2ps.1.gz stl2pov.1.gz stl2pdf.1.gz stlinfo.1.gz
 
 deinstall::
 	@if [ `id -u` != 0 ]; then \
@@ -38,8 +38,6 @@ deinstall::
 	fi
 	rm -f ${PYSITE}/brep
 	rm -f $(BINDIR)/stl2ps $(BINDIR)/stl2pov $(BINDIR)/stl2pdf $(BINDIR)/stlinfo
-	rm -f $(MANDIR)/man1/stl2ps.1* $(MANDIR)/man1/stl2pdf.1*
-	rm -f $(MANDIR)/man1/stlinfo.1* $(MANDIR)/man1/stl2pov.1*
 
 #beginskip
 dist: ${ALL}
@@ -58,32 +56,6 @@ clean::
 backup::
 	sh tools/genbackup
 
-check: .IGNORE
-	pylint -i y --rcfile=tools/pylintrc ${SRCS}
-
 .git/hooks/post-commit: tools/post-commit
 	install -m 755 $> $@
-
-tools/replace.sed: .git/index
-	tools/post-commit
-
-stl2ps.1.pdf: stl2ps.1
-	mandoc -Tps $> >$*.ps
-	epspdf $*.ps
-	rm -f $*.ps
-
-stl2pov.1.pdf: stl2pov.1
-	mandoc -Tps $> >$*.ps
-	epspdf $*.ps
-	rm -f $*.ps
-
-stl2pdf.1.pdf: stl2pdf.1
-	mandoc -Tps $> >$*.ps
-	epspdf $*.ps
-	rm -f $*.ps
-
-stlinfo.1.pdf: stlinfo.1
-	mandoc -Tps $> >$*.ps
-	epspdf $*.ps
-	rm -f $*.ps
 #endskip
