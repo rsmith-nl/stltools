@@ -27,9 +27,8 @@
 '''Program for converting a view of an STL file into a PDF file.'''
 
 import sys
-import os
 import cairo
-from brep import stl, xform, bbox
+from brep import stl, xform, bbox, utils
 
 
 ver = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
@@ -42,56 +41,13 @@ def usage():
     print "where [transform] is [x number|y number|z number]"
 
 
-def getargs(args):
-    """ Process the command-line arguments.
-
-    Returns:
-    A tuple containing the input file name, the output filename and
-    the transformation matrix.
-    """
-    validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
-    if len(args) < 1:
-        usage()
-        sys.exit(0)
-    infile = args[0]
-    if len(args) < 2 or args[1] in validargs:
-        outfile = None
-        del args[:1]
-        outbase = os.path.basename(infile)
-        if outbase.endswith((".stl", ".STL")):
-            outbase = outbase[:-4]
-        outfile = outbase+".pdf"
-    else:
-        outfile = args[1]
-        del args[:2]
-    tr = xform.Xform()
-    while len(args) > 1:
-        if not args[0] in validargs:
-            print "Unknown argument '{}' ignored.".format(args[0])
-            del args[0]
-            continue
-        try:
-            ang = float(args[1])
-            if args[0] in ['x','X']:
-                tr.rotx(ang)
-            elif args[0] in ['y','Y']:
-                tr.roty(ang)
-            else:
-                tr.rotz(ang)
-            del args[:2]
-        except:
-            print "Argument '{}' is not a number, ignored.".format(args[1])
-            continue
-    return (infile, outfile, tr)
-
-
 def main(args):
     """Main program.
 
     Keyword arguments:
     argv -- command line arguments (without program name!)
     """
-    infile, outfile, tr = getargs(args)
+    infile, outfile, tr = utils.processargs(args, '.pdf', usage)
     try:
         ifacets, points, _ = stl.readstl(infile)
         inormals, vectors = stl.normals(ifacets, points)

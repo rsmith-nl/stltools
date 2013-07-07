@@ -80,7 +80,7 @@ def _parsebinary(m):
     name = ''
     points = None
     if not 'facet normal' in data:
-        name, _ = struct.unpack("=80sI", data[0:84])
+        name, _ = struct.unpack("<80sI", data[0:84])
         name = name.replace("solid ", "")
         name = name.strip('\x00 \t\n\r')
         points = [p for p in _getbp(m)] 
@@ -97,7 +97,7 @@ def _getbp(m):
         v = m.read(50)
         if len(v) != 50:
             break
-        p = struct.unpack('=12x9f2x', v)
+        p = struct.unpack('<12x9f2x', v)
         yield tuple(p[0:3])
         yield tuple(p[3:6])
         yield tuple(p[6:])
@@ -160,6 +160,24 @@ def text(name, ifacets, points, inormals, vectors):
         ln.append('  endfacet')
     ln.append('endsolid')
     return '\n'.join(ln)
+
+
+def binary(name, ifacets, points, inormals, vectors):
+    """Make an STL binary representation of a brep.
+
+    :name: A string containing the name of the object.
+    :ifacets: List of indices into the points list.
+    :points: List of point coordinates.
+    :inormals: List of indices into the vectors list.
+    :vectors: List of normal vectors
+    :returns: A string containing a binary representation of the brep.
+    """
+    rc = [struct.pack('<80sI', name, len(ifacets))]
+    for fi, ni in zip(ifacets, inormals):
+        a, b, c, n = points[fi[0]], points[fi[1]], points[fi[2]], vectors[ni]
+        data = n + a + b + c + (0,)
+        rc.append(struct.pack('<12fH', *data))
+    return ''.join(rc)
 
 
 def _test(args):
