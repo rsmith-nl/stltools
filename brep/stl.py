@@ -45,7 +45,10 @@ def _parsetxt(m):
     points = None
     if (first.startswith('solid') and
         'facet normal' in m.readline()):
-        name = first.strip().split(None, 1)[1]
+        try:
+            name = first.strip().split(None, 1)[1]
+        except IndexError:
+            name = ''
         vlines = [l.split() for l in _striplines(m) if l.startswith('vertex')]
         points = [tuple(float(k) for k in j[1:]) for j in vlines]
     m.seek(0)
@@ -74,7 +77,7 @@ def _parsebinary(m):
     from the file.
     """
     data = m.read(84)
-    name = None
+    name = ''
     points = None
     if not 'facet normal' in data:
         name, _ = struct.unpack("=80sI", data[0:84])
