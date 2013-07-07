@@ -32,12 +32,12 @@ import cairo
 from brep import stl, xform, bbox
 
 
-name = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
+ver = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
        '] ('+'$Date$'[7:17]+')')
 
 
 def usage():
-    print name
+    print ver
     print "Usage: stl2pdf infile [outfile] [transform [transform ...]]"
     print "where [transform] is [x number|y number|z number]"
 
