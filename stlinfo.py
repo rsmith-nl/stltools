@@ -32,7 +32,10 @@ import sys
 import time
 from brep import stl, bbox
 
-ver = ('stlinfo [ver. ' + '$Revision$'[11:-2] + ']')
+
+ver = ('stlinfo [ver. ' + '$Revision$'[11:-2] + 
+       '] ('+'$Date$'[7:17]+')')
+
 
 def main(argv):
     """Main program.
@@ -70,6 +73,6 @@ def main(argv):
             print "# Text representation:"
             print stl.text(name, facets, points, normals, vectors)
 
+
 if __name__ == '__main__':
     main(sys.argv[1:])
-

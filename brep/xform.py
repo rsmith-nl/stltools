@@ -37,6 +37,7 @@ __version__ = '$Revision$'[11:-2]
 import math
 import vecops
 
+
 class Zpar:
     """Class for parallel projection along the Z-axis. Output
        screen coordinates from left bottom, size 100×100 mm."""
@@ -51,18 +52,18 @@ class Zpar:
         self.w = math.ceil(self.s*(xmax-xmin))
         self.h = math.ceil(self.s*(ymax-ymin))
 
-    def point(self, p):
+    def applyto(self, p):
         """Projects a point. 
 
         Arguments:
-        p -- a 3-tuple
+        :p: A 3-tuple to project
 
         Returns:
         a 2-tuple containing the projection of that point
         """
         x, y, _ = p
-        p = ((x-self.xmin)*self.s, (y-self.ymin)*self.s)
-        return p
+        r = ((x-self.xmin)*self.s, (y-self.ymin)*self.s)
+        return r
 
     def isvisible(self, n):
         """Checks a normal vector n to see if it points toward or away

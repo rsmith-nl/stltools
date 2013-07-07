@@ -29,11 +29,11 @@
 import sys
 import os
 import cairo
-from brep import stlfile, stlobject, xform
+from brep import stl, xform, bbox
 
 
 name = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
-       '] ('+'$Date$'[7:-2]+')')
+       '] ('+'$Date$'[7:17]+')')
 
 
 def usage():
@@ -84,14 +84,6 @@ def getargs(args):
             continue
     return (infile, outfile, tr)
 
-def facetsort(f):
-    """Function for sorting facets
-
-    :f: facet
-    :returns: maximum value
-    """
-    (a, b, c), _  = f
-    return max(a.z, b.z, c.z)
 
 def main(args):
     """Main program.
@@ -101,42 +93,43 @@ def main(args):
     """
     infile, outfile, tr = getargs(args)
     try:
-        rf = stlfile.StlReader(infile)
+        ifacets, points, _ = stl.readstl(infile)
+        inormals, vectors = stl.normals(ifacets, points)
     except ValueError as e:
         print infile + ':', e
         sys.exit(1)
-    fcts = rf.readall()
-    raw = stlobject.RawStl(rf.name)
-    raw.addfacets(fcts)
     # Apply transformations
-    raw.xform(tr)
+    points  = [tr.applyto(p) for p in points]
+    vectors  = [tr.applyrot(v) for v in vectors]
     # Calculate viewport and transformation
-    b = raw.bbox()
-    pr = xform.Zpar(b.minx, b.maxx, b.miny, b.maxy)
+    minx, maxx, miny, maxy, _, _ = bbox.makebb(points)
+    pr = xform.Zpar(minx, maxx, miny, maxy)
     out = cairo.PDFSurface(outfile, pr.w, pr.h)
     ctx = cairo.Context(out)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
     # Calculate the visible facets
-    vf = [(f, n) for f, n in raw.facets if pr.isvisible(n)]
+    vf = [(f, n) for f, n in zip(ifacets, inormals) 
+          if pr.isvisible(vectors[n])]
     # Next, depth-sort the facets using the largest z-value of the
-    # three vertices. 
-    vf.sort(None, facetsort)
-    # Project the facets, using the z-value of the normal vector for 80% of
-    # the light indensity. 20% is ambient.
-    pf = [(pr.point(a), pr.point(b), pr.point(c), 0.8*n.z + 0.2)
-          for (a, b, c), n in vf]
+    # three vertices.
+    def fkey(t):
+        (a, b, c), _ = t
+        return max(points[a][2], points[b][2], points[c][2])
+    vf.sort(None, fkey)
+    ppoints = [pr.applyto(p) for p in points]
+    intensity = [0.4*v[2]+0.5 for v in vectors]
     # Draw the triangles. The transform is needed because Cairo uses a
     # different coordinate system.
     ctx.transform(cairo.Matrix(1.0, 0.0, 0.0, -1.0, 0.0, pr.h))
-    for a, b, c, z in pf:
+    for (a, b, c), ni in vf:
         ctx.new_path()
-        ctx.move_to(a.x, a.y)
-        ctx.line_to(b.x, b.y)
-        ctx.line_to(c.x, c.y)
+        ctx.move_to(ppoints[a][0], ppoints[a][1])
+        ctx.line_to(ppoints[b][0], ppoints[b][1])
+        ctx.line_to(ppoints[c][0], ppoints[c][1])
         ctx.close_path()
-        ctx.set_source_rgb(z, z, z)
+        ctx.set_source_rgb(intensity[ni], intensity[ni], intensity[ni])
         ctx.fill_preserve()
         ctx.stroke()
     # Send output.
