@@ -69,10 +69,10 @@ def indexate(points):
     :returns: a tuple of indices and an array of unique points
     """
     pd = {}
-    indices = tuple(pd.setdefault(tuple(p), len(pd)) for p in points)
+    indices = [pd.setdefault(tuple(p), len(pd)) for p in points]
     pt = sorted([(v, k) for k, v in pd.iteritems()], key=lambda x: x[0])
     unique = np.array([i[1] for i in pt])
-    return indices, unique
+    return np.array(indices, np.uint16), unique
 
 
 def to4(pnts):

@@ -31,7 +31,22 @@ __version__ = '$Revision$'[11:-2]
 
 import struct
 import mmap
-import vecops
+import vecops as vo
+import numpy as np
+
+def _striplines(m):
+    """Generator to yield stripped lines from a memmapped text file.
+
+    :m: A memory mapped file.
+    :yields: The stripped lines of the file, one at a time.
+    """
+    while True:
+        v = m.readline()
+        if v:
+            yield v.strip()
+        else:
+            break
+
 
 def _parsetxt(m):
     """Parses the file if it is an text STL file.
@@ -50,40 +65,9 @@ def _parsetxt(m):
         except IndexError:
             name = ''
         vlines = [l.split() for l in _striplines(m) if l.startswith('vertex')]
-        points = [tuple(float(k) for k in j[1:]) for j in vlines]
+        points = np.array([tuple(float(k) for k in j[1:]) for j in vlines],
+                          np.float32)
     m.seek(0)
-    return points, name
-
-
-def _striplines(m):
-    """Generator to yield stripped lines from a memmapped text file.
-
-    :m: A memory mapped file.
-    :yields: The stripped lines of the file, one at a time.
-    """
-    while True:
-        v = m.readline()
-        if v:
-            yield v.strip()
-        else:
-            break
-
-
-def _parsebinary(m):
-    """Parses the file if it is a binary STL file.
-
-    :m: A memory mapped file.
-    :returns: The vertices as a list of 3-tuples, and the name of the object
-    from the file.
-    """
-    data = m.read(84)
-    name = ''
-    points = None
-    if not 'facet normal' in data:
-        name, _ = struct.unpack("<80sI", data[0:84])
-        name = name.replace("solid ", "")
-        name = name.strip('\x00 \t\n\r')
-        points = [p for p in _getbp(m)] 
     return points, name
 
 
@@ -103,40 +87,71 @@ def _getbp(m):
         yield tuple(p[6:])
 
 
-def readstl(name):
-    """Reads an STL file
+def _parsebinary(m):
+    """Parses the file if it is a binary STL file.
 
-    :name: Path of the STL file to read.
-    :returns: A tuple (facets, points, name). Where facets is a list of
-    3-tuples which contain indices into the points list. Points is a list of
-    3-tuples containing the vertex coordinates. Name is the name of the object
-    given in the STL file.
+    :m: A memory mapped file.
+    :returns: The vertices as a list of 3-tuples, and the name of the object
+    from the file.
+    """
+    data = m.read(84)
+    name = ''
+    points = None
+    if 'facet normal' in data:
+        return None, None
+    name, _ = struct.unpack("<80sI", data[0:84])
+    name = name.replace("solid ", "")
+    name = name.strip('\x00 \t\n\r')
+    points = [p for p in _getbp(m)] 
+    return np.array(points, np.float32), name
+
+
+def readstl(name):
+    """Reads an STL file, returns the vertices and the name. 
+    The normal vector information is discarded since it is often unreliable.
+
+    :name: path of the STL file to read
+    :returns: a numpy array of the shape (N, 3) containing the vertices 
+    of the facets, and the name of the object as given in the STL file.
     """
     with open(name, 'rb') as f:
         mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
-        points, name = _parsebinary(mm)
-        if not points:
+        vertices, name = _parsebinary(mm)
+        if vertices == None:
             mm.seek(0)
-            points, name = _parsetxt(mm)
+            vertices, name = _parsetxt(mm)
         mm.close()
-    if not points:
+    if vertices == None:
         raise ValueError('not a valid STL file.')
-    ix, points = vecops.indexate(points)
-    facets = zip(ix[::3], ix[1::3], ix[2::3])
-    return facets, points, name
+    #ix, points = vecops.indexate(points)
+    #facets = zip(ix[::3], ix[1::3], ix[2::3])
+    return vertices, name
+
+
+def toindexed(vertices):
+    """Convert a numpy array of vertices of an indexed array facets and 
+    an array of unique vertices.
+
+    :vertices: (N, 3) array of vertex coordinates
+    :returns: an (N, 3) array of facet indices and an (M, 3) array of 
+    unique points.
+    """
+    ix, points = vo.indexate(vertices)
+    facets = ix.reshape((-1, 3))
+    return facets, points
 
 
 def normals(facets, points):
     """Calculate normal vectors of facets
 
-    :facets: List of facets. Each facet is a 3-tuple of indices in points
-    :points: List of points.
-    :returns: A tuple containing a list of normal vector indices for each
-    facet and a list of unique normals.
+    :facets: an (N, 3) array of facet indices into points
+    :points: an (M, 3) array of unique points
+    :returns: an array of normal vector indices for each
+    facet and an array of unique normals
     """
-    nv = [vecops.normal(points[i], points[j], points[k])
+    nv = [vo.normal(points[i], points[j], points[k])
           for i, j, k in facets]
-    return vecops.indexate(nv)
+    return vo.indexate(nv)
 
 
 def text(name, ifacets, points, inormals, vectors):
@@ -152,10 +167,10 @@ def text(name, ifacets, points, inormals, vectors):
     fcts = zip(ifacets, inormals)
     ln = ['solid {}'.format(name)]
     for f, n in fcts:
-        ln.append('  facet normal ' + vecops.mkstr(vectors[n], sep=' '))
+        ln.append('  facet normal ' + str(vectors[n])[2:-1])
         ln.append('    outer loop')
         for v in f:
-            ln.append('      vertex ' + vecops.mkstr(points[v], sep=' '))
+            ln.append('      vertex ' + str(points[v])[2:-1])
         ln.append('    endloop')
         ln.append('  endfacet')
     ln.append('endsolid')
@@ -185,11 +200,13 @@ def _test(args):
 
     :args: filename arguments for the test function
     """
-    if len(args) < 1:
-        print('usage: python stlfile.py filename')
-    f, p, nm = readstl(argv[1])
+    if len(args) < 2:
+        print('usage: python stl.py filename')
+        exit(1)
+    v, nm = readstl(args[1])
+    f, p = toindexed(v)
     n, nv = normals(f, p)
-    print 'Filename: "{}"'.format(args[0])
+    print 'Filename: "{}"'.format(args[1])
     print 'Object name: "{}"'.format(nm)
     print 'Number of facets:', len(f)
     print 'Facet data:'
@@ -199,4 +216,4 @@ def _test(args):
 
 if __name__ == '__main__':
     from sys import argv
-    _test(argv[1:])
+    _test(argv)
