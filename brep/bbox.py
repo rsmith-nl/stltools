@@ -25,37 +25,36 @@
 
 """Operations on two or three dimensional bounding boxes."""
 
+import numpy as np
 
 def makebb(pnts):
     """Find the bound for a list of points
 
-    :pnts: list of 2-tuples or 3-tuples of numbers
-    :returns: a tuple (minx, maxx, miny, maxy[, minz, maxz])
+    :pnts: numpy array, shape (N,2) or (N,3)
+    :returns: an array [minx, maxx, miny, maxy[, minz, maxz]
     """
-    if len(pnts[0]) == 3:
-        x, y, z = zip(*pnts)
-        return min(x), max(x), min(y), max(y), min(z), max(z)
-    elif len(pnts[0]) == 2:
-        x, y = zip(*pnts)
-        return min(x), max(x), min(y), max(y)
-    raise ValueError('pnts must be a list of 2-tuples or 3-tuples')
+    if len(pnts.shape) != 2:
+        raise ValueError('invalid shape')
+    dim = pnts.shape[-1]
+    out = []
+    for n in range(dim):
+        out.append(np.min(pnts.T[n]))
+        out.append(np.max(pnts.T[n]))
+    return np.array(out)
+
 
 def inside(bb, v):
     """Test if a point is inside a bounding box.
 
-    :bb: bounding box, a 4-tuple or 6-tuple
-    :v: point to test
+    :bb: bounding box numpy array
+    :v: point array
     :returns: True if v is inside the bounding box, false otherwise.
     :raises: ValueError if the number of dimensions of the point and bounding
     box don't match.
     """
-    if len(bb) == 6 and len(v) == 3:
-        vx, vy, vz = v
-        minx, maxx, miny, maxy, minz, maxz = bb
-        return (minx <= vx <= maxx and miny <= vy <= maxy and 
-                minz <= vz <= maxz)
-    elif len(bb) == 4 and len(v) == 2:
-        vx, vy = v
-        minx, maxx, miny, maxy = bb
-        return minx <= vx <= maxx and miny <= vy <= maxy
-    raise ValueError('wrong box/vector combo')
+    if len(bb.shape) != 1:
+        raise ValueError('invalid shape')
+    if bb.shape[0] != 2*v.shape[0]:
+        raise ValueError('incompatible shape')
+    mi, ma = bb.reshape((-1, 2)).T
+    return np.all(v >= mi) and np.all(v <= ma)
