@@ -73,3 +73,25 @@ def indexate(points):
     pt = sorted([(v, k) for k, v in pd.iteritems()], key=lambda x: x[0])
     unique = np.array([i[1] for i in pt])
     return indices, unique
+
+
+def to4(pnts):
+    """Converts 3D coordinates to homogeneous coordinates.
+
+    :pnts: a numpy array of shape (N,3)
+    :returns: a numpy array of shape (N,4)
+    """
+    if len(pnts.shape) != 2 or pnts.shape[1] != 3:
+        raise ValueError('invalid shape')
+    return np.vstack((pnts.T, np.ones(pnts.shape[0]))).T
+
+
+def to3(pnts):
+    """Converts homogeneous coordinates to plain 3D coordinates.
+
+    :pnts: a numpy array of shape (N,4)
+    :returns: a numpy array of shape (N,3)
+    """
+    if len(pnts.shape) != 2 or pnts.shape[1] != 4:
+        raise ValueError('invalid shape')
+    return pnts[:, 0:3]
