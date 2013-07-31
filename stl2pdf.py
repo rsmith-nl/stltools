@@ -28,7 +28,8 @@
 
 import sys
 import cairo
-from brep import stl, xform, bbox, utils
+import numpy as np
+from brep import stl, xform, bbox, utils, vecops
 
 
 ver = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
@@ -49,16 +50,19 @@ def main(args):
     """
     infile, outfile, tr = utils.processargs(args, '.pdf', usage)
     try:
-        ifacets, points, _ = stl.readstl(infile)
-        inormals, vectors = stl.normals(ifacets, points)
+        vertices, _ = stl.readstl(infile)
     except ValueError as e:
         print infile + ':', e
         sys.exit(1)
+    # Calculate normals
+    facets = vertices.reshape((-1, 3, 3))
+    normals = [vecops.normal(a, b, c) for a, b, c in facets]
     # Apply transformations
-    points  = [tr.applyto(p) for p in points]
-    vectors  = [tr.applyrot(v) for v in vectors]
+    vertices = vecops.xform(tr, vertices)
+    normals = vecops.xform(tr[0:3, 0:3], normals) 
+
     # Calculate viewport and transformation
-    minx, maxx, miny, maxy, _, _ = bbox.makebb(points)
+    minx, maxx, miny, maxy, _, _ = bbox.makebb(vertices)
     pr = xform.Zpar(minx, maxx, miny, maxy)
     out = cairo.PDFSurface(outfile, pr.w, pr.h)
     ctx = cairo.Context(out)
@@ -66,7 +70,7 @@ def main(args):
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
     # Calculate the visible facets
-    vf = [(f, n) for f, n in zip(ifacets, inormals) 
+    vf = [(f, n) for f, n in zip(facets, normals) 
           if pr.isvisible(vectors[n])]
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.

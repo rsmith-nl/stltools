@@ -87,11 +87,40 @@ def to4(pnts):
 
 
 def to3(pnts):
-    """Converts homogeneous coordinates to plain 3D coordinates.
+    """Converts homogeneous coordinates to plain 3D coordinates. 
+    It scales the x, y and z values by the w value.
 
     :pnts: a numpy array of shape (N,4)
     :returns: a numpy array of shape (N,3)
     """
     if len(pnts.shape) != 2 or pnts.shape[1] != 4:
         raise ValueError('invalid shape')
-    return pnts[:, 0:3]
+    #return pnts[:, 0:3]
+    d = pnts[:, 3]
+    div = np.vstack((d, d, d)).T
+    return pnts[:, 0:3]/div
+
+
+def xform(mat, pnts):
+    """Apply a transformation matrix to a numpy array of points.
+
+    :mat: 3x3 or 4x4 numpy array
+    :pnts: (N,3) or (N,4) numpy array
+    :returns: transformed array
+    """
+    if len(pnts.shape) != 2 and pnts.shape[1] not in (3, 4):
+        raise ValueError('wrong shape of pnts')
+    conv = False
+    if mat.shape == (3, 3):
+        if pnts.shape[1] == 4:
+            raise ValueError('homogeneous coordinates with 3x3 matrix')
+    elif mat.shape == (4, 4):
+        if pnts.shape[1] == 3:
+            pnts = to4(pnts)
+            conv = True
+    else:
+        raise ValueError('wrong shape of matrix')
+    rv = np.array([np.dot(mat, v) for v in pnts])
+    if conv:
+        return to3(rv)
+    return rv

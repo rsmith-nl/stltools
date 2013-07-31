@@ -9,7 +9,8 @@
 # related or neighboring rights to matrix.py. This work is published from the
 # Netherlands. See http://creativecommons.org/publicdomain/zero/1.0/
 
-"""3D homogeneous coordinates matrix functions"""
+"""3D homogeneous coordinates matrix functions in a 
+right-handed coordinate system."""
 
 import math
 import numpy as np
@@ -116,13 +117,17 @@ def rot(axis, angle):
     m = np.column_stack((m, np.array([0, 0, 0, 1], np.float32)))
     return m
 
-#def rotpart(mat):
-#    """Return the 3x3 rotation submatrix of a 4x4 matrix
-#
-#    :mat: 4x4 homogeneous coordinates matrix
-#    :returns: 3x3 rotation matrix
-#    """
-#    return mat[0:3, 0:3]
+
+def scale(x=1, y=1, z=1):
+    """Returns a scaling matrix
+
+    :x: scale factor for x direction
+    :y: scale factor for y direction
+    :z: scale factor for z direction
+    """
+    rv = I()
+    rv[0, 0], rv[1, 1], rv[2, 2] = float(x), float(y), float(z)
+    return rv
 
 
 def lookat(eye, center, up):
@@ -148,24 +153,48 @@ def lookat(eye, center, up):
     return rv
 
 
-def perspective(fovy, w, h, znear, zfar):
+def ortho(left, right, top, bottom, near, far):
+    """Creates an orthographic projection matrix.
+
+    :left: @todo
+    :right: @todo
+    :top: @todo
+    :bottom: @todo
+    :near: @todo
+    :far: @todo
+    :returns: @todo
+    """
+    left, right = float(left), float(right)
+    top, bottom = float(top), float(bottom)
+    far, near = float(far), float(near)
+    width = left - right
+    height = top - bottom
+    depth = far - near
+    rv = I()
+    rv[0, 0], rv[1, 1], rv[2, 2] = 2/width, 2/height, -2/depth
+    rv[0, 3] = -(right+left)/width
+    rv[1, 3] = -(top+bottom)/height
+    rv[2, 3] = -(far+near)/depth
+    return rv
+
+
+def perspective(fovy, width, height, near, far):
     """Create a prespective projection matrix.
 
     :fovy: field of view in y direction, in degrees
-    :w: width
-    :h: height
-    :znear: near clipping plane
-    :zfar: far clipping plane
+    :width: width of the viewport
+    :height: height of the viewport
+    :znear: near clipping plane (> 0)
+    :zfar: far clipping plane (> 0)
     :returns: projection matrix
     """
-    aspect = float(w)/float(h)
+    aspect = float(width)/float(height)
     f = 1/math.tan(math.radians(float(fovy))/2)
-    znear = float(znear)
-    zfar = float(zfar)
-    d = znear - zfar
+    near = float(near)
+    far = float(far)
+    d = near - far
     rv = np.array([[f/aspect, 0, 0, 0],
                    [0, f, 0, 0],
-                   [0, 0, (zfar+znear)/d, 2*zfar*znear/d],
+                   [0, 0, (far+near)/d, 2*far*near/d],
                    [0, 0, -1, 0]], np.float32)
     return rv
-

@@ -29,7 +29,7 @@
 import os.path
 import glob
 import sys
-import xform
+import matrix as m
 
 __version__ = '$Revision$'[11:-2]
 
@@ -82,7 +82,7 @@ def processargs(args, ext, use):
     else:
         outfile = args[1]
         del args[:2]
-    tr = xform.Xform()
+    tr = m.I()
     while len(args) > 1:
         if not args[0] in validargs:
             print "Unknown argument '{}' ignored.".format(args[0])
@@ -91,12 +91,13 @@ def processargs(args, ext, use):
         try:
             ang = float(args[1])
             if args[0] in ['x','X']:
-                tr.rotx(ang)
+                add = m.rotx(ang)
             elif args[0] in ['y','Y']:
-                tr.roty(ang)
+                add = m.roty(ang)
             else:
-                tr.rotz(ang)
+                add = m.rotx(ang)
             del args[:2]
+            tr = m.concat(add, tr)
         except:
             print "Argument '{}' is not a number, ignored.".format(args[1])
             continue
