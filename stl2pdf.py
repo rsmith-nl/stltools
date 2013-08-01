@@ -57,18 +57,25 @@ def main(args):
     # Calculate normals
     facets = vertices.reshape((-1, 3, 3))
     normals = np.array([vecops.normal(a, b, c) for a, b, c in facets])
-    # Apply transformations
+    # Apply transformations to world coordinates
     vertices = vecops.xform(tr, vertices)
     normals = vecops.xform(tr[0:3, 0:3], normals) 
     # Calculate viewport and projection
-    minx, maxx, miny, maxy, minz, maxz = bbox.makebb(vertices)
-    pr = matrix.ortho(minx, maxx, miny, maxy, minz, maxz)
-    sc = matrix.scale(100, 100, 100)
-    pr = sc * pr
-    vertices = vecops.xform(pr, vertices)
+    minx, maxx, miny, maxy, _, _ = bbox.makebb(vertices)
+    #pr = matrix.ortho(minx, maxx, miny, maxy, minz, maxz)
+    width = maxx - minx
+    height = maxy - miny
+    dx = -width/2
+    dy = -height/2
+    mv = matrix.trans([dx, dy, 0])
+    pr = matrix.I()
+    pr[2, 2] = 0
+    # still to do, determine the scaling factor.
+    mvp = matrix.concat(pr, mv)
+    vertices = vecops.xform(mvp, vertices)
     facets = vertices.reshape((-1, 3, 3))
-    normals = vecops.xform(tr[0:3, 0:3], normals)
-    vf = [(f, n, 0.4*n[2]+0.5) for f, n in zip(facets, normals) if n[2] > 0]
+    # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
+    vf = [(f, n, -0.4*n[2]+0.5) for f, n in zip(facets, normals) if n[2] > 0]
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
     def fkey(t):
