@@ -26,6 +26,7 @@
 
 '''Program for converting a view of an STL file into a PDF file.'''
 
+from __future__ import print_function, division
 import sys
 import cairo
 import numpy as np
@@ -37,9 +38,9 @@ ver = ('stl2pdf [ver. ' + '$Revision$'[11:-2] +
 
 
 def usage():
-    print ver
-    print "Usage: stl2pdf infile [outfile] [transform [transform ...]]"
-    print "where [transform] is [x number|y number|z number]"
+    print(ver)
+    print("Usage: stl2pdf infile [outfile] [transform [transform ...]]")
+    print("where [transform] is [x number|y number|z number]")
 
 
 def main(args):
@@ -48,49 +49,54 @@ def main(args):
     Keyword arguments:
     argv -- command line arguments (without program name!)
     """
+    msg = utils.Msg()
+    canvas_size = 200
     infile, outfile, tr = utils.processargs(args, '.pdf', usage)
+    msg.say('Reading STL file')
     try:
         vertices, _ = stl.readstl(infile)
     except ValueError as e:
-        print infile + ':', e
+        print((infile + ':', e))
         sys.exit(1)
-    # Calculate normals
+    msg.say('Calculating normal vectors')
     facets = vertices.reshape((-1, 3, 3))
     normals = np.array([vecops.normal(a, b, c) for a, b, c in facets])
-    # Apply transformations to world coordinates
+    msg.say('Apply transformations to world coordinates')
     vertices = vecops.xform(tr, vertices)
     normals = vecops.xform(tr[0:3, 0:3], normals) 
-    # Calculate viewport and projection
-    minx, maxx, miny, maxy, _, _ = bbox.makebb(vertices)
-    #pr = matrix.ortho(minx, maxx, miny, maxy, minz, maxz)
+    msg.say('Making model-view matrix')
+    minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     width = maxx - minx
     height = maxy - miny
-    dx = -width/2
-    dy = -height/2
-    mv = matrix.trans([dx, dy, 0])
-    pr = matrix.I()
-    pr[2, 2] = 0
-    # still to do, determine the scaling factor.
-    mvp = matrix.concat(pr, mv)
-    vertices = vecops.xform(mvp, vertices)
+    dx = -(minx + maxx)/2
+    dy = -(miny + maxy)/2
+    dz = -maxz
+    m = matrix.trans([dx, dy, dz])
+    sf = min(canvas_size/width, canvas_size/height)
+    v = matrix.scale(sf, -sf)
+    v[0, 3], v[1, 3] = canvas_size/2, canvas_size/2
+    mv = matrix.concat(m, v)
+    msg.say('Transforming to view space')
+    vertices = vecops.xform(mv, vertices)
     facets = vertices.reshape((-1, 3, 3))
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
-    vf = [(f, n, -0.4*n[2]+0.5) for f, n in zip(facets, normals) if n[2] > 0]
+    msg.say('Determine visible facets')
+    vf = [(f, n, 0.4*n[2]+0.5) for f, n in zip(facets, normals) if n[2] > 0]
+    msg.say('{:.2f}% of facets is visible'.format(100*len(vf)/len(facets)))
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
+    msg.say('Depth-sorting visible facets')
     def fkey(t):
         (a, b, c), _, _ = t
         return max(a[2], b[2], c[2])
     vf.sort(None, fkey)
-    # Initialize drawing surface
-    out = cairo.PDFSurface(outfile, 200, 200)
+    msg.say('Initialize drawing surface')
+    out = cairo.PDFSurface(outfile, canvas_size, canvas_size)
     ctx = cairo.Context(out)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
-    # Draw the triangles. The transform is needed because Cairo uses a
-    # different coordinate system.
-    ctx.transform(cairo.Matrix(1.0, 0.0, 0.0, -1.0, 200, 0))
+    msg.say('Drawing the triangles')
     for (a, b, c), _, i in vf:
         ctx.new_path()
         ctx.move_to(a[0], a[1])
@@ -103,6 +109,7 @@ def main(args):
     # Send output.
     out.show_page()
     out.finish()
+    msg.say('Done')
 
 if __name__ == '__main__':
     main(sys.argv[1:])

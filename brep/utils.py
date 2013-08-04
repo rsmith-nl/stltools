@@ -26,7 +26,9 @@
 
 """Utilities for nctools."""
 
+from __future__ import print_function, division
 import os.path
+from datetime import datetime
 import glob
 import sys
 import matrix as m
@@ -56,8 +58,8 @@ def skip(error, filename):
     :error: exception
     :filename: name of file to skip
     """
-    print "Cannot read file: {}".format(error)
-    print "Skipping file '{}'".format(filename)
+    print("Cannot read file: {}".format(error))
+    print("Skipping file '{}'".format(filename))
 
 
 def processargs(args, ext, use):
@@ -85,7 +87,7 @@ def processargs(args, ext, use):
     tr = m.I()
     while len(args) > 1:
         if not args[0] in validargs:
-            print "Unknown argument '{}' ignored.".format(args[0])
+            print("Unknown argument '{}' ignored.".format(args[0]))
             del args[0]
             continue
         try:
@@ -97,9 +99,9 @@ def processargs(args, ext, use):
             else:
                 add = m.rotx(ang)
             del args[:2]
-            tr = m.concat(add, tr)
+            tr = m.concat(tr, add)
         except:
-            print "Argument '{}' is not a number, ignored.".format(args[1])
+            print("Argument '{}' is not a number, ignored.".format(args[1]))
             continue
     return (infile, outfile, tr)
 
@@ -115,3 +117,20 @@ def xpand(args):
     for a in args:
         xa += glob.glob(a)
     return xa
+
+
+class Msg(object):
+    """Message printer"""
+
+    def __init__(self):
+        """@todo: to be defined1 """
+        self.start = datetime.now()
+
+    def say(self, *args):
+        """@todo: Docstring for message
+
+        :*args: @todo
+        :returns: @todo
+        """
+        delta = datetime.now() - self.start
+        print('['+str(delta)[:-4]+']:', *args) 

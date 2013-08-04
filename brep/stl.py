@@ -27,12 +27,15 @@
 
 """Handling STL files and brep datasets."""
 
-__version__ = '$Revision$'[11:-2]
-
+from __future__ import print_function, division
 import struct
 import mmap
 import vecops as vo
 import numpy as np
+
+
+__version__ = '$Revision$'[11:-2]
+
 
 def _striplines(m):
     """Generator to yield stripped lines from a memmapped text file.
@@ -206,13 +209,13 @@ def _test(args):
     v, nm = readstl(args[1])
     f, p = toindexed(v)
     n, nv = normals(f, p)
-    print 'Filename: "{}"'.format(args[1])
-    print 'Object name: "{}"'.format(nm)
-    print 'Number of facets:', len(f)
-    print 'Facet data:'
+    print('Filename: "{}"'.format(args[1]))
+    print('Object name: "{}"'.format(nm))
+    print('Number of facets:', len(f))
+    print('Facet data:')
     for j, k in zip(f, n):
-        print ' vertices:', p[j[0]], p[j[1]], p[j[2]]
-        print ' normal:', nv[k]
+        print(' vertices:', p[j[0]], p[j[1]], p[j[2]])
+        print(' normal:', nv[k])
 
 if __name__ == '__main__':
     from sys import argv

@@ -33,12 +33,26 @@ def trans(vec):
     return rv
 
 
-def concat(begin, *rest):
-    """Returns the concatenation of the 4x4 matrix arguments.
+def mul(begin, *rest):
+    """Returns the multiplication of the 4x4 matrix arguments.
 
     :begin, rest: 4x4 matrices
     """
     rv = np.copy(begin)
+    for r in rest:
+        rv = np.dot(rv, r)
+    return rv
+
+
+def concat(*args):
+    """Concatenate the transforms. This is actually a multiplication 
+    of the arguments in reversed order.
+
+    :*args: 4x4 matrices
+    :returns: a combined matrix
+    """
+    rv = np.copy(args[-1])
+    rest = list(reversed(args[:-1]))
     for r in rest:
         rv = np.dot(rv, r)
     return rv
@@ -153,29 +167,16 @@ def lookat(eye, center, up):
     return rv
 
 
-def ortho(left, right, top, bottom, near, far):
-    """Creates an orthographic projection matrix.
-
-    :left: @todo
-    :right: @todo
-    :top: @todo
-    :bottom: @todo
-    :near: @todo
-    :far: @todo
-    :returns: @todo
-    """
-    left, right = float(left), float(right)
-    top, bottom = float(top), float(bottom)
-    far, near = float(far), float(near)
-    width = left - right
-    height = top - bottom
-    depth = far - near
-    rv = I()
-    rv[0, 0], rv[1, 1], rv[2, 2] = 2/width, 2/height, -2/depth
-    rv[0, 3] = -(right+left)/width
-    rv[1, 3] = -(top+bottom)/height
-    rv[2, 3] = -(far+near)/depth
-    return rv
+#def ortho(xyscale):
+#    """Creates a simple orthographic projection matrix.
+#
+#    :xyscale: scaling factor for x and y
+#    :returns: orthographic projection matrix
+#    """
+#    rv = I()
+#    rv[0, 0], rv[1, 1] = xyscale, xyscale
+#    rv[2, 2] = 0
+#    return rv
 
 
 def perspective(fovy, width, height, near, far):
