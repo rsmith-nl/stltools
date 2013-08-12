@@ -30,15 +30,15 @@ from __future__ import print_function, division
 import sys
 import cairo
 import numpy as np
-from brep import stl, bbox, utils, vecops, matrix
+from stltools import stl, bbox, utils, vecops, matrix
 
 
-ver = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
-       '] ('+'$Date$'[7:17]+')')
+_progver = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
+            '] ('+'$Date$'[7:17]+')')
 
 
 def usage():
-    print(ver)
+    print(_progver)
     print("Usage: stl2pdf infile [outfile] [transform [transform ...]]")
     print("where [transform] is [x number|y number|z number]")
 
