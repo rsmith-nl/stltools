@@ -1,4 +1,4 @@
-.PHONY: all install dist clean backup deinstall check
+.PHONY: all install dist clean
 .SUFFIXES: .py
 
 BASE=/usr/local
@@ -10,18 +10,10 @@ help::
 	@echo "You can use one of the following commands:"
 	@echo "  install -- install the package system-wide"
 	@echo "  deinstall -- remove the system-wide installation"
-#beginskip
-	@echo "  dist -- create a distribution file"
-	@echo "  clean -- remove all generated files"
-	@echo "  backup -- make a complete backup"
-#endskip
 
+all: install
 
-install: ${ALL}
-	@if [ `id -u` != 0 ]; then \
-		echo "You must be root to install the program!"; \
-		exit 1; \
-	fi
+install::
 # Let Python do most of the install work.
 	python setup.py install
 # Lose the extension; this is UNIX. :-)
@@ -32,30 +24,18 @@ install: ${ALL}
 	rm -rf build
 
 deinstall::
-	@if [ `id -u` != 0 ]; then \
-		echo "You must be root to deinstall the program!"; \
-		exit 1; \
-	fi
-	rm -f ${PYSITE}/brep
+	rm -f ${PYSITE}/stltools
 	rm -f $(BINDIR)/stl2ps $(BINDIR)/stl2pov $(BINDIR)/stl2pdf $(BINDIR)/stlinfo
-
-#beginskip
-dist: ${ALL}
-	mv Makefile Makefile.org
-	awk -f tools/makemakefile.awk Makefile.org >Makefile
-	python setup.py sdist --format=zip
-	mv Makefile.org Makefile
-	rm -f MANIFEST
-	cd dist ; sha256 stltools-* >../port/stltools/distinfo 
-	cd dist ; ls -l stltools-* | awk '{printf "SIZE (%s) = %d\n", $$9, $$5};' >>../port/stltools/distinfo 
 
 clean::
 	rm -rf dist build backup-*.tar.gz *.pyc ${ALL} MANIFEST
-	rm -f port/stltools/distinfo
 
-backup::
-	sh tools/genbackup
+#EOF
+# The specifications below are for the maintainer only.
+CUTLINE!=grep -n '\#[^E]*EOF' Makefile | cut -d ':' -f 1
 
-.git/hooks/post-commit: tools/post-commit
-	install -m 755 $> $@
-#endskip
+dist: ${ALL}
+	mv Makefile Makefile.orig
+	head -n ${CUTLINE} Makefile.orig >Makefile
+	python setup.py sdist --format=zip
+	mv Makefile.orig Makefile

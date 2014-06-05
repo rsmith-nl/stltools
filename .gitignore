@@ -9,7 +9,3 @@ stl2pdf.1.pdf
 stl2pov.1.pdf
 stlinfo.1.pdf
 MANIFEST
-tools/replace.sed
-port/stltools/Makefile
-port/stltools/work
-port/stltools/distinfo
