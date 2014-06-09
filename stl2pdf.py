@@ -1,8 +1,9 @@
-#! /usr/bin/env python
-# -*- python coding: utf-8 -*-
-# Copyright © 2012,2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+#! /usr/bin/env python2
+# vim:fileencoding=utf-8
+#
+# Copyright © 2012-2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # $Date$
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
@@ -11,7 +12,7 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,13 +33,10 @@ import cairo
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-
-_progver = ('stl2pdf [ver. ' + '$Revision$'[11:-2] + 
-            '] ('+'$Date$'[7:17]+')')
+__version__ = '$Revision$'[11:-2]
 
 
 def usage():
-    print(_progver)
     print("Usage: stl2pdf infile [outfile] [transform [transform ...]]")
     print("where [transform] is [x number|y number|z number]")
 
@@ -63,7 +61,7 @@ def main(args):
     normals = np.array([vecops.normal(a, b, c) for a, b, c in facets])
     msg.say('Apply transformations to world coordinates')
     vertices = vecops.xform(tr, vertices)
-    normals = vecops.xform(tr[0:3, 0:3], normals) 
+    normals = vecops.xform(tr[0:3, 0:3], normals)
     msg.say('Making model-view matrix')
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     width = maxx - minx
@@ -86,9 +84,11 @@ def main(args):
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
     msg.say('Depth-sorting visible facets')
+
     def fkey(t):
         (a, b, c), _, _ = t
         return max(a[2], b[2], c[2])
+
     vf.sort(None, fkey)
     msg.say('Initialize drawing surface')
     out = cairo.PDFSurface(outfile, canvas_size, canvas_size)

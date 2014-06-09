@@ -5,22 +5,19 @@ BASE=/usr/local
 MANDIR=$(BASE)/man
 BINDIR=$(BASE)/bin
 PYSITE!=python -c 'import site; print site.getsitepackages()[0]'
+VER!=grep Revision stl2pov.py | cut -d ' ' -f 4
 
 help::
 	@echo "You can use one of the following commands:"
 	@echo "  install -- install the package system-wide"
 	@echo "  deinstall -- remove the system-wide installation"
+	@echo "  clean -- remove generated files"
 
 all: install
 
 install::
-# Let Python do most of the install work.
+# Let Python do the install work.
 	python setup.py install
-# Lose the extension; this is UNIX. :-)
-	mv $(BINDIR)/stl2ps.py $(BINDIR)/stl2ps
-	mv $(BINDIR)/stl2pov.py $(BINDIR)/stl2pov
-	mv $(BINDIR)/stl2pdf.py $(BINDIR)/stl2pdf
-	mv $(BINDIR)/stlinfo.py $(BINDIR)/stlinfo
 	rm -rf build
 
 deinstall::
