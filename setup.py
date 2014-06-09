@@ -5,10 +5,20 @@
 # $Date$
 
 from distutils.core import setup
+from sys import argv
+import os
+
+_scripts = ['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py']
 
 with open('README.txt') as f:
     ld = f.read()
 
+# Remove the extensions from the scripts for UNIX-like systems.
+if 'install' in argv and os.name is 'posix':
+    outnames = [s[:-3] for s in _scripts]
+    for old, new in zip(_scripts, outnames):
+        os.link(old, new)
+    _scripts = outnames
 
 setup(name='stltools',
       version='$Revision$'[11:-2],
@@ -16,7 +26,7 @@ setup(name='stltools',
       description='Programs to read and convert STL files.',
       author='Roland Smith', author_email='rsmith@xs4all.nl',
       url='http://rsmith.home.xs4all.nl/software/',
-      scripts=['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py'],
+      scripts=_scripts,
       provides='stltools', packages=['stltools'],
       classifiers=['Development Status :: 5 - Production/Stable',
                    'Environment :: Console',
@@ -27,5 +37,5 @@ setup(name='stltools',
                    'Programming Language :: Python :: 2.7',
                    'Topic :: Scientific/Engineering'
                    ],
-      long_description = ld
+      long_description=ld
       )
