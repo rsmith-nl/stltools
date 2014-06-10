@@ -10,3 +10,7 @@ stl2pov.1.pdf
 stlinfo.1.pdf
 MANIFEST
 Makefile.orig
+stl2ps
+stl2pdf
+stl2pov
+stlinfo

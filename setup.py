@@ -14,7 +14,7 @@ with open('README.txt') as f:
     ld = f.read()
 
 # Remove the extensions from the scripts for UNIX-like systems.
-if 'install' in argv and os.name is 'posix':
+if 'install' or 'build' in argv and os.name is 'posix':
     outnames = [s[:-3] for s in _scripts]
     for old, new in zip(_scripts, outnames):
         os.link(old, new)

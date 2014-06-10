@@ -25,13 +25,13 @@ deinstall::
 	rm -f $(BINDIR)/stl2ps $(BINDIR)/stl2pov $(BINDIR)/stl2pdf $(BINDIR)/stlinfo
 
 clean::
-	rm -rf dist build backup-*.tar.gz *.pyc ${ALL} MANIFEST
+	rm -rf dist build backup-*.tar.gz *.pyc MANIFEST stl2ps stl2pov stl2pdf stlinfo
 
 #EOF
 # The specifications below are for the maintainer only.
 CUTLINE!=grep -n '\#[^E]*EOF' Makefile | cut -d ':' -f 1
 
-dist: ${ALL}
+dist::
 	mv Makefile Makefile.orig
 	head -n ${CUTLINE} Makefile.orig >Makefile
 	python setup.py sdist --format=zip
