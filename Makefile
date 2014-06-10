@@ -36,3 +36,6 @@ dist::
 	head -n ${CUTLINE} Makefile.orig >Makefile
 	python setup.py sdist --format=zip
 	mv Makefile.orig Makefile
+
+refresh::
+	update-all-keywords
