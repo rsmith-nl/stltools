@@ -5,7 +5,6 @@
 # $Date$
 
 from distutils.core import setup
-from sys import argv
 import os
 
 _scripts = ['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py']
@@ -14,14 +13,14 @@ with open('README.txt') as f:
     ld = f.read()
 
 # Remove the extensions from the scripts for UNIX-like systems.
-if os.name is 'posix' and ('install' in argv or 'build' in argv):
+if os.name is 'posix':
     outnames = [s[:-3] for s in _scripts]
     try:
         for old, new in zip(_scripts, outnames):
             os.link(old, new)
-        _scripts = outnames
     except OSError:
         pass
+    _scripts = outnames
 
 setup(name='stltools',
       version='$Revision$'[11:-2],
