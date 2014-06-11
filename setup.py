@@ -16,9 +16,12 @@ with open('README.txt') as f:
 # Remove the extensions from the scripts for UNIX-like systems.
 if os.name is 'posix' and ('install' in argv or 'build' in argv):
     outnames = [s[:-3] for s in _scripts]
-    for old, new in zip(_scripts, outnames):
-        os.link(old, new)
-    _scripts = outnames
+    try:
+        for old, new in zip(_scripts, outnames):
+            os.link(old, new)
+        _scripts = outnames
+    except OSError:
+        pass
 
 setup(name='stltools',
       version='$Revision$'[11:-2],
