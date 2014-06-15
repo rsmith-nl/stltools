@@ -1,8 +1,11 @@
-# -*- coding: utf-8 -*-
+# file: utils.py
+# vim:fileencoding=utf-8
 #
-# Copyright © 2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Created: 2013-07-07 21:01:52  +0200
 # $Date$
-# 
+# $Revision$
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
@@ -11,8 +14,8 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
-# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+#
+# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
@@ -24,7 +27,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-"""Utilities for nctools."""
+"""Utilities for stltools."""
 
 from __future__ import print_function, division
 import os.path
@@ -40,7 +43,7 @@ def outname(inname, extension, addenum=''):
     """Creates the name of the output filename based on the input filename.
 
     :inname: name + path of the input file
-    :extension: extension of the output file. 
+    :extension: extension of the output file.
     :addenum: string to append to filename
     :returns: output file name.
     """
@@ -92,9 +95,9 @@ def processargs(args, ext, use):
             continue
         try:
             ang = float(args[1])
-            if args[0] in ['x','X']:
+            if args[0] in ['x', 'X']:
                 add = m.rotx(ang)
-            elif args[0] in ['y','Y']:
+            elif args[0] in ['y', 'Y']:
                 add = m.roty(ang)
             else:
                 add = m.rotx(ang)
@@ -133,4 +136,4 @@ class Msg(object):
         :returns: @todo
         """
         delta = datetime.now() - self.start
-        print('['+str(delta)[:-4]+']:', *args) 
+        print('['+str(delta)[:-4]+']:', *args)

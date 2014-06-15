@@ -1,6 +1,10 @@
-# # -*- coding: utf-8 -*-
-# Copyright © 2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# file: stl.py
+# vim:fileencoding=utf-8
+#
+# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Created: 2012-11-10 07:55:54 +0100
 # $Date$
+# $Revision$
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -11,7 +15,7 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
@@ -23,8 +27,6 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-# Check this code with 'pylint -r n stl.py'
-
 """Handling STL files and brep datasets."""
 
 from __future__ import print_function, division
@@ -32,7 +34,6 @@ import struct
 import mmap
 import vecops as vo
 import numpy as np
-
 
 __version__ = '$Revision$'[11:-2]
 
@@ -55,14 +56,14 @@ def _parsetxt(m):
     """Parses the file if it is an text STL file.
 
     :m: A memory mapped file.
-    :returns: The vertices as a list of 3-tuples, and the name of the 
+    :returns: The vertices as a list of 3-tuples, and the name of the
     object from the file.
     """
     first = m.readline()
     name = None
     points = None
     if (first.startswith('solid') and
-        'facet normal' in m.readline()):
+       'facet normal' in m.readline()):
         try:
             name = first.strip().split(None, 1)[1]
         except IndexError:
@@ -105,38 +106,36 @@ def _parsebinary(m):
     name, _ = struct.unpack("<80sI", data[0:84])
     name = name.replace("solid ", "")
     name = name.strip('\x00 \t\n\r')
-    points = [p for p in _getbp(m)] 
+    points = [p for p in _getbp(m)]
     return np.array(points, np.float32), name
 
 
 def readstl(name):
-    """Reads an STL file, returns the vertices and the name. 
+    """Reads an STL file, returns the vertices and the name.
     The normal vector information is discarded since it is often unreliable.
 
     :name: path of the STL file to read
-    :returns: a numpy array of the shape (N, 3) containing the vertices 
+    :returns: a numpy array of the shape (N, 3) containing the vertices
     of the facets, and the name of the object as given in the STL file.
     """
     with open(name, 'rb') as f:
         mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
         vertices, name = _parsebinary(mm)
-        if vertices == None:
+        if vertices is None:
             mm.seek(0)
             vertices, name = _parsetxt(mm)
         mm.close()
-    if vertices == None:
+    if vertices is None:
         raise ValueError('not a valid STL file.')
-    #ix, points = vecops.indexate(points)
-    #facets = zip(ix[::3], ix[1::3], ix[2::3])
     return vertices, name
 
 
 def toindexed(vertices):
-    """Convert a numpy array of vertices of an indexed array facets and 
+    """Convert a numpy array of vertices of an indexed array facets and
     an array of unique vertices.
 
     :vertices: (N, 3) array of vertex coordinates
-    :returns: an (N, 3) array of facet indices and an (M, 3) array of 
+    :returns: an (N, 3) array of facet indices and an (M, 3) array of
     unique points.
     """
     ix, points = vo.indexate(vertices)

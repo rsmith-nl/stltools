@@ -39,15 +39,15 @@ def mesh1(name, vertices):
     """Creates a POV-ray mesh description from facet data.
 
     :name: The name of the object.
-    :ifacets: List of facets. Each facet is a 3-tuple of indices into the
-    points list.
-    :points: List of points. Each point is a 3-tuple of numbers.
+    :vertices: An (N,3) numpy array containing the vertex data.
     :returns: a string representation of a POV-ray mesh object.
     """
     facets = vertices.reshape((-1, 3, 3))
     lines = ["# declare m_{} = mesh {{".format(name.replace(' ', '_'))]
     sot = "  triangle {"
-    fc = "    <{1}, {0}, {2}>,"  # POV-ray has a different coordinate system.
+    # The indices sequence 1, 0, 2 is used because of the difference between
+    # the STL coordinate system and that used in POV-ray.
+    fc = "    <{1}, {0}, {2}>,"
     for (a, b, c) in facets:
         lines += [sot, fc.format(*a), fc.format(*b),
                   fc.format(*c)[:-1], "  }"]
@@ -59,14 +59,14 @@ def mesh2(name, vertices):
     """Creates a POV-ray mesh2 object from facet data.
 
     :name: The name of the object.
-    :ifacets: List of facets. Each facet is a 3-tuple of indices into the
-    points list.
-    :points: List of points. Each point is a 3-tuple of numbers.
+    :vertices: An (N,3) numpy array containing the vertex data.
     :returns: a string representation of a POV-ray mesh2 object.
     """
     ifacets, points = stl.toindexed(vertices)
     lines = ["# declare m_{} = mesh2 {{".format(name),
              '  vertex_vectors {', '    {},'.format(len(points))]
+    # The indices sequence 1, 0, 2 is used because of the difference between
+    # the STL coordinate system and that used in POV-ray
     lines += ['    <{1}, {0}, {2}>,'.format(*p) for p in points]
     lines[-1] = lines[-1][:-1]
     lines += ['  face_indices {', '    {},'.format(len(ifacets))]
@@ -101,7 +101,6 @@ def main(argv):
             continue
         try:
             msg.say('Reading facets')
-            # facets, points, name = stl.readstl(fn)
             vertices, name = stl.readstl(fn)
             outfn = utils.outname(fn, '.inc')
         except Exception as e:  # pylint: disable=W0703

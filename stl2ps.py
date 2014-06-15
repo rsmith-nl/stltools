@@ -34,8 +34,6 @@ import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
 __version__ = '$Revision$'[11:-2]
-_progver = ('stl2ps [ver. ' + __version__ +
-            '] ('+'$Date$'[7:17]+')')
 
 
 def usage():

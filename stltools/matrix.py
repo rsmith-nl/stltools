@@ -1,19 +1,39 @@
-#!/usr/bin/env python
+# file: matrix.py
 # vim:fileencoding=utf-8
 #
-# Author: R.F. Smith <rsmith@xs4all.nl>
+# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-28 02:07:00 +0200
-# Modified: $Date$
+# $Date$
+# $Revision$
 #
-# To the extent possible under law, Roland Smith has waived all copyright and
-# related or neighboring rights to matrix.py. This work is published from the
-# Netherlands. See http://creativecommons.org/publicdomain/zero/1.0/
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
 
-"""3D homogeneous coordinates matrix functions in a 
+"""3D homogeneous coordinates matrix functions in a
 right-handed coordinate system."""
 
 import math
 import numpy as np
+
+__version__ = '$Revision$'[11:-2]
 
 
 def I():
@@ -45,7 +65,7 @@ def mul(begin, *rest):
 
 
 def concat(*args):
-    """Concatenate the transforms. This is actually a multiplication 
+    """Concatenate the transforms. This is actually a multiplication
     of the arguments in reversed order.
 
     :*args: 4x4 matrices
@@ -61,15 +81,15 @@ def concat(*args):
 def rotx(angle):
     """Returns the 4x4 homogeneous coordinates matrix for rotation around the
     X axis.
-    
+
     :angle: rotation angle in degrees
     """
     rad = math.radians(angle)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array([[1.0, 0.0, 0.0, 0.0], 
-                     [0.0,   c,  -s, 0.0], 
-                     [0.0,   s,   c, 0.0], 
+    return np.array([[1.0, 0.0, 0.0, 0.0],
+                     [0.0,   c,  -s, 0.0],
+                     [0.0,   s,   c, 0.0],
                      [0.0, 0.0, 0.0, 1.0]], np.float32)
 
 
@@ -82,9 +102,9 @@ def roty(ang):
     rad = math.radians(ang)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array([[  c, 0.0,   s, 0.0],
+    return np.array([[c, 0.0,   s, 0.0],
                      [0.0, 1.0, 0.0, 0.0],
-                     [ -s, 0.0,   c, 0.0],
+                     [-s, 0.0,   c, 0.0],
                      [0.0, 0.0, 0.0, 1.0]], np.float32)
 
 
@@ -97,8 +117,8 @@ def rotz(ang):
     rad = math.radians(ang)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array([[  c,  -s, 0.0, 0.0],
-                     [  s,   c, 0.0, 0.0],
+    return np.array([[c,  -s, 0.0, 0.0],
+                     [s,   c, 0.0, 0.0],
                      [0.0, 0.0, 1.0, 0.0],
                      [0.0, 0.0, 0.0, 1.0]]), np.float32
 
@@ -120,8 +140,8 @@ def rot(axis, angle):
     a = math.radians(angle)
     c = math.cos(a)
     s = math.sin(a)
-    uc = np.array([[0, -uz, uy], 
-                   [uz, 0, -ux], 
+    uc = np.array([[0, -uz, uy],
+                   [uz, 0, -ux],
                    [-uy, ux, 0]], np.float32)
     ut = np.array([[ux*ux, ux*uy, ux*uz],
                    [ux*uy, uy*uy, uy*uz],
@@ -160,23 +180,22 @@ def lookat(eye, center, up):
     S = np.cross(f, up)
     s = S/np.linalg.norm(S)
     u = np.cross(s, f)
-    rv = np.array([[ s[0],  s[1],  s[2], -eye[0]],
-                   [ u[0],  u[1],  u[2], -eye[1]],
+    rv = np.array([[s[0],  s[1],  s[2], -eye[0]],
+                   [u[0],  u[1],  u[2], -eye[1]],
                    [-f[0], -f[1], -f[2], -eye[2]],
-                   [    0,     0,     0,       1]], np.float32)
+                   [0,     0,     0,       1]], np.float32)
     return rv
 
 
-#def ortho(xyscale):
-#    """Creates a simple orthographic projection matrix.
-#
-#    :xyscale: scaling factor for x and y
-#    :returns: orthographic projection matrix
-#    """
-#    rv = I()
-#    rv[0, 0], rv[1, 1] = xyscale, xyscale
-#    rv[2, 2] = 0
-#    return rv
+def ortho(xyscale):
+    """Creates a simple orthographic projection matrix.
+    :xyscale: scaling factor for x and y
+    :returns: orthographic projection matrix
+    """
+    rv = I()
+    rv[0, 0], rv[1, 1] = xyscale, xyscale
+    rv[2, 2] = 0
+    return rv
 
 
 def perspective(fovy, width, height, near, far):

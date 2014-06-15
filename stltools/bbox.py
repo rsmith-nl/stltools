@@ -1,6 +1,10 @@
-# -*- coding: utf-8 -*-
-# Copyright © 2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# file: bbox.py
+# vim:fileencoding=utf-8
+#
+# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Created: 2013-06-10 22:41:00 +0200
 # $Date$
+# $Revision$
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -26,6 +30,9 @@
 """Operations on two or three dimensional bounding boxes."""
 
 import numpy as np
+
+__version__ = '$Revision$'[11:-2]
+
 
 def makebb(pnts):
     """Find the bound for a list of points

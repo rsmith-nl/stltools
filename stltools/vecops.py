@@ -1,6 +1,10 @@
-# -*- coding: utf-8 -*-
-# Copyright © 2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# file: vecops.py
+# vim:fileencoding=utf-8
+#
+# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Created: 2013-06-10 22:41:00 +0200
 # $Date$
+# $Revision$
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -11,7 +15,7 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
@@ -27,6 +31,8 @@
 
 import numpy as np
 import math as m
+
+__version__ = '$Revision$'[11:-2]
 
 
 def length(v):
@@ -62,7 +68,7 @@ def normal(a, b, c):
 
 
 def indexate(points):
-    """Convert a numpy array of points into a list of indices and an array of 
+    """Convert a numpy array of points into a list of indices and an array of
     unique points.
 
     :points: a numpy array of shape (N, 3)
@@ -87,7 +93,7 @@ def to4(pnts):
 
 
 def to3(pnts):
-    """Converts homogeneous coordinates to plain 3D coordinates. 
+    """Converts homogeneous coordinates to plain 3D coordinates.
     It scales the x, y and z values by the w value.
 
     :pnts: a numpy array of shape (N,4)
@@ -95,7 +101,6 @@ def to3(pnts):
     """
     if len(pnts.shape) != 2 or pnts.shape[1] != 4:
         raise ValueError('invalid shape')
-    #return pnts[:, 0:3]
     d = pnts[:, 3]
     div = np.vstack((d, d, d)).T
     return pnts[:, 0:3]/div
