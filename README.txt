@@ -4,6 +4,8 @@ STL file manipulation with stltools
 
 :Author: Roland Smith
 
+.. vim:fileencoding=utf-8:ft=rst
+
 The stltools module reads both text and binary STL files and creates STL
 objects. It also handles coordinate transforms and projections.
 
@@ -63,7 +65,7 @@ object, its bounding box and the number of facets. Optionally it can also list
 an STL text version of the file. This way stlinfo can be used to convert a
 binary STL file to a text version.
 
-    usage: stlinfo.py [-h] [-t] [-b] [-v] [file [file ...]]
+    usage: stlinfo [-h] [-t] [-b] [-v] [file [file ...]]
 
     Reads an STL file and prints information about the object or a text
     representation of the object in the file.
@@ -77,3 +79,12 @@ binary STL file to a text version.
     -b, --binary   write binary representation of the file
     -v, --version  show program's version number and exit
 
+
+Installation
+============
+
+Run the following command to install the module and the scripts.
+
+.. code-block:: sh
+
+    # python setup.py install

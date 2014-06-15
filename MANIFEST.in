@@ -1,3 +1,2 @@
-include Makefile
 include test/cube.stl
 include test/cube_bin.stl
