@@ -14,3 +14,4 @@ stl2ps
 stl2pdf
 stl2pov
 stlinfo
+*.inc

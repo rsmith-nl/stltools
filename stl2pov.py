@@ -42,15 +42,13 @@ def mesh1(name, vertices):
     :vertices: An (N,3) numpy array containing the vertex data.
     :returns: a string representation of a POV-ray mesh object.
     """
-    facets = vertices.reshape((-1, 3, 3))
+    facets = vertices.reshape((-1, 9))
     lines = ["# declare m_{} = mesh {{".format(name.replace(' ', '_'))]
-    sot = "  triangle {"
     # The indices sequence 1, 0, 2 is used because of the difference between
     # the STL coordinate system and that used in POV-ray.
-    fc = "    <{1}, {0}, {2}>,"
-    for (a, b, c) in facets:
-        lines += [sot, fc.format(*a), fc.format(*b),
-                  fc.format(*c)[:-1], "  }"]
+    fct = "  triangle {{\n    <{1}, {0}, {2}>,\n    <{4}, {3}, {5}>,\n" \
+          "    <{7}, {6}, {8}>\n  }}"
+    lines += [fct.format(*f) for f in facets]
     lines += ['}']
     return '\n'.join(lines)
 
