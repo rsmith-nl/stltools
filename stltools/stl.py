@@ -167,7 +167,7 @@ def text(name, ifacets, points, inormals, vectors):
     :returns: A string containing a text representation of the brep.
     """
     fcts = list(zip(ifacets, inormals))
-    ln = ['solid {}'.format(name)]
+    ln = ['solid {}'.format(name.decode('utf-8'))]
     for f, n in fcts:
         ln.append('  facet normal ' + str(vectors[n])[2:-1])
         ln.append('    outer loop')
@@ -191,10 +191,10 @@ def binary(name, ifacets, points, inormals, vectors):
     """
     rc = [struct.pack('<80sI', name, len(ifacets))]
     for fi, ni in zip(ifacets, inormals):
-        a, b, c, n = points[fi[0]], points[fi[1]], points[fi[2]], vectors[ni]
-        data = n + a + b + c + (0,)
+        data = list(np.concatenate((points[fi[0]], points[fi[1]],
+                                    points[fi[2]], vectors[ni]))) + [0]
         rc.append(struct.pack('<12fH', *data))
-    return ''.join(rc)
+    return b''.join(rc)
 
 
 def _test(args):
