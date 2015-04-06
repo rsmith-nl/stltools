@@ -10,7 +10,9 @@ help::
 	@echo "  clean -- Update keywords in files."
 
 clean::
-	rm -rf dist build backup-*.tar.gz *.pyc MANIFEST ${SCRIPTS}
+	rm -rf dist build backup-*.tar.gz MANIFEST ${SCRIPTS}
+	find . -type f -name '*.pyc' -delete
+	find . -type d -name __pycache__ -delete
 
 dist::
 	python setup.py sdist --format=zip
