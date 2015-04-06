@@ -59,10 +59,10 @@ def _parsetxt(m):
     :returns: The vertices as a list of 3-tuples, and the name of the
     object from the file.
     """
-    first = m.readline()
+    first = m.readline().decode('utf-8')
     name = None
     points = None
-    if (first.startswith(b'solid') and
+    if (first.startswith('solid') and
        b'facet normal' in m.readline()):
         try:
             name = first.strip().split(None, 1)[1]
@@ -104,8 +104,9 @@ def _parsebinary(m):
     if b'facet normal' in data:
         return None, None
     name, _ = struct.unpack("<80sI", data[0:84])
-    name = name.replace(b"solid ", b"")
-    name = name.strip(b'\x00 \t\n\r')
+    name = name.decode('utf-8')
+    name = name.replace("solid ", "")
+    name = name.strip('\x00 \t\n\r')
     points = [p for p in _getbp(m)]
     return np.array(points, np.float32), name
 

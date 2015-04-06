@@ -43,7 +43,7 @@ def mesh1(name, vertices):
     :returns: a string representation of a POV-ray mesh object.
     """
     facets = vertices.reshape((-1, 9))
-    lines = ["# declare m_{} = mesh {{".format(name.replace(b' ', b'_'))]
+    lines = ["# declare m_{} = mesh {{".format(name.replace(' ', '_'))]
     # The indices sequence 1, 0, 2 is used because of the difference between
     # the STL coordinate system and that used in POV-ray.
     fct = "  triangle {{\n    <{1}, {0}, {2}>,\n    <{4}, {3}, {5}>,\n" \
