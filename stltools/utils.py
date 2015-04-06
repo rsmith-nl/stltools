@@ -29,12 +29,12 @@
 
 """Utilities for stltools."""
 
-from __future__ import print_function, division
+
 import os.path
 from datetime import datetime
 import glob
 import sys
-import matrix as m
+from . import matrix as m
 
 __version__ = '$Revision$'[11:-2]
 
@@ -136,4 +136,4 @@ class Msg(object):
         :returns: @todo
         """
         delta = datetime.now() - self.start
-        print('['+str(delta)[:-4]+']:', *args)
+        print('['+str(delta)[:-4]+']:', args)

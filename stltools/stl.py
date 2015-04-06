@@ -29,10 +29,10 @@
 
 """Handling STL files and brep datasets."""
 
-from __future__ import print_function, division
+
 import struct
 import mmap
-import vecops as vo
+from . import vecops as vo
 import numpy as np
 
 __version__ = '$Revision$'[11:-2]
@@ -62,13 +62,13 @@ def _parsetxt(m):
     first = m.readline()
     name = None
     points = None
-    if (first.startswith('solid') and
-       'facet normal' in m.readline()):
+    if (first.startswith(b'solid') and
+       b'facet normal' in m.readline()):
         try:
             name = first.strip().split(None, 1)[1]
         except IndexError:
             name = ''
-        vlines = [l.split() for l in _striplines(m) if l.startswith('vertex')]
+        vlines = [l.split() for l in _striplines(m) if l.startswith(b'vertex')]
         points = np.array([tuple(float(k) for k in j[1:]) for j in vlines],
                           np.float32)
     m.seek(0)
@@ -101,11 +101,11 @@ def _parsebinary(m):
     data = m.read(84)
     name = ''
     points = None
-    if 'facet normal' in data:
+    if b'facet normal' in data:
         return None, None
     name, _ = struct.unpack("<80sI", data[0:84])
-    name = name.replace("solid ", "")
-    name = name.strip('\x00 \t\n\r')
+    name = name.replace(b"solid ", b"")
+    name = name.strip(b'\x00 \t\n\r')
     points = [p for p in _getbp(m)]
     return np.array(points, np.float32), name
 
@@ -166,7 +166,7 @@ def text(name, ifacets, points, inormals, vectors):
     :vectors: List of normal vectors
     :returns: A string containing a text representation of the brep.
     """
-    fcts = zip(ifacets, inormals)
+    fcts = list(zip(ifacets, inormals))
     ln = ['solid {}'.format(name)]
     for f, n in fcts:
         ln.append('  facet normal ' + str(vectors[n])[2:-1])

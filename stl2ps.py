@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
@@ -27,7 +27,7 @@
 
 '''Program for converting a view of an STL file into a PDF file.'''
 
-from __future__ import print_function, division
+
 import sys
 import time
 import numpy as np

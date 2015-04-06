@@ -76,7 +76,7 @@ def indexate(points):
     """
     pd = {}
     indices = [pd.setdefault(tuple(p), len(pd)) for p in points]
-    pt = sorted([(v, k) for k, v in pd.iteritems()], key=lambda x: x[0])
+    pt = sorted([(v, k) for k, v in pd.items()], key=lambda x: x[0])
     unique = np.array([i[1] for i in pt])
     return np.array(indices, np.uint16), unique
 
