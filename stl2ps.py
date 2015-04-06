@@ -89,7 +89,7 @@ def main(args):
         (a, b, c), _, _ = t
         return max(a[2], b[2], c[2])
 
-    vf.sort(None, fkey)
+    vf.sort(key=fkey)
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     msg.say('Creating PostScript header')
     s1 = "% The scale factor used is: {:.2f} PostScript points/STL-unit"

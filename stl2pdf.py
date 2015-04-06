@@ -89,7 +89,7 @@ def main(args):
         (a, b, c), _, _ = t
         return max(a[2], b[2], c[2])
 
-    vf.sort(None, fkey)
+    vf.sort(key=fkey)
     msg.say('Initialize drawing surface')
     out = cairo.PDFSurface(outfile, canvas_size, canvas_size)
     ctx = cairo.Context(out)

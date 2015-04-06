@@ -136,4 +136,5 @@ class Msg(object):
         :returns: @todo
         """
         delta = datetime.now() - self.start
-        print('['+str(delta)[:-4]+']:', args)
+        print('[', str(delta)[:-4], ']:', sep="", end=" ")
+        print(*args)
