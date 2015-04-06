@@ -120,7 +120,7 @@ def rotz(ang):
     return np.array([[c,  -s, 0.0, 0.0],
                      [s,   c, 0.0, 0.0],
                      [0.0, 0.0, 1.0, 0.0],
-                     [0.0, 0.0, 0.0, 1.0]]), np.float32
+                     [0.0, 0.0, 0.0, 1.0]], np.float32)
 
 
 def rot(axis, angle):
