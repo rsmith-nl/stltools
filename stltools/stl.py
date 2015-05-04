@@ -35,7 +35,7 @@ import mmap
 from . import vecops as vo
 import numpy as np
 
-__version__ = '$Revision$'[11:-2]
+__version__ = '3.3'
 
 
 def _striplines(m):

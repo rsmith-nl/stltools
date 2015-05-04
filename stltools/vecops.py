@@ -32,7 +32,7 @@
 import numpy as np
 import math as m
 
-__version__ = '$Revision$'[11:-2]
+__version__ = '3.3'
 
 
 def length(v):

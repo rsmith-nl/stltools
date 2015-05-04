@@ -33,7 +33,7 @@ import time
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-__version__ = '$Revision$'[11:-2]
+__version__ = '3.3'
 
 
 def usage():
