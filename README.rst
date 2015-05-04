@@ -1,8 +1,8 @@
-===================================
 STL file manipulation with stltools
-===================================
+###################################
 
-:Author: Roland Smith
+:date: 2015-05-04
+:author: Roland Smith
 
 .. vim:fileencoding=utf-8:ft=rst
 
@@ -19,7 +19,7 @@ because it tried to do too much. This version is a straight translator.
 However, the speed of the method to create a POV-ray mesh2 object was much
 improved.  It produces a POV-ray mesh or mesh2 declaration that you can use in
 your scenes. N.B.: you still have to instantiate the mesh as an object, give
-it material properties, define a light and a camera &c.
+it material properties, define a light and a camera &c.::
 
     usage: stl2pov.py [-h] [-2,--mesh2] [-v] [file [file ...]]
 
@@ -43,7 +43,7 @@ simple shading algorithm. It does not draw facets that point away from the
 viewer. The remaining facets are sorted back to front by average depth of
 their vertices. The removal of completely occluded surfaces has been tested
 and dropped as too expensive. Shadows and more sophisticated lighting effects
-are not planned, but patches are welcome.
+are not planned, but patches are welcome.::
 
     usage: stl2ps infile [outfile] [transform [transform ...]]
     where [transform] is [x number|y number|z number]
@@ -52,7 +52,7 @@ are not planned, but patches are welcome.
 stl2pdf
 -------
 This is basically a variant of stl2ps using the cairo library to generate
-PDF output directly. It requires the cairo library and its Python binding.
+PDF output directly. It requires the cairo library and its Python binding.::
 
     usage: stl2pdf infile [outfile] [transform [transform ...]]
     where [transform] is [x number|y number|z number]
@@ -63,7 +63,7 @@ stlinfo
 This program prints some information about the STL file, like the name of the
 object, its bounding box and the number of facets. Optionally it can also list
 an STL text version of the file. This way stlinfo can be used to convert a
-binary STL file to a text version.
+binary STL file to a text version.::
 
     usage: stlinfo [-h] [-t] [-b] [-v] [file [file ...]]
 
