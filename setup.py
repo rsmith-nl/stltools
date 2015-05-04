@@ -2,14 +2,14 @@
 # Installation script for stltools
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Last modified: 2015-05-04 22:32:59 +0200
+# Last modified: 2015-05-05 00:25:23 +0200
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 import os
 
 _scripts = ['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py']
 
-with open('README.rst') as f:
+with open('README.rst', encoding='utf-8') as f:
     ld = f.read()
 
 # Remove the extensions from the scripts for UNIX-like systems.
@@ -26,7 +26,8 @@ setup(name='stltools',
       version='3.3',
       license='BSD',
       description='Programs to read and convert STL files.',
-      author='Roland Smith', author_email='rsmith@xs4all.nl',
+      author='Roland Smith',
+      author_email='rsmith@xs4all.nl',
       url='http://rsmith.home.xs4all.nl/software/py-stl-stl2pov.html',
       scripts=_scripts,
       provides='stltools', packages=['stltools'],

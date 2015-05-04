@@ -1,7 +1,7 @@
 STL file manipulation with stltools
 ###################################
 
-:date: 2015-05-04
+:date: 2015-05-05
 :author: Roland Smith
 
 .. vim:fileencoding=utf-8:ft=rst
@@ -87,4 +87,7 @@ Run the following command to install the module and the scripts.
 
 .. code-block:: sh
 
-    # python setup.py install
+    # python3 setup.py install --record stltools-files.txt
+
+Keep the file ``stltools-files.txt``; it shows you which files to remove to
+uninstall the program.
