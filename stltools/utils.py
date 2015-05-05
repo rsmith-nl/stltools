@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2015-05-05 18:20:45 +0200
+# Last modified: 2015-05-05 23:50:46 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,12 +29,30 @@
 """Utilities for stltools."""
 
 from datetime import datetime
+import argparse
 import glob
 import os.path
 import sys
 from . import matrix as m
 
 __version__ = '3.3'
+
+
+class RotateAction(argparse.Action):
+    """Gather rotation options."""
+
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(RotateAction, self).__init__(option_strings, dest,
+                                           **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        rotations = getattr(namespace, 'rotations', None)
+        if not rotations:
+            rotations = []
+        rotations += [(option_string[1], values)]
+        setattr(namespace, 'rotations', rotations)
 
 
 def outname(inname, extension, addenum=''):

@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# $Date$
+# Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2015-05-05 23:53:21 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,7 +27,8 @@
 
 '''Program for converting a view of an STL file into a PDF file.'''
 
-
+import argparse
+import logging
 import sys
 import cairo
 import numpy as np
@@ -36,33 +37,56 @@ from stltools import stl, bbox, utils, vecops, matrix
 __version__ = '3.3'
 
 
-def usage():
-    print("Usage: stl2pdf infile [outfile] [transform [transform ...]]")
-    print("where [transform] is [x number|y number|z number]")
+def main(argv):
+    """Main program of stl2pdf.
 
-
-def main(args):
-    """Main program.
-
-    Keyword arguments:
-    argv -- command line arguments (without program name!)
+    Arguments:
+        args: Command line arguments (without program name!)
     """
-    msg = utils.Msg()
-    canvas_size = 200
-    infile, outfile, tr = utils.processargs(args, '.pdf', usage)
-    msg.say('Reading STL file')
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--log', default='warning',
+                        choices=['info', 'debug', 'warning', 'error'],
+                        help="logging level (defaults to 'warning')")
+    parser.add_argument('-c', '--canvas', dest='canvas_size', type=int,
+                        help="canvas size", default=200)
+    parser.add_argument('-o', '--output', dest='outfile', type=str,
+                        help="output file name", default="")
+    parser.add_argument('-x', type=float, action=utils.RotateAction)
+    parser.add_argument('-y', type=float, action=utils.RotateAction)
+    parser.add_argument('-z', type=float, action=utils.RotateAction)
+    parser.add_argument('file', nargs=1, type=str,
+                        help='name of the file to process')
+    args = parser.parse_args(argv)
+    logging.basicConfig(level=getattr(logging, args.log.upper(), None),
+                        format='%(levelname)s: %(message)s')
+    args.file = args.file[0]
+    if 'rotations' not in args:
+        logging.info('no rotations specified')
+        tr = matrix.I()
+    else:
+        tl = []
+        which = {'x': matrix.rotx, 'y': matrix.roty, 'z': matrix.rotz}
+        for axis, rot in args.rotations:
+            tl.append(which[axis](rot))
+        tr = matrix.concat(*tl)
+        logging.info('rotation matrix:\n{}'.format(tr))
+    if not args.outfile:
+        args.outfile = utils.outname(args.file, '.pdf')
+        ofs = "no output filename given, using '{}'"
+        logging.info(ofs.format(args.outfile))
+    logging.info("reading STL file '{}'".format(args.file))
     try:
-        vertices, _ = stl.readstl(infile)
+        vertices, _ = stl.readstl(args.file)
     except ValueError as e:
-        print((infile + ':', e))
+        logging.error('{}: {}'.format(args.file, e))
         sys.exit(1)
-    msg.say('Calculating normal vectors')
+    logging.info('calculating normal vectors')
     facets = vertices.reshape((-1, 3, 3))
     normals = np.array([vecops.normal(a, b, c) for a, b, c in facets])
-    msg.say('Apply transformations to world coordinates')
+    logging.info('applying transformations to world coordinates')
     vertices = vecops.xform(tr, vertices)
     normals = vecops.xform(tr[0:3, 0:3], normals)
-    msg.say('Making model-view matrix')
+    logging.info('making model-view matrix')
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     width = maxx - minx
     height = maxy - miny
@@ -70,33 +94,34 @@ def main(args):
     dy = -(miny + maxy)/2
     dz = -maxz
     m = matrix.trans([dx, dy, dz])
-    sf = min(canvas_size/width, canvas_size/height)
+    sf = min(args.canvas_size/width, args.canvas_size/height)
     v = matrix.scale(sf, -sf)
-    v[0, 3], v[1, 3] = canvas_size/2, canvas_size/2
+    v[0, 3], v[1, 3] = args.canvas_size/2, args.canvas_size/2
     mv = matrix.concat(m, v)
-    msg.say('Transforming to view space')
+    logging.info('transforming to view space')
     vertices = vecops.xform(mv, vertices)
     facets = vertices.reshape((-1, 3, 3))
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
-    msg.say('Determine visible facets')
+    logging.info('Determining visible facets')
     vf = [(f, n, 0.4*n[2]+0.5) for f, n in zip(facets, normals) if n[2] > 0]
-    msg.say('{:.2f}% of facets is visible'.format(100*len(vf)/len(facets)))
+    vfs = '{:.2f}% of facets is visible'
+    logging.info(vfs.format(100*len(vf)/len(facets)))
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
-    msg.say('Depth-sorting visible facets')
+    logging.info('depth-sorting visible facets')
 
     def fkey(t):
         (a, b, c), _, _ = t
         return max(a[2], b[2], c[2])
 
     vf.sort(key=fkey)
-    msg.say('Initialize drawing surface')
-    out = cairo.PDFSurface(outfile, canvas_size, canvas_size)
+    logging.info('initializing drawing surface')
+    out = cairo.PDFSurface(args.outfile, args.canvas_size, args.canvas_size)
     ctx = cairo.Context(out)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
-    msg.say('Drawing the triangles')
+    logging.info('drawing the triangles')
     for (a, b, c), _, i in vf:
         ctx.new_path()
         ctx.move_to(a[0], a[1])
@@ -109,7 +134,7 @@ def main(args):
     # Send output.
     out.show_page()
     out.finish()
-    msg.say('Done')
+    logging.info('done')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
