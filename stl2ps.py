@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2015-05-05 22:08:35 +0200
+# Last modified: 2015-05-05 22:12:27 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -53,7 +53,7 @@ def main(args):
     try:
         vertices, _ = stl.readstl(infile)
     except ValueError as e:
-        print((infile + ':', e))
+        logging.error('{}: {}'.format(infile, e))
         sys.exit(1)
     origbb = bbox.makebb(vertices)
     logging.info('Calculating normal vectors')
