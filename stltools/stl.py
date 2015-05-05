@@ -1,9 +1,9 @@
 # file: stl.py
 # vim:fileencoding=utf-8
 #
-# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2015-05-05 01:07:49 +0200
+# Last modified: 2015-05-05 18:14:00 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
