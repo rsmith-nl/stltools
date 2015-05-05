@@ -1,10 +1,9 @@
 # file: utils.py
 # vim:fileencoding=utf-8
 #
-# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# $Date$
-# $Revision$
+# Last modified: 2015-05-05 18:20:45 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,10 +28,9 @@
 
 """Utilities for stltools."""
 
-
-import os.path
 from datetime import datetime
 import glob
+import os.path
 import sys
 from . import matrix as m
 
@@ -40,12 +38,16 @@ __version__ = '3.3'
 
 
 def outname(inname, extension, addenum=''):
-    """Creates the name of the output filename based on the input filename.
+    """
+    Creates the name of the output filename based on the input filename.
 
-    :inname: name + path of the input file
-    :extension: extension of the output file.
-    :addenum: string to append to filename
-    :returns: output file name.
+    Arguments:
+        inname: Name + path of the input file.
+        extension: Extension of the output file.
+        addenum: String to append to filename.
+
+    Returns:
+        Output file name.
     """
     rv = os.path.splitext(os.path.basename(inname))[0]
     if rv.startswith('.') or rv.isspace():
@@ -56,24 +58,30 @@ def outname(inname, extension, addenum=''):
 
 
 def skip(error, filename):
-    """Skip a file in case of an error
+    """
+    Notify that an input file will be skipped because of an error.
 
-    :error: exception
-    :filename: name of file to skip
+    Arguments:
+        error: Exception.
+        filename: Name of file to skip.
     """
     print("Cannot read file: {}".format(error))
     print("Skipping file '{}'".format(filename))
 
 
 def processargs(args, ext, use):
-    """Process the command-line arguments for a program that does coordinate
+    """
+    Process the command-line arguments for a program that does coordinate
     transformations.
 
-    :args: The command line arguments without the program name.
-    :ext: The extension of the output file.
-    :use: A function for printing a usage message.
-    :returns: A tuple containing the input file name, the output filename and
-    the transformation matrix.
+    Arguments:
+        args: The command line arguments without the program name.
+        ext: The extension of the output file.
+        use: A function for printing a usage message.
+
+    Returns:
+        A tuple containing the input file name, the output filename and
+        the transformation matrix.
     """
     validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
     if len(args) < 1:
@@ -110,11 +118,14 @@ def processargs(args, ext, use):
 
 
 def xpand(args):
-    """Expand command line arguments for operating systems incapable of doing
-    so.
+    """
+    Expand command line arguments for operating systems incapable of doing so.
 
-    :args: list of argument
-    :returns: expanded argument list
+    Arguments:
+        args: list of command-line arguments.
+
+    Returns:
+        Expanded argument list.
     """
     xa = []
     for a in args:

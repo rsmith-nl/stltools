@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-28 02:07:00 +0200
-# Last modified: 2015-05-05 18:08:45 +0200
+# Last modified: 2015-05-05 20:59:36 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,7 +36,12 @@ __version__ = '3.3'
 
 
 def I():
-    """Returns the 4x4 identity matrix."""
+    """
+    Creates identity matrix.
+
+    Returns:
+        A 4x4 numpy array of float32 with main diagonal set to 1, rest 0.
+    """
     return np.identity(4, np.float32)
 
 
@@ -45,10 +50,11 @@ def trans(vec):
     Creates a transformation matrix for translation.
 
     Arguments:
-        vec: 3D translation vector.
+        vec: (3,) numpy array representing a 3D translation vector.
 
     Returns:
-        4x4 homogeneous coordinates translation matrix along vec.
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        translation matrix along vec.
     """
     rv = I()
     rv[0, 3] = vec[0]
@@ -62,7 +68,7 @@ def mul(*args):
     Returns the multiplication of the 4x4 matrix arguments.
 
     Arguments:
-        args: 4x4 matrices A, B, C, ..., N.
+        args: 4x4 numpy arrayis of float32 A, B, C, ..., N.
 
     Returns:
         A × B × C × ... × N
@@ -79,7 +85,7 @@ def concat(*args):
     of the arguments in reversed order.
 
     Arguments:
-        args: 4x4 matrices A, B, C, ..., N.
+        args: 4x4 arrays of float32 A, B, C, ..., N.
 
     Returns:
         N × ... × C × B × A
@@ -99,7 +105,8 @@ def rotx(angle):
         angle: Rotation angle in degrees.
 
     Returns:
-        4x4 homogeneous coordinates matrix for rotation around the X axis.
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        matrix for rotation around the X axis.
     """
     rad = math.radians(angle)
     c = math.cos(rad)
@@ -118,7 +125,8 @@ def roty(ang):
         angle: Rotation angle in degrees.
 
     Returns:
-        4x4 homogeneous coordinates matrix for rotation around the Y axis.
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        matrix for rotation around the Y axis.
     """
     rad = math.radians(ang)
     c = math.cos(rad)
@@ -137,7 +145,8 @@ def rotz(ang):
         angle: Rotation angle in degrees.
 
     Returns:
-        4x4 homogeneous coordinates matrix for rotation around the Z axis.
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        matrix for rotation around the Z axis.
     """
     rad = math.radians(ang)
     c = math.cos(rad)
@@ -150,15 +159,16 @@ def rotz(ang):
 
 def rot(axis, angle):
     """
-    Calculates the transform for rotation through O around the an arbitrary
-    direction.
+    Calculates the transform for rotation through O around the an
+    arbitrary direction.
 
     Arguments:
         axis: (3,) array representing the rotation axis.
         angle: Rotation angle in degrees.
 
     Returns:
-        4x4 homogeneous coordinates matrix for rotation around the axis.
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates matrix for rotation around the axis.
     """
     ax = np.require(axis[0:3], np.float32)
     l = np.linalg.norm(ax)
@@ -192,7 +202,8 @@ def scale(x=1, y=1, z=1):
         z: Scale factor for z direction (default 1).
 
     Returns:
-        4x4 homogeneous coordinates scaling matrix.
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates scaling matrix.
     """
     rv = I()
     rv[0, 0], rv[1, 1], rv[2, 2] = float(x), float(y), float(z)
@@ -209,7 +220,8 @@ def lookat(eye, center, up):
         up: 3D upward direction
 
     Returns:
-        4x4 homogeneous coordinates view matrix.
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates view matrix.
     """
     eye = np.array(eye, np.float32)
     center = np.array(center, np.float32)
@@ -234,7 +246,8 @@ def ortho(xyscale):
         xyscale: scaling factor for x and y
 
     Returns:
-        4x4 homogeneous coordinates orthographic projection matrix.
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates orthographic projection matrix.
     """
     rv = I()
     rv[0, 0], rv[1, 1] = xyscale, xyscale
@@ -254,7 +267,8 @@ def perspective(fovy, width, height, near, far):
         zfar: far clipping plane (> 0)
 
     Returns:
-        4x4 homogeneous coordinates perspective projection matrix.
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates perspective projection matrix.
     """
     aspect = float(width)/float(height)
     f = 1/math.tan(math.radians(float(fovy))/2)
