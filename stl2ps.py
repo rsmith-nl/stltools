@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# $Date$
+# Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2015-05-05 22:08:35 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,6 +28,7 @@
 '''Program for converting a view of an STL file into a PDF file.'''
 
 
+import logging
 import sys
 import time
 import numpy as np
@@ -46,23 +47,22 @@ def main(args):
 
     :argv: command line arguments (without program name!)
     """
-    msg = utils.Msg()
     canvas_size = 200
     infile, outfile, tr = utils.processargs(args, '.eps', usage)
-    msg.say('Reading STL file')
+    logging.info('Reading STL file')
     try:
         vertices, _ = stl.readstl(infile)
     except ValueError as e:
         print((infile + ':', e))
         sys.exit(1)
     origbb = bbox.makebb(vertices)
-    msg.say('Calculating normal vectors')
+    logging.info('Calculating normal vectors')
     facets = vertices.reshape((-1, 3, 3))
     normals = np.array([vecops.normal(a, b, c) for a, b, c in facets])
-    msg.say('Apply transformations to world coordinates')
+    logging.info('Apply transformations to world coordinates')
     vertices = vecops.xform(tr, vertices)
     normals = vecops.xform(tr[0:3, 0:3], normals)
-    msg.say('Making model-view matrix')
+    logging.info('Making model-view matrix')
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     width = maxx - minx
     height = maxy - miny
@@ -74,16 +74,17 @@ def main(args):
     v = matrix.scale(sf, sf)
     v[0, 3], v[1, 3] = canvas_size/2, canvas_size/2
     mv = matrix.concat(m, v)
-    msg.say('Transforming to view space')
+    logging.info('Transforming to view space')
     vertices = vecops.xform(mv, vertices)
     facets = vertices.reshape((-1, 3, 3))
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
-    msg.say('Determine visible facets')
+    logging.info('Determine visible facets')
     vf = [(f, n, 0.4*n[2]+0.5) for f, n in zip(facets, normals) if n[2] > 0]
-    msg.say('{:.2f}% of facets is visible'.format(100*len(vf)/len(facets)))
+    fvs = '{:.2f}% of facets is visible'
+    logging.info(fvs.format(100*len(vf)/len(facets)))
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
-    msg.say('Depth-sorting visible facets')
+    logging.info('Depth-sorting visible facets')
 
     def fkey(t):
         (a, b, c), _, _ = t
@@ -91,7 +92,7 @@ def main(args):
 
     vf.sort(key=fkey)
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
-    msg.say('Creating PostScript header')
+    logging.info('Creating PostScript header')
     s1 = "% The scale factor used is: {:.2f} PostScript points/STL-unit"
     s2 = "% This becomes a picture of {:.0f}×{:.0f} PostScript points;"\
          " {:.0f}×{:.0f} mm."
@@ -117,18 +118,18 @@ def main(args):
               "/t {lineto closepath gsave fill grestore stroke} def",
               "% Start drawing"]
     s3 = "{:4.2f} g {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t"
-    msg.say('Rendering triangles')
+    logging.info('Rendering triangles')
     lines += [s3.format(i, a[0], a[1], b[0], b[1], c[0], c[1])
               for (a, b, c), z, i in vf]
     lines += ["showpage", '%%EOF']
     outs = '\n'.join(lines)
     try:
         with open(outfile, "w+") as outf:
-            msg.say('Writing output file "{}"'.format(outfile))
+            logging.info('Writing output file "{}"'.format(outfile))
             outf.write(outs)
-            msg.say('Done')
+            logging.info('Done')
     except:
-        msg.say('Error: Cannot write output file "{}"'.format())
+        logging.error('Cannot write output file "{}"'.format())
 
 
 if __name__ == '__main__':
