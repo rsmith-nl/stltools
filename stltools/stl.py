@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2015-05-06 23:50:55 +0200
+# Last modified: 2015-05-07 00:14:10 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -112,10 +112,10 @@ def text(name, ifacets, points, inormals, vectors):
     fcts = list(zip(ifacets, inormals))
     ln = ['solid {}'.format(name)]
     for f, n in fcts:
-        ln.append('  facet normal ' + str(vectors[n])[2:-1])
+        ln.append('  facet normal ' + str(vectors[n])[1:-1])
         ln.append('    outer loop')
         for v in f:
-            ln.append('      vertex ' + str(points[v])[2:-1])
+            ln.append('      vertex ' + str(points[v])[1:-1])
         ln.append('    endloop')
         ln.append('  endfacet')
     ln.append('endsolid')
