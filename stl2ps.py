@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2015-05-06 01:56:13 +0200
+# Last modified: 2015-05-07 00:03:52 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,7 +25,13 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-'''Program for converting a view of an STL file into a PostScript file.'''
+'''Program for converting a view of an STL file into a PostScript file.
+Using the -x, -y and -z options you can rotate the object around these axis.
+Subsequent rotations will be applied in the order they are given on the
+command line.
+Note that the object will be automatically centered and scaled to fit in the
+picture.
+'''
 
 import argparse
 import logging
@@ -41,19 +47,23 @@ def main(argv):
     """Main program of stl2ps.
 
     Arguments:
-        args: Command line arguments (without program name!)
+        argv: Command line arguments (without program name!)
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--log', default='warning',
-                        choices=['info', 'debug', 'warning', 'error'],
+                        choices=['debug', 'info', 'warning', 'error'],
                         help="logging level (defaults to 'warning')")
     parser.add_argument('-c', '--canvas', dest='canvas_size', type=int,
-                        help="canvas size", default=200)
+                        help="canvas size, defaults to 200 PostScript points",
+                        default=200)
     parser.add_argument('-o', '--output', dest='outfile', type=str,
                         help="output file name", default="")
-    parser.add_argument('-x', type=float, action=utils.RotateAction)
-    parser.add_argument('-y', type=float, action=utils.RotateAction)
-    parser.add_argument('-z', type=float, action=utils.RotateAction)
+    parser.add_argument('-x', type=float, action=utils.RotateAction,
+                        help="rotation around X axis in degrees")
+    parser.add_argument('-y', type=float, action=utils.RotateAction,
+                        help="rotation around Y axis in degrees")
+    parser.add_argument('-z', type=float, action=utils.RotateAction,
+                        help="rotation around Z axis in degrees")
     parser.add_argument('file', nargs=1, type=str,
                         help='name of the file to process')
     args = parser.parse_args(argv)
