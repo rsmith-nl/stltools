@@ -33,7 +33,7 @@ import sys
 import time
 from stltools import stl, utils
 
-__version__ = '3.3'
+__version__ = '4-beta'
 
 
 def mesh1(name, vertices):

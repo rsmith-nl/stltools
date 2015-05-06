@@ -32,7 +32,7 @@ right-handed coordinate system."""
 import math
 import numpy as np
 
-__version__ = '3.3'
+__version__ = '4-beta'
 
 
 def I():

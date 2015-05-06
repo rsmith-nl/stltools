@@ -31,7 +31,7 @@
 import numpy as np
 import math as m
 
-__version__ = '3.3'
+__version__ = '4-beta'
 
 
 def length(v):

@@ -34,7 +34,7 @@ import time
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-__version__ = '3.3'
+__version__ = '4-beta'
 
 
 def main(argv):

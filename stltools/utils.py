@@ -35,7 +35,7 @@ import os.path
 import sys
 from . import matrix as m
 
-__version__ = '3.3'
+__version__ = '4-beta'
 
 
 class RotateAction(argparse.Action):
