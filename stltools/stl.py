@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2015-05-06 20:55:05 +0200
+# Last modified: 2015-05-06 22:06:00 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -199,7 +199,7 @@ def _getbp(m):
         v = m.read(50)
         if len(v) != 50:
             break
-        p = struct.unpack('<12x9f2x', v)
+        p = struct.unpack('<9f14x', v)
         yield tuple(p[0:3])
         yield tuple(p[3:6])
         yield tuple(p[6:])
