@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2015-05-05 18:14:00 +0200
+# Last modified: 2015-05-06 20:55:05 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -135,7 +135,7 @@ def binary(name, ifacets, points, inormals, vectors):
     Returns:
         A string containing a binary representation of the brep.
     """
-    rc = [struct.pack('<80sI', name, len(ifacets))]
+    rc = [struct.pack('<80sI', name.encode('utf-8'), len(ifacets))]
     for fi, ni in zip(ifacets, inormals):
         data = list(np.concatenate((points[fi[0]], points[fi[1]],
                                     points[fi[2]], vectors[ni]))) + [0]
