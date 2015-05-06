@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2015-05-05 23:50:46 +0200
+# Last modified: 2015-05-06 20:01:44 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -149,21 +149,3 @@ def xpand(args):
     for a in args:
         xa += glob.glob(a)
     return xa
-
-
-class Msg(object):
-    """Message printer"""
-
-    def __init__(self):
-        """@todo: to be defined1 """
-        self.start = datetime.now()
-
-    def say(self, *args):
-        """@todo: Docstring for message
-
-        :*args: @todo
-        :returns: @todo
-        """
-        delta = datetime.now() - self.start
-        print('[', str(delta)[:-4], ']:', sep="", end=" ")
-        print(*args)
