@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2015-05-06 20:01:44 +0200
+# Last modified: 2015-05-06 20:06:35 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -73,79 +73,3 @@ def outname(inname, extension, addenum=''):
     if not extension.startswith('.'):
         extension = '.' + extension
     return rv + addenum + extension
-
-
-def skip(error, filename):
-    """
-    Notify that an input file will be skipped because of an error.
-
-    Arguments:
-        error: Exception.
-        filename: Name of file to skip.
-    """
-    print("Cannot read file: {}".format(error))
-    print("Skipping file '{}'".format(filename))
-
-
-def processargs(args, ext, use):
-    """
-    Process the command-line arguments for a program that does coordinate
-    transformations.
-
-    Arguments:
-        args: The command line arguments without the program name.
-        ext: The extension of the output file.
-        use: A function for printing a usage message.
-
-    Returns:
-        A tuple containing the input file name, the output filename and
-        the transformation matrix.
-    """
-    validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
-    if len(args) < 1:
-        use()
-        sys.exit(0)
-    infile = args[0]
-    if len(args) < 2 or args[1] in validargs:
-        outfile = None
-        del args[:1]
-        outfile = outname(infile, ext)
-    else:
-        outfile = args[1]
-        del args[:2]
-    tr = m.I()
-    while len(args) > 1:
-        if not args[0] in validargs:
-            print("Unknown argument '{}' ignored.".format(args[0]))
-            del args[0]
-            continue
-        try:
-            ang = float(args[1])
-            if args[0] in ['x', 'X']:
-                add = m.rotx(ang)
-            elif args[0] in ['y', 'Y']:
-                add = m.roty(ang)
-            else:
-                add = m.rotx(ang)
-            del args[:2]
-            tr = m.concat(tr, add)
-        except:
-            print("Argument '{}' is not a number, ignored.".format(args[1]))
-            continue
-    return (infile, outfile, tr)
-
-
-def xpand(args):
-    """
-    Expand command line arguments for operating systems incapable of doing so.
-
-    Arguments:
-        args: list of command-line arguments.
-
-    Returns:
-        Expanded argument list.
-    """
-    xa = []
-    for a in args:
-        xa += glob.glob(a)
-    return xa
