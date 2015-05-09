@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2015-05-05 21:21:58 +0200
+# Last modified: 2015-05-09 17:03:52 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -96,7 +96,7 @@ def main(argv):
     parser.add_argument('-v', '--version', action='version',
                         version=__version__)
     parser.add_argument('--log', default='warning',
-                        choices=['info', 'debug', 'warning', 'error'],
+                        choices=['debug', 'info', 'warning', 'error'],
                         help="logging level (defaults to 'warning')")
     parser.add_argument('file', nargs='*', help='one or more file names')
     args = parser.parse_args(argv)
