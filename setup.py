@@ -2,7 +2,7 @@
 # Installation script for stltools
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Last modified: 2015-05-05 00:25:23 +0200
+# Last modified: 2015-08-22 21:39:31 +0200
 
 from setuptools import setup, find_packages
 import os
@@ -29,6 +29,11 @@ setup(name='stltools',
       author='Roland Smith',
       author_email='rsmith@xs4all.nl',
       url='http://rsmith.home.xs4all.nl/software/py-stl-stl2pov.html',
+      install_requires=['numpy>=1.7.0'],
+      extras_require={
+          'PDF':  ["pycairo>=1.10.0"],
+          'test': ["nose>=1.3.0"],
+      },
       scripts=_scripts,
       provides='stltools', packages=['stltools'],
       classifiers=['Development Status :: 5 - Production/Stable',

@@ -131,6 +131,24 @@ binary STL file to a text version.::
                             logging level (defaults to 'warning')
 
 
+Requirements
+============
+
+General requirements;
+
+* Python 3 (tested with 3.4)
+* numpy (tested with 1.9.2)
+
+For ``stl2pdf``, the cairo_ graphics library (tested with version 1.14.2) and
+its Python bindings (tested with version 1.10.0) are required.
+
+.. _cairo: http://cairographics.org/
+
+For running the tests, nosetests_ is required.
+
+.. _nosetests: https://nose.readthedocs.org/en/latest/index.html
+
+
 Installation
 ============
 
@@ -148,8 +166,6 @@ Testing the code
 ================
 
 The directory ``test`` contains tests (using nosetests_) for most of the code.
-
-.. _nosetests: https://nose.readthedocs.org/en/latest/index.html
 
 To run the tests;
 
