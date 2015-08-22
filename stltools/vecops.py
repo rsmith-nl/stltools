@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2015-05-06 20:08:22 +0200
+# Last modified: 2015-08-22 15:59:20 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -110,7 +110,7 @@ def to4(pnts):
     """
     if len(pnts.shape) != 2 or pnts.shape[1] != 3:
         raise ValueError('invalid shape')
-    return np.vstack((pnts.T, np.ones(pnts.shape[0]))).T
+    return np.hstack((pnts, np.ones(pnts.shape[0]).reshape((-1, 1))))
 
 
 def to3(pnts):

@@ -1,68 +1,24 @@
-# file: test-stltools.py
+# file: test_matrix.py
 # vim:fileencoding=utf-8:ft=python
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-04-06 23:26:45 +0200
-# $Date$
-# $Revision$
+# Last modified: 2015-08-22 19:19:32 +0200
 
-"""Tests for the stltools module.
+"""Tests for the matrix module.
 
-Run with: nosetests-3.4 -v test-stltools.py
+Run this test only with nosetests-3.4 -v test_matrix.py
+Run all tests with: nosetests-3.4 -v test_*
 """
 
 import os
 import sys
-
-bp = os.path.dirname(os.path.realpath('.')).split(os.sep)
-modpath = os.sep.join(bp + ['stltools'])
-sys.path.append(modpath)
-
 import numpy as np
-import vecops as vo
-import matrix as ma
 
+sys.path.insert(1, '..')
 
-def test_vo_length():
-    v = np.array([0, 0, 0])
-    assert vo.length(v) == 0
-    v = np.array([1, 0, 0])
-    assert vo.length(v) == 1
-    v = np.array([0, 1, 0])
-    assert vo.length(v) == 1
-    v = np.array([0, 0, 1])
-    assert vo.length(v) == 1
-    v = np.array([20, 5, 4])
-    assert vo.length(v) == 21
-
-
-def test_vo_normalize():
-    v = np.array([20.0, 5.0, 4.0])
-    r = vo.normalize(v)
-    assert np.all(v/r == 21)
-
-
-def test_vo_normal():
-    r = vo.normal(np.array([0, 0, 0]), np.array([1, 0, 0]),
-                  np.array([0, 1, 0]))
-    assert np.all(r == np.array([0, 0, 1]))
-
-
-def test_vo_indexate():
-    c = np.arange(15).reshape((-1, 3))
-    pnts = np.concatenate((c, c))
-    q = np.arange(5, dtype=np.uint16)
-    q = np.concatenate((q, q))
-    indices, unique = vo.indexate(pnts)
-    assert np.all(unique == c)
-    assert np.all(indices == q)
-
-
-def test_vo_to():
-    pnts = np.arange(15).reshape((-1, 3))
-    p4 = vo.to4(pnts)
-    p3 = vo.to3(p4)
-    assert np.all(p3 == pnts)
+import stltools.vecops as vo
+import stltools.matrix as ma
 
 
 def test_vo_xform_scale():

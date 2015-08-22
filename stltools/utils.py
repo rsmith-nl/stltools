@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2015-05-06 20:06:35 +0200
+# Last modified: 2015-08-22 20:32:13 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,6 +32,7 @@ from datetime import datetime
 import argparse
 import glob
 import os.path
+import re
 import sys
 from . import matrix as m
 
@@ -68,8 +69,8 @@ def outname(inname, extension, addenum=''):
         Output file name.
     """
     rv = os.path.splitext(os.path.basename(inname))[0]
-    if rv.startswith('.') or rv.isspace():
-        raise ValueError("Invalid file name!")
+    rv = re.sub('^[\s\.]+|\s+$', '', rv)
+    rv = re.sub('\s+', '_', rv)
     if not extension.startswith('.'):
         extension = '.' + extension
     return rv + addenum + extension

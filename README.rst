@@ -1,7 +1,7 @@
 STL file manipulation with stltools
 ###################################
 
-:date: 2015-05-05
+:date: 2015-08-22
 :author: Roland Smith
 
 .. vim:fileencoding=utf-8:ft=rst
@@ -136,9 +136,24 @@ Installation
 
 Run the following command to install the module and the scripts.
 
-.. code-block:: sh
+.. code-block:: console
 
     # python3 setup.py install --record stltools-files.txt
 
 Keep the file ``stltools-files.txt``; it shows you which files to remove to
 completely uninstall the program.
+
+
+Testing the code
+================
+
+The directory ``test`` contains tests (using nosetests_) for most of the code.
+
+.. _nosetests: https://nose.readthedocs.org/en/latest/index.html
+
+To run the tests;
+
+.. code-block:: console
+
+    > cd test/
+    > nosetests -v
