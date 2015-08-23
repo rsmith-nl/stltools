@@ -3,7 +3,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-08-22 20:18:04 +0200
-# Last modified: 2015-08-22 20:55:33 +0200
+# Last modified: 2015-08-24 01:29:50 +0200
 
 """Tests for the utils module.
 
@@ -12,12 +12,8 @@ Run all tests with: nosetests-3.4 -v
 """
 
 import os
-import sys
 import numpy as np
 from nose.tools import raises
-
-sys.path.insert(1, '..')
-
 import stltools.utils as utils
 
 

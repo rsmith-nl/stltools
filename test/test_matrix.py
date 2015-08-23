@@ -3,7 +3,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-04-06 23:26:45 +0200
-# Last modified: 2015-08-22 19:19:32 +0200
+# Last modified: 2015-08-24 01:29:34 +0200
 
 """Tests for the matrix module.
 
@@ -12,11 +12,7 @@ Run all tests with: nosetests-3.4 -v test_*
 """
 
 import os
-import sys
 import numpy as np
-
-sys.path.insert(1, '..')
-
 import stltools.vecops as vo
 import stltools.matrix as ma
 

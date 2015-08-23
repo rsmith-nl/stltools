@@ -3,7 +3,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-08-22 16:45:36 +0200
-# Last modified: 2015-08-22 21:06:47 +0200
+# Last modified: 2015-08-24 01:29:43 +0200
 
 """Tests for the stl module.
 
@@ -12,11 +12,7 @@ Run all tests with: nosetests-3.4 -v test_*
 """
 
 import os
-import sys
 import numpy as np
-
-sys.path.insert(1, '..')
-
 import stltools.stl as stl
 
 
