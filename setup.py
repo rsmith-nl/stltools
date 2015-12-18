@@ -9,7 +9,7 @@ import os
 
 _scripts = ['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py']
 
-with open('README.txt') as f:
+with open('README.rst') as f:
     ld = f.read()
 
 # Remove the extensions from the scripts for UNIX-like systems.
