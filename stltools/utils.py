@@ -75,37 +75,39 @@ def processargs(args, ext, use):
     :returns: A tuple containing the input file name, the output filename and
     the transformation matrix.
     """
-    validargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
+    print(args)
+    transformargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
     if len(args) < 1:
         use()
         sys.exit(0)
-    infile = args[0]
-    if len(args) < 2 or args[1] in validargs:
-        outfile = None
-        del args[:1]
-        outfile = outname(infile, ext)
-    else:
-        outfile = args[1]
-        del args[:2]
+    infile = ''
+    for arg in args:
+        if 'stl' in arg:
+            infile = arg
+    if infile == '':
+        use()
+        sys.exit(0)
+    outfile = None
     tr = m.I()
-    while len(args) > 1:
-        if not args[0] in validargs:
-            print("Unknown argument '{}' ignored.".format(args[0]))
-            del args[0]
-            continue
-        try:
-            ang = float(args[1])
-            if args[0] in ['x', 'X']:
-                add = m.rotx(ang)
-            elif args[0] in ['y', 'Y']:
-                add = m.roty(ang)
-            else:
-                add = m.rotx(ang)
-            del args[:2]
-            tr = m.concat(tr, add)
-        except:
-            print("Argument '{}' is not a number, ignored.".format(args[1]))
-            continue
+    for arg in args:
+        if arg in transformargs:
+            try:
+                ang = float(arg)
+                if arg in ['x', 'X']:
+                    add = m.rotx(ang)
+                elif arg in ['y', 'Y']:
+                    add = m.roty(ang)
+                else:
+                    add = m.rotx(ang)
+                tr = m.concat(tr, add)
+            except:
+                print("Argument '{}' is not a number, ignored."
+                      .format(arg))
+                continue
+        elif ext in arg:
+            outfile = arg
+    if outfile == None:
+        outfile = outname(infile, ext)
     return (infile, outfile, tr)
 
 
