@@ -60,7 +60,7 @@ PDF output directly. It requires the cairo library and its Python binding.::
 
     usage: stl2pdf infile [outfile] [transform [transform ...]]
     where [transform] is [x number|y number|z number]
-
+    --bg and --fg both take six digit hex color codes of the form xxxxxx.  Please note the lack of '#'
 
 stlinfo
 -------

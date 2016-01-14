@@ -41,6 +41,7 @@ def usage():
             [--bg background color] [--fg object color]
             [transform [transform ...]]""")
     print("where [transform] is [x number|y number|z number]")
+    print("--bg and --fg both take six digit hex color codes of the form xxxxxx.  Please note the lack of '#'")
 
 
 def main(args):
