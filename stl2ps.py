@@ -37,7 +37,7 @@ __version__ = '$Revision$'[11:-2]
 
 
 def usage():
-    print("Usage: stl2ps infile [outfile] [transform [transform ...]]")
+    print("Usage: stl2ps infile [--ouput outfile] [transform [transform ...]]")
     print("where [transform] is [x number|y number|z number]")
 
 

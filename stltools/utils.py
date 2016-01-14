@@ -65,6 +65,20 @@ def skip(error, filename):
     print("Skipping file '{}'".format(filename))
 
 
+def hex2rgb(hex):
+    """Convert hex color code to rgb(ish) for cairo"""
+    hex_length = len(hex)
+    if hex_length == 6:
+        r = float(int(hex[0:2], 16)) / 255
+        g = float(int(hex[2:4], 16)) / 255
+        b = float(int(hex[4:6], 16)) / 255
+    else:
+        r = 1
+        g = 1
+        b = 1
+    return r, g, b
+
+
 def processargs(args, ext, use):
     """Process the command-line arguments for a program that does coordinate
     transformations.
@@ -75,40 +89,46 @@ def processargs(args, ext, use):
     :returns: A tuple containing the input file name, the output filename and
     the transformation matrix.
     """
-    print(args)
     transformargs = ['x', 'y', 'z', 'X', 'Y', 'Z']
     if len(args) < 1:
         use()
         sys.exit(0)
-    infile = ''
-    for arg in args:
-        if 'stl' in arg:
-            infile = arg
-    if infile == '':
-        use()
-        sys.exit(0)
-    outfile = None
-    tr = m.I()
-    for arg in args:
-        if arg in transformargs:
-            try:
-                ang = float(arg)
-                if arg in ['x', 'X']:
-                    add = m.rotx(ang)
-                elif arg in ['y', 'Y']:
-                    add = m.roty(ang)
-                else:
-                    add = m.rotx(ang)
-                tr = m.concat(tr, add)
-            except:
-                print("Argument '{}' is not a number, ignored."
-                      .format(arg))
-                continue
-        elif ext in arg:
-            outfile = arg
+    else:
+        infile = ''
+        outfile = None
+        tr = m.I()
+        infile = args[0]
+        bg_color = None
+        fg_color = None
+        del args[0]
+        for arg in args:
+            if 'stl' in arg:  # Hack
+                infile = arg
+        for arg in args:
+            arg_index = args.index(arg)
+            if arg in transformargs:
+                try:
+                    ang = float(args[arg_index +1])
+                    if arg in ['x', 'X']:
+                        add = m.rotx(ang)
+                    elif arg in ['y', 'Y']:
+                        add = m.roty(ang)
+                    else:
+                        add = m.rotx(ang)
+                    tr = m.concat(tr, add)
+                except:
+                    print("Argument '{}' is not a number, ignored."
+                          .format(arg))
+                    continue
+            elif arg == '--output':
+                outfile = args[arg_index + 1]
+            elif arg == '--bg':
+                bg_color = args[arg_index + 1]
+            elif arg == '--fg':
+                fg_color = args[arg_index + 1]
     if outfile == None:
         outfile = outname(infile, ext)
-    return (infile, outfile, tr)
+    return (infile, outfile, tr, bg_color, fg_color)
 
 
 def xpand(args):

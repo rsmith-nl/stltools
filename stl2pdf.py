@@ -37,7 +37,9 @@ __version__ = '$Revision$'[11:-2]
 
 
 def usage():
-    print("Usage: stl2pdf infile [outfile] [transform [transform ...]]")
+    print("""Usage: stl2pdf infile [--output outfile] 
+            [--bg background color] [--fg object color]
+            [transform [transform ...]]""")
     print("where [transform] is [x number|y number|z number]")
 
 
@@ -49,7 +51,19 @@ def main(args):
     """
     msg = utils.Msg()
     canvas_size = 200
-    infile, outfile, tr = utils.processargs(args, '.pdf', usage)
+    infile, outfile, tr, bg_color, fg_color = utils.processargs(args, '.pdf', usage)
+    if bg_color == None:
+        b_red = 1
+        b_green = 1
+        b_blue = 1
+    else:
+        b_red, b_green, b_blue = utils.hex2rgb(bg_color)
+    if fg_color == None:
+        f_red = 0.9
+        f_green = 0.9
+        f_blue = 0.9
+    else:
+        f_red, f_green, f_blue = utils.hex2rgb(fg_color)
     msg.say('Reading STL file')
     try:
         vertices, _ = stl.readstl(infile)
@@ -93,6 +107,9 @@ def main(args):
     msg.say('Initialize drawing surface')
     out = cairo.PDFSurface(outfile, canvas_size, canvas_size)
     ctx = cairo.Context(out)
+    ctx.set_source_rgb(b_red, b_green, b_blue)
+    ctx.rectangle(0,0,canvas_size,canvas_size)
+    ctx.fill()
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
@@ -103,7 +120,7 @@ def main(args):
         ctx.line_to(b[0], b[1])
         ctx.line_to(c[0], c[1])
         ctx.close_path()
-        ctx.set_source_rgb(i, i, i)
+        ctx.set_source_rgb(f_red, f_green, f_blue)
         ctx.fill_preserve()
         ctx.stroke()
     # Send output.
