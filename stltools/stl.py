@@ -35,7 +35,7 @@ import mmap
 import vecops as vo
 import numpy as np
 
-__version__ = '$Revision$'[11:-2]
+__version__ = '3.3'
 
 
 def _striplines(m):
@@ -119,7 +119,7 @@ def readstl(name):
     of the facets, and the name of the object as given in the STL file.
     """
     with open(name, 'rb') as f:
-        mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         vertices, name = _parsebinary(mm)
         if vertices is None:
             mm.seek(0)

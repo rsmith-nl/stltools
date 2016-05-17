@@ -33,7 +33,7 @@ right-handed coordinate system."""
 import math
 import numpy as np
 
-__version__ = '$Revision$'[11:-2]
+__version__ = '3.3'
 
 
 def I():
