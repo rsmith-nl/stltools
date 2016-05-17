@@ -69,7 +69,7 @@ def mesh2(name, vertices):
     # the STL coordinate system and that used in POV-ray
     lines += ['    <{1}, {0}, {2}>,'.format(*p) for p in points]
     lines[-1] = lines[-1][:-1]
-    lines += ['  face_indices {', '    {},'.format(len(ifacets))]
+    lines += ['  }\n  face_indices {', '    {},'.format(len(ifacets))]
     lines += ['    <{}, {}, {}>,'.format(*f) for f in ifacets]
     lines[-1] = lines[-1][:-1]
     lines += ['  }', '}']
