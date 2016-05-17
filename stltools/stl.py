@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2015-05-07 00:14:10 +0200
+# Last modified: 2016-05-17 21:06:49 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -51,7 +51,7 @@ def readstl(name):
         facets, and the name of the object as given in the STL file.
     """
     with open(name, 'rb') as f:
-        mm = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
+        mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         vertices, name = _parsebinary(mm)
         if vertices is None:
             mm.seek(0)
