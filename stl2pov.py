@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2015-05-09 17:03:52 +0200
+# Last modified: 2016-05-17 21:17:40 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -76,7 +76,7 @@ def mesh2(name, vertices):
     # the STL coordinate system and that used in POV-ray
     lines += ['    <{1}, {0}, {2}>,'.format(*p) for p in points]
     lines[-1] = lines[-1][:-1]
-    lines += ['  face_indices {', '    {},'.format(len(ifacets))]
+    lines += ['  }\n  face_indices {', '    {},'.format(len(ifacets))]
     lines += ['    <{0}, {1}, {2}>,'.format(*f) for f in ifacets]
     lines[-1] = lines[-1][:-1]
     lines += ['  }', '}']
