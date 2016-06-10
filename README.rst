@@ -136,17 +136,17 @@ Requirements
 
 General requirements;
 
-* Python 3 (tested with 3.4)
-* numpy (tested with 1.9.2)
+* Python 3 (tested with 3.5)
+* numpy (tested with 1.11.0)
 
-For ``stl2pdf``, the cairo_ graphics library (tested with version 1.14.2) and
+For ``stl2pdf``, the cairo_ graphics library (tested with version 1.14.6) and
 its Python bindings (tested with version 1.10.0) are required.
 
 .. _cairo: http://cairographics.org/
 
-For running the tests, nosetests_ is required.
+For running the tests, pytest_ is required.
 
-.. _nosetests: https://nose.readthedocs.org/en/latest/index.html
+.. _pytest: http://pytest.org/
 
 
 Installation
@@ -165,11 +165,11 @@ completely uninstall the program.
 Testing the code
 ================
 
-The directory ``test`` contains tests (using nosetests_) for most of the code.
+The directory ``test`` contains tests (using pytest_) for most of the code.
 
 To run the tests;
 
 .. code-block:: console
 
     > cd test/
-    > nosetests -v
+    > py.test -v

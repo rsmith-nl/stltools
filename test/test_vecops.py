@@ -3,16 +3,15 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-04-06 23:26:45 +0200
-# Last modified: 2015-08-24 01:30:01 +0200
+# Last modified: 2016-06-11 00:46:27 +0200
 
 """
 Tests for the vecops module.
 
-Run this test only with nosetests-3.4 -v test_vecops.py
-Run all tests with: nosetests-3.4 -v test_*
+Run this test only with py.tests-3.5 -v test_vecops.py
+Run all tests with: py.test-3.5 -v test_*
 """
 
-import os
 import numpy as np
 import stltools.vecops as vo
 

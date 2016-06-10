@@ -3,15 +3,15 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-08-22 16:45:36 +0200
-# Last modified: 2015-08-24 01:29:43 +0200
+# Last modified: 2016-06-11 00:44:07 +0200
 
-"""Tests for the stl module.
+"""
+Tests for the stl module.
 
-Run this test only with nosetests-3.4 -v test_stl.py
-Run all tests with: nosetests-3.4 -v test_*
+Run this test only with py.test-3.5 -v test_stl.py
+Run all tests with: py.test-3.5 -v test_*
 """
 
-import os
 import numpy as np
 import stltools.stl as stl
 

@@ -3,15 +3,15 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-04-06 23:26:45 +0200
-# Last modified: 2015-08-24 01:29:34 +0200
+# Last modified: 2016-06-11 00:43:29 +0200
 
-"""Tests for the matrix module.
+"""
+Tests for the matrix module.
 
-Run this test only with nosetests-3.4 -v test_matrix.py
-Run all tests with: nosetests-3.4 -v test_*
+Run this test only with py.test-3.5 -v test_matrix.py
+Run all tests with: py.test-3.5 -v test_*
 """
 
-import os
 import numpy as np
 import stltools.vecops as vo
 import stltools.matrix as ma
