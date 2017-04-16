@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2015-05-07 00:03:52 +0200
+# Last modified: 2017-04-16 19:08:50 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -163,7 +163,7 @@ def main(argv):
             logging.info('writing output file "{}"'.format(args.outfile))
             outf.write(outs)
             logging.info('done')
-    except:
+    except Exception:
         logging.error('cannot write output file "{}"'.format())
 
 

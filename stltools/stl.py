@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2016-05-17 21:06:49 +0200
+# Last modified: 2017-04-16 19:12:32 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -246,6 +246,7 @@ def _test(args):
     for j, k in zip(f, n):
         print(' vertices:', p[j[0]], p[j[1]], p[j[2]])
         print(' normal:', nv[k])
+
 
 if __name__ == '__main__':
     from sys import argv

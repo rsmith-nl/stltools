@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2015-08-22 15:59:20 +0200
+# Last modified: 2017-04-16 19:15:17 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -57,8 +57,8 @@ def normalize(v):
     Returns:
         The scaled array.
     """
-    l = length(v)
-    return v/l
+    ln = length(v)
+    return v/ln
 
 
 def normal(a, b, c):
@@ -74,9 +74,9 @@ def normal(a, b, c):
     u = b - a
     v = c - b
     n = np.cross(u, v)
-    l = length(n)
-    if l:
-        return n/l
+    ln = length(n)
+    if ln:
+        return n/ln
     return n
 
 

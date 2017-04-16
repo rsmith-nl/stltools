@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-28 02:07:00 +0200
-# Last modified: 2015-05-05 20:59:36 +0200
+# Last modified: 2017-04-16 19:11:55 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -35,7 +35,7 @@ import numpy as np
 __version__ = '4-beta'
 
 
-def I():
+def I():  # noqa
     """
     Creates identity matrix.
 
@@ -171,11 +171,11 @@ def rot(axis, angle):
         coordinates matrix for rotation around the axis.
     """
     ax = np.require(axis[0:3], np.float32)
-    l = np.linalg.norm(ax)
-    if l == 0.0:
+    length = np.linalg.norm(ax)
+    if length == 0.0:
         raise ValueError('axis cannot have length 0')
-    elif not l == 1.0:
-        ax /= l
+    elif not length == 1.0:
+        ax /= length
     ux, uy, uz = ax
     a = math.radians(angle)
     c = math.cos(a)

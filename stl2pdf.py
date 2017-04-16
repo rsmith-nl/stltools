@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2015-05-07 00:04:02 +0200
+# Last modified: 2017-04-16 19:05:12 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -145,6 +145,7 @@ def main(argv):
     out.show_page()
     out.finish()
     logging.info('done')
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])

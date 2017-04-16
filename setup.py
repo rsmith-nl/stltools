@@ -2,9 +2,9 @@
 # Installation script for stltools
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Last modified: 2015-08-22 21:39:31 +0200
+# Last modified: 2017-04-16 19:04:29 +0200
 
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 
 _scripts = ['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py']
