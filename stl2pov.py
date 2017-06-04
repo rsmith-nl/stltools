@@ -24,7 +24,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """Program for converting an STL file into a POV-ray mesh or mesh2."""
 
 import argparse
@@ -70,8 +69,10 @@ def mesh2(name, vertices):
         A string representation of a POV-ray mesh2 object.
     """
     ifacets, points = stl.toindexed(vertices)
-    lines = ["# declare m_{} = mesh2 {{".format(name),
-             '  vertex_vectors {', '    {},'.format(len(points))]
+    lines = [
+        "# declare m_{} = mesh2 {{".format(name), '  vertex_vectors {',
+        '    {},'.format(len(points))
+    ]
     # The indices sequence 1, 0, 2 is used because of the difference between
     # the STL coordinate system and that used in POV-ray
     lines += ['    <{1}, {0}, {2}>,'.format(*p) for p in points]
@@ -92,17 +93,21 @@ def main(argv):
     """
     parser = argparse.ArgumentParser(description=__doc__)
     argtxt = 'generate a mesh2 object (slow on big files)'
-    parser.add_argument('-2,' '--mesh2', action='store_true',
-                        help=argtxt, dest='mesh2')
-    parser.add_argument('-v', '--version', action='version',
-                        version=__version__)
-    parser.add_argument('--log', default='warning',
-                        choices=['debug', 'info', 'warning', 'error'],
-                        help="logging level (defaults to 'warning')")
+    parser.add_argument(
+        '-2,'
+        '--mesh2', action='store_true', help=argtxt, dest='mesh2')
+    parser.add_argument(
+        '-v', '--version', action='version', version=__version__)
+    parser.add_argument(
+        '--log',
+        default='warning',
+        choices=['debug', 'info', 'warning', 'error'],
+        help="logging level (defaults to 'warning')")
     parser.add_argument('file', nargs='*', help='one or more file names')
     args = parser.parse_args(argv)
-    logging.basicConfig(level=getattr(logging, args.log.upper(), None),
-                        format='%(levelname)s: %(message)s')
+    logging.basicConfig(
+        level=getattr(logging, args.log.upper(), None),
+        format='%(levelname)s: %(message)s')
     if not args.file:
         parser.print_help()
         sys.exit(0)

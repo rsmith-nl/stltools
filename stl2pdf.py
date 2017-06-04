@@ -53,25 +53,46 @@ def main(argv):
         argv: Command line arguments (without program name!)
     """
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--log', default='warning',
-                        choices=['debug', 'info', 'warning', 'error'],
-                        help="logging level (defaults to 'warning')")
-    parser.add_argument('-c', '--canvas', dest='canvas_size', type=int,
-                        help="canvas size, defaults to 200 PostScript points",
-                        default=200)
-    parser.add_argument('-o', '--output', dest='outfile', type=str,
-                        help="output file name", default="")
-    parser.add_argument('-x', type=float, action=utils.RotateAction,
-                        help="rotation around X axis in degrees")
-    parser.add_argument('-y', type=float, action=utils.RotateAction,
-                        help="rotation around Y axis in degrees")
-    parser.add_argument('-z', type=float, action=utils.RotateAction,
-                        help="rotation around X axis in degrees")
-    parser.add_argument('file', nargs=1, type=str,
-                        help='name of the file to process')
+    parser.add_argument(
+        '--log',
+        default='warning',
+        choices=['debug', 'info', 'warning', 'error'],
+        help="logging level (defaults to 'warning')")
+    parser.add_argument(
+        '-c',
+        '--canvas',
+        dest='canvas_size',
+        type=int,
+        help="canvas size, defaults to 200 PostScript points",
+        default=200)
+    parser.add_argument(
+        '-o',
+        '--output',
+        dest='outfile',
+        type=str,
+        help="output file name",
+        default="")
+    parser.add_argument(
+        '-x',
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around X axis in degrees")
+    parser.add_argument(
+        '-y',
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around Y axis in degrees")
+    parser.add_argument(
+        '-z',
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around X axis in degrees")
+    parser.add_argument(
+        'file', nargs=1, type=str, help='name of the file to process')
     args = parser.parse_args(argv)
-    logging.basicConfig(level=getattr(logging, args.log.upper(), None),
-                        format='%(levelname)s: %(message)s')
+    logging.basicConfig(
+        level=getattr(logging, args.log.upper(), None),
+        format='%(levelname)s: %(message)s')
     args.file = args.file[0]
     if 'rotations' not in args:
         logging.info('no rotations specified')
@@ -103,22 +124,23 @@ def main(argv):
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     width = maxx - minx
     height = maxy - miny
-    dx = -(minx + maxx)/2
-    dy = -(miny + maxy)/2
+    dx = -(minx + maxx) / 2
+    dy = -(miny + maxy) / 2
     dz = -maxz
     m = matrix.trans([dx, dy, dz])
-    sf = min(args.canvas_size/width, args.canvas_size/height)
+    sf = min(args.canvas_size / width, args.canvas_size / height)
     v = matrix.scale(sf, -sf)
-    v[0, 3], v[1, 3] = args.canvas_size/2, args.canvas_size/2
+    v[0, 3], v[1, 3] = args.canvas_size / 2, args.canvas_size / 2
     mv = matrix.concat(m, v)
     logging.info('transforming to view space')
     vertices = vecops.xform(mv, vertices)
     facets = vertices.reshape((-1, 3, 3))
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
     logging.info('Determining visible facets')
-    vf = [(f, n, 0.4*n[2]+0.5) for f, n in zip(facets, normals) if n[2] > 0]
+    vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(facets, normals)
+          if n[2] > 0]
     vfs = '{:.2f}% of facets is visible'
-    logging.info(vfs.format(100*len(vf)/len(facets)))
+    logging.info(vfs.format(100 * len(vf) / len(facets)))
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
     logging.info('depth-sorting visible facets')

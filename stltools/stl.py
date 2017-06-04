@@ -27,7 +27,6 @@
 # SUCH DAMAGE.
 """Handling STL files and brep datasets."""
 
-
 import struct
 import mmap
 from . import vecops as vo
@@ -92,8 +91,7 @@ def normals(facets, points):
         an array of normal vector indices for each facet and an array of
         unique normals.
     """
-    nv = [vo.normal(points[i], points[j], points[k])
-          for i, j, k in facets]
+    nv = [vo.normal(points[i], points[j], points[k]) for i, j, k in facets]
     return vo.indexate(nv)
 
 
@@ -140,8 +138,9 @@ def binary(name, ifacets, points, inormals, vectors):
     """
     rc = [struct.pack('<80sI', name.encode('utf-8'), len(ifacets))]
     for fi, ni in zip(ifacets, inormals):
-        data = list(np.concatenate((vectors[ni], points[fi[0]],
-                                    points[fi[1]], points[fi[2]]))) + [0]
+        data = list(
+            np.concatenate((vectors[ni], points[fi[0]], points[fi[1]],
+                            points[fi[2]]))) + [0]
         rc.append(struct.pack('<12fH', *data))
     return b''.join(rc)
 
@@ -178,15 +177,14 @@ def _parsetxt(m):
     first = m.readline().decode('utf-8')
     name = None
     points = None
-    if (first.startswith('solid') and
-       b'facet normal' in m.readline()):
+    if (first.startswith('solid') and b'facet normal' in m.readline()):
         try:
             name = first.strip().split(None, 1)[1]
         except IndexError:
             name = ''
         vlines = [l.split() for l in _striplines(m) if l.startswith('vertex')]
-        points = np.array([tuple(float(k) for k in j[1:]) for j in vlines],
-                          np.float32)
+        points = np.array([tuple(float(k) for k in j[1:])
+                           for j in vlines], np.float32)
     m.seek(0)
     return points, name
 
