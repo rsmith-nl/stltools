@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2015-05-06 20:03:46 +0200
+# Last modified: 2017-06-04 16:31:28 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,7 +25,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """Operations on two or three dimensional bounding boxes."""
 
 import numpy as np
@@ -35,7 +34,7 @@ __version__ = '4-beta'
 
 def makebb(pnts):
     """
-    Find the bound for a list of points
+    Find the bounding box for a list of points.
 
     Arguments:
         pnts: Numpy array of shape (N, 2) or (N, 3).

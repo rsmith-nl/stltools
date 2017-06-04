@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-04-16 19:08:50 +0200
+# Last modified: 2017-06-04 16:29:03 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,13 +25,16 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-'''Program for converting a view of an STL file into a PostScript file.
+"""
+Program for converting a view of an STL file into a PostScript file.
+
 Using the -x, -y and -z options you can rotate the object around these axis.
-Subsequent rotations will be applied in the order they are given on the
-command line.
+Subsequent rotations will be applied in the order they are given on the command
+line.
+
 Note that the object will be automatically centered and scaled to fit in the
 picture.
-'''
+"""
 
 import argparse
 import logging
@@ -44,7 +47,8 @@ __version__ = '4-beta'
 
 
 def main(argv):
-    """Main program of stl2ps.
+    """
+    Entry point of stl2ps.
 
     Arguments:
         argv: Command line arguments (without program name!)

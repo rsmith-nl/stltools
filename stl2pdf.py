@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-04-16 19:05:12 +0200
+# Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2017-06-04 16:27:14 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,14 +24,16 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+"""
+Program for converting a view of an STL file into a PDF file.
 
-'''Program for converting a view of an STL file into a PDF file.
 Using the -x, -y and -z options you can rotate the object around these axis.
 Subsequent rotations will be applied in the order they are given on the
 command line.
+
 Note that the object will be automatically centered and scaled to fit in the
 picture.
-'''
+"""
 
 import argparse
 import logging
@@ -44,7 +46,8 @@ __version__ = '4-beta'
 
 
 def main(argv):
-    """Main program of stl2pdf.
+    """
+    Entry point of stl2pdf.
 
     Arguments:
         argv: Command line arguments (without program name!)

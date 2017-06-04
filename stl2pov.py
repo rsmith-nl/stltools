@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-04-16 19:08:20 +0200
+# Last modified: 2017-06-04 16:27:53 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -38,7 +38,7 @@ __version__ = '4-beta'
 
 def mesh1(name, vertices):
     """
-    Creates a POV-ray mesh description from vertices data.
+    Create a POV-ray mesh description from vertices data.
 
     Arguments:
         name: The name of the object.
@@ -60,7 +60,7 @@ def mesh1(name, vertices):
 
 def mesh2(name, vertices):
     """
-    Creates a POV-ray mesh2 object from facet data.
+    Create a POV-ray mesh2 object from facet data.
 
     Arguments:
         name: The name of the object.
@@ -84,7 +84,8 @@ def mesh2(name, vertices):
 
 
 def main(argv):
-    """Main program for stl2pov.
+    """
+    Entry point for stl2pov.
 
     Arguments:
         argv: List of command line arguments (without program name!)

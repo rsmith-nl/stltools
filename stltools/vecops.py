@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2017-04-16 19:15:17 +0200
+# Last modified: 2017-06-04 16:44:10 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,8 +25,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
-"""Operations of two or three dimensional vectors."""
+"""Operations on two or three dimensional vectors."""
 
 import numpy as np
 import math as m
@@ -36,7 +35,7 @@ __version__ = '4-beta'
 
 def length(v):
     """
-    Calculates the length of a (N,) numpy array.
+    Calculate the length of a (N,) numpy array.
 
     Arguments:
         v: numpy array
@@ -49,7 +48,7 @@ def length(v):
 
 def normalize(v):
     """
-    Scales the (N, ) array to lenth 1.
+    Scale the (N, ) array to lenth 1.
 
     Arguments:
         v: numpy array
@@ -82,8 +81,7 @@ def normal(a, b, c):
 
 def indexate(points):
     """
-    Convert a numpy array of points into a list of indices and an array of
-    unique points.
+    Create an array of unique points and indexes into this array.
 
     Arguments:
         points: A numpy array of shape (N, 3).
@@ -100,7 +98,7 @@ def indexate(points):
 
 def to4(pnts):
     """
-    Converts 3D coordinates to homogeneous coordinates.
+    Convert 3D coordinates to homogeneous coordinates.
 
     Arguments:
         pnts: A numpy array of shape (N, 3).
@@ -114,7 +112,9 @@ def to4(pnts):
 
 
 def to3(pnts):
-    """Converts homogeneous coordinates to plain 3D coordinates.
+    """
+    Convert homogeneous coordinates to plain 3D coordinates.
+
     It scales the x, y and z values by the w value.
 
     Aruments:
@@ -131,7 +131,8 @@ def to3(pnts):
 
 
 def xform(mat, pnts):
-    """Apply a transformation matrix to a numpy array of points.
+    """
+    Apply a transformation matrix to a numpy array of points.
 
     Arguments:
         mat: A (3, 3) or (4, 4) numpy array.

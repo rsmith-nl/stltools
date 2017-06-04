@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2015-05-07 00:25:07 +0200
+# Last modified: 2017-06-04 16:30:30 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,9 +25,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-'''Reads an STL file and prints information about the object and optionally
-a text representation of the object. It can also write a binary STL version of
-the object.'''
+"""
+Read an STL file and print information about the object.
+
+Optionally print a text representation of the object. It can also write a binary
+STL version of the object.
+"""
 
 import argparse
 import logging
@@ -39,10 +42,11 @@ __version__ = '4-beta'
 
 
 def main(argv):
-    """Main program.
+    """
+    Entry point for stlinfo.
 
-    Keyword arguments:
-    argv -- command line arguments (without program name!)
+    Arguments:
+        argv: command line arguments (without program name!)
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-t', '--text', action='store_true',

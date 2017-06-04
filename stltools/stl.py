@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2017-04-16 19:12:32 +0200
+# Last modified: 2017-06-04 16:40:54 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,7 +25,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """Handling STL files and brep datasets."""
 
 
@@ -39,9 +38,10 @@ __version__ = '4-beta'
 
 def readstl(name):
     """
-    Reads an STL file, returns the vertices and the name. The normal vector
-    information is *discarded* since it is often unreliable. Instead the
-    normal vector is calculated from the sequence of the vertices.
+    Read an STL file, return the vertices and the name.
+
+    The normal vector information is *discarded* since it is often unreliable.
+    Instead the normal vector is calculated from the sequence of the vertices.
 
     Arguments:
         name: Path of the STL file to read.
@@ -64,8 +64,10 @@ def readstl(name):
 
 def toindexed(vertices):
     """
-    Convert a numpy array of vertices of an indexed array facets and
-    an array of unique vertices.
+    Convert vertices to index format.
+
+    Create an array of unique vertices and an array of indices into the unique
+    vertax array that matches the original array.
 
     Arguments:
         vertices: (?, 3) array of vertex coordinates.
@@ -80,7 +82,7 @@ def toindexed(vertices):
 
 def normals(facets, points):
     """
-    Calculate normal vectors of facets
+    Calculate normal vectors of facets.
 
     Arguments:
         facets: An (?, 3) array of facet indices into points.
@@ -123,7 +125,8 @@ def text(name, ifacets, points, inormals, vectors):
 
 
 def binary(name, ifacets, points, inormals, vectors):
-    """Make an STL binary representation of a brep.
+    """
+    Make an STL binary representation of a brep.
 
     Arguments:
         name: The name of the object.
@@ -144,7 +147,8 @@ def binary(name, ifacets, points, inormals, vectors):
 
 
 def _striplines(m):
-    """Generator to yield stripped lines from a memmapped text file.
+    """
+    Generate stripped lines from a memmapped text file.
 
     Arguments:
         m: A memory mapped file.
@@ -161,7 +165,8 @@ def _striplines(m):
 
 
 def _parsetxt(m):
-    """Parses the file if it is an text STL file.
+    """
+    Parse a text STL file.
 
     Arguments:
         m: A memory mapped file.
@@ -187,7 +192,8 @@ def _parsetxt(m):
 
 
 def _getbp(m):
-    """Generator to yield points from a binary STL file.
+    """
+    Generate points from a binary STL file.
 
     Arguments:
         m: A memory mapped file.
@@ -206,7 +212,8 @@ def _getbp(m):
 
 
 def _parsebinary(m):
-    """Parses the file if it is a binary STL file.
+    """
+    Parse a binary STL file.
 
     Arguments:
         m: A memory mapped file.
@@ -229,9 +236,11 @@ def _parsebinary(m):
 
 
 def _test(args):
-    """Test function
+    """
+    Test function.
 
-    :args: filename arguments for the test function
+    Arguments:
+        args: filename arguments for the test function
     """
     if len(args) < 2:
         print('usage: python stl.py filename')

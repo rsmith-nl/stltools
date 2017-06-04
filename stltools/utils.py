@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2017-04-16 19:13:51 +0200
+# Last modified: 2017-06-04 16:42:06 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,7 +25,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """Utilities for stltools."""
 
 import argparse
@@ -39,12 +38,14 @@ class RotateAction(argparse.Action):
     """Gather rotation options."""
 
     def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        """Create RotateAction object."""
         if nargs is not None:
             raise ValueError("nargs not allowed")
         super(RotateAction, self).__init__(option_strings, dest,
                                            **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
+        """Implement rotate option."""
         rotations = getattr(namespace, 'rotations', None)
         if not rotations:
             rotations = []
@@ -54,7 +55,7 @@ class RotateAction(argparse.Action):
 
 def outname(inname, extension, addenum=''):
     """
-    Creates the name of the output filename based on the input filename.
+    Create the name of the output filename based on the input filename.
 
     Arguments:
         inname: Name + path of the input file.

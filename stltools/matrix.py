@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-28 02:07:00 +0200
-# Last modified: 2017-04-16 19:11:55 +0200
+# Last modified: 2017-06-04 16:33:56 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,9 +25,11 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+"""
+3D homogeneous coordinates matrix functions.
 
-"""3D homogeneous coordinates matrix functions in a
-right-handed coordinate system."""
+For a right-handed coordinate system.
+"""
 
 import math
 import numpy as np
@@ -37,7 +39,7 @@ __version__ = '4-beta'
 
 def I():  # noqa
     """
-    Creates identity matrix.
+    Create identity matrix.
 
     Returns:
         A 4x4 numpy array of float32 with main diagonal set to 1, rest 0.
@@ -47,7 +49,7 @@ def I():  # noqa
 
 def trans(vec):
     """
-    Creates a transformation matrix for translation.
+    Create a transformation matrix for translation.
 
     Arguments:
         vec: (3,) numpy array representing a 3D translation vector.
@@ -65,7 +67,7 @@ def trans(vec):
 
 def mul(*args):
     """
-    Returns the multiplication of the 4x4 matrix arguments.
+    Return the multiplication of the 4x4 matrix arguments.
 
     Arguments:
         args: 4x4 numpy arrayis of float32 A, B, C, ..., N.
@@ -81,8 +83,9 @@ def mul(*args):
 
 def concat(*args):
     """
-    Concatenate the transforms. This is actually a multiplication
-    of the arguments in reversed order.
+    Concatenate the transforms.
+
+    This is actually a multiplication of the arguments in reversed order.
 
     Arguments:
         args: 4x4 arrays of float32 A, B, C, ..., N.
@@ -99,7 +102,7 @@ def concat(*args):
 
 def rotx(angle):
     """
-    Calculates the transform for rotation around the X-axis.
+    Calculate the transform for rotation around the X-axis.
 
     Arguments:
         angle: Rotation angle in degrees.
@@ -119,7 +122,7 @@ def rotx(angle):
 
 def roty(ang):
     """
-    Calculates the transform for rotation around the Y-axis.
+    Calculate the transform for rotation around the Y-axis.
 
     Arguments:
         angle: Rotation angle in degrees.
@@ -139,7 +142,7 @@ def roty(ang):
 
 def rotz(ang):
     """
-    Calculates the transform for rotation around the Z-axis.
+    Calculate the transform for rotation around the Z-axis.
 
     Arguments:
         angle: Rotation angle in degrees.
@@ -159,8 +162,7 @@ def rotz(ang):
 
 def rot(axis, angle):
     """
-    Calculates the transform for rotation through O around the an
-    arbitrary direction.
+    Calculate the transform for rotation around an arbitrary axis.
 
     Arguments:
         axis: (3,) array representing the rotation axis.
@@ -194,7 +196,7 @@ def rot(axis, angle):
 
 def scale(x=1, y=1, z=1):
     """
-    Calculates a scaling matrix.
+    Calculate a scaling matrix.
 
     Arguments:
         x: Scale factor for x direction (default 1).
@@ -212,7 +214,7 @@ def scale(x=1, y=1, z=1):
 
 def lookat(eye, center, up):
     """
-    Create a viewing matrix
+    Create a viewing matrix.
 
     Arguments
         eye: 3D point where the viewer is located
@@ -240,7 +242,7 @@ def lookat(eye, center, up):
 
 def ortho(xyscale):
     """
-    Creates a simple orthographic projection matrix.
+    Create a simple orthographic projection matrix.
 
     Arguments:
         xyscale: scaling factor for x and y
