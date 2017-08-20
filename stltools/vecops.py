@@ -1,10 +1,9 @@
 # file: vecops.py
 # vim:fileencoding=utf-8
 #
-# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# $Date$
-# $Revision$
+# Last modified: 2017-06-04 16:44:10 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -26,78 +25,103 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
-"""Operations of two or three dimensional vectors."""
+"""Operations on two or three dimensional vectors."""
 
 import numpy as np
 import math as m
 
-__version__ = '3.3'
+__version__ = '4.0.0'
 
 
 def length(v):
-    """Returns the length of a vector.
+    """
+    Calculate the length of a (N,) numpy array.
 
-    :v: numpy vector
+    Arguments:
+        v: numpy array
+
+    Returns:
+        The length of the vector.
     """
     return m.sqrt(np.sum(v*v))
 
 
 def normalize(v):
-    """Returns the vector scaled to lenth 1.
-
-    :v: numpy vector
     """
-    l = length(v)
-    return v/l
+    Scale the (N, ) array to lenth 1.
+
+    Arguments:
+        v: numpy array
+
+    Returns:
+        The scaled array.
+    """
+    ln = length(v)
+    return v/ln
 
 
 def normal(a, b, c):
-    """Calculate the normal vector for the triangle defined by a, b and c.
+    """
+    Calculate the normal vector for the triangle defined by a, b and c.
 
-    :a, b, c: numpy array of shape (3,)
-    :returns: a vector normal to the plane formed by a, b and c.
+    Arguments:
+        a, b, c: Numpy arrays of shape (3,).
+
+    Returns:
+        A (3,) numpy array normal to the plane formed by a, b and c.
     """
     u = b - a
     v = c - b
     n = np.cross(u, v)
-    l = length(n)
-    if l:
-        return n/l
+    ln = length(n)
+    if ln:
+        return n/ln
     return n
 
 
 def indexate(points):
-    """Convert a numpy array of points into a list of indices and an array of
-    unique points.
+    """
+    Create an array of unique points and indexes into this array.
 
-    :points: a numpy array of shape (N, 3)
-    :returns: a tuple of indices and an array of unique points
+    Arguments:
+        points: A numpy array of shape (N, 3).
+
+    Returns:
+        An array of indices and an (M, 3) array of unique points.
     """
     pd = {}
     indices = [pd.setdefault(tuple(p), len(pd)) for p in points]
-    pt = sorted([(v, k) for k, v in pd.iteritems()], key=lambda x: x[0])
+    pt = sorted([(v, k) for k, v in pd.items()], key=lambda x: x[0])
     unique = np.array([i[1] for i in pt])
     return np.array(indices, np.uint16), unique
 
 
 def to4(pnts):
-    """Converts 3D coordinates to homogeneous coordinates.
+    """
+    Convert 3D coordinates to homogeneous coordinates.
 
-    :pnts: a numpy array of shape (N,3)
-    :returns: a numpy array of shape (N,4)
+    Arguments:
+        pnts: A numpy array of shape (N, 3).
+
+    Returns:
+        A numpy array of shape (N, 4).
     """
     if len(pnts.shape) != 2 or pnts.shape[1] != 3:
         raise ValueError('invalid shape')
-    return np.vstack((pnts.T, np.ones(pnts.shape[0]))).T
+    return np.hstack((pnts, np.ones(pnts.shape[0]).reshape((-1, 1))))
 
 
 def to3(pnts):
-    """Converts homogeneous coordinates to plain 3D coordinates.
+    """
+    Convert homogeneous coordinates to plain 3D coordinates.
+
     It scales the x, y and z values by the w value.
 
-    :pnts: a numpy array of shape (N,4)
-    :returns: a numpy array of shape (N,3)
+    Aruments:
+        pnts: A numpy array of shape (N,4).
+
+    Returns:
+        A numpy array of shape (N,3).
     """
     if len(pnts.shape) != 2 or pnts.shape[1] != 4:
         raise ValueError('invalid shape')
@@ -107,11 +131,15 @@ def to3(pnts):
 
 
 def xform(mat, pnts):
-    """Apply a transformation matrix to a numpy array of points.
+    """
+    Apply a transformation matrix to a numpy array of points.
 
-    :mat: 3x3 or 4x4 numpy array
-    :pnts: (N,3) or (N,4) numpy array
-    :returns: transformed array
+    Arguments:
+        mat: A (3, 3) or (4, 4) numpy array.
+        pnts: A (N,3) or (N,4) numpy array.
+
+    Returns:
+        The transformed array.
     """
     if len(pnts.shape) != 2 and pnts.shape[1] not in (3, 4):
         raise ValueError('wrong shape of pnts')

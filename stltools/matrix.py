@@ -1,10 +1,9 @@
 # file: matrix.py
 # vim:fileencoding=utf-8
 #
-# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-28 02:07:00 +0200
-# $Date$
-# $Revision$
+# Last modified: 2017-06-04 16:33:56 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -26,25 +25,38 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+"""
+3D homogeneous coordinates matrix functions.
 
-"""3D homogeneous coordinates matrix functions in a
-right-handed coordinate system."""
+For a right-handed coordinate system.
+"""
 
 import math
 import numpy as np
 
-__version__ = '3.3'
+__version__ = '4.0.0'
 
 
-def I():
-    """Returns the 4x4 identity matrix."""
+def I():  # noqa
+    """
+    Create identity matrix.
+
+    Returns:
+        A 4x4 numpy array of float32 with main diagonal set to 1, rest 0.
+    """
     return np.identity(4, np.float32)
 
 
 def trans(vec):
-    """Returns a 4x4 homogeneous coordinates translation matrix along vec.
+    """
+    Create a transformation matrix for translation.
 
-    :vec: 3D translation vector
+    Arguments:
+        vec: (3,) numpy array representing a 3D translation vector.
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        translation matrix along vec.
     """
     rv = I()
     rv[0, 3] = vec[0]
@@ -53,23 +65,33 @@ def trans(vec):
     return rv
 
 
-def mul(begin, *rest):
-    """Returns the multiplication of the 4x4 matrix arguments.
-
-    :begin, rest: 4x4 matrices
+def mul(*args):
     """
-    rv = np.copy(begin)
-    for r in rest:
+    Return the multiplication of the 4x4 matrix arguments.
+
+    Arguments:
+        args: 4x4 numpy arrayis of float32 A, B, C, ..., N.
+
+    Returns:
+        A × B × C × ... × N
+    """
+    rv = np.copy(args[0])
+    for r in args[1:]:
         rv = np.dot(rv, r)
     return rv
 
 
 def concat(*args):
-    """Concatenate the transforms. This is actually a multiplication
-    of the arguments in reversed order.
+    """
+    Concatenate the transforms.
 
-    :*args: 4x4 matrices
-    :returns: a combined matrix
+    This is actually a multiplication of the arguments in reversed order.
+
+    Arguments:
+        args: 4x4 arrays of float32 A, B, C, ..., N.
+
+    Returns:
+        N × ... × C × B × A
     """
     rv = np.copy(args[-1])
     rest = list(reversed(args[:-1]))
@@ -79,10 +101,15 @@ def concat(*args):
 
 
 def rotx(angle):
-    """Returns the 4x4 homogeneous coordinates matrix for rotation around the
-    X axis.
+    """
+    Calculate the transform for rotation around the X-axis.
 
-    :angle: rotation angle in degrees
+    Arguments:
+        angle: Rotation angle in degrees.
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        matrix for rotation around the X axis.
     """
     rad = math.radians(angle)
     c = math.cos(rad)
@@ -94,10 +121,15 @@ def rotx(angle):
 
 
 def roty(ang):
-    """Returns the 4x4 homogeneous coordinates matrix for rotation around the
-    Y axis.
+    """
+    Calculate the transform for rotation around the Y-axis.
 
-    :angle: rotation angle in degrees
+    Arguments:
+        angle: Rotation angle in degrees.
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        matrix for rotation around the Y axis.
     """
     rad = math.radians(ang)
     c = math.cos(rad)
@@ -109,10 +141,15 @@ def roty(ang):
 
 
 def rotz(ang):
-    """Returns the 4x4 homogeneous coordinates matrix for rotation around the
-    Z axis.
+    """
+    Calculate the transform for rotation around the Z-axis.
 
-    :angle: rotation angle in degrees
+    Arguments:
+        angle: Rotation angle in degrees.
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous coordinates
+        matrix for rotation around the Z axis.
     """
     rad = math.radians(ang)
     c = math.cos(rad)
@@ -120,22 +157,27 @@ def rotz(ang):
     return np.array([[c,  -s, 0.0, 0.0],
                      [s,   c, 0.0, 0.0],
                      [0.0, 0.0, 1.0, 0.0],
-                     [0.0, 0.0, 0.0, 1.0]]), np.float32
+                     [0.0, 0.0, 0.0, 1.0]], np.float32)
 
 
 def rot(axis, angle):
-    """Returns the 4x4 homogeneous coordinates matrix for rotation around the
-    an arbitrary axis by an arbitrary angle.
+    """
+    Calculate the transform for rotation around an arbitrary axis.
 
-    :axis: rotation axis
-    :angle: rotation angle in degrees
+    Arguments:
+        axis: (3,) array representing the rotation axis.
+        angle: Rotation angle in degrees.
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates matrix for rotation around the axis.
     """
     ax = np.require(axis[0:3], np.float32)
-    l = np.linalg.norm(ax)
-    if l == 0.0:
+    length = np.linalg.norm(ax)
+    if length == 0.0:
         raise ValueError('axis cannot have length 0')
-    elif not l == 1.0:
-        ax /= l
+    elif not length == 1.0:
+        ax /= length
     ux, uy, uz = ax
     a = math.radians(angle)
     c = math.cos(a)
@@ -153,11 +195,17 @@ def rot(axis, angle):
 
 
 def scale(x=1, y=1, z=1):
-    """Returns a scaling matrix
+    """
+    Calculate a scaling matrix.
 
-    :x: scale factor for x direction
-    :y: scale factor for y direction
-    :z: scale factor for z direction
+    Arguments:
+        x: Scale factor for x direction (default 1).
+        y: Scale factor for y direction (default 1).
+        z: Scale factor for z direction (default 1).
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates scaling matrix.
     """
     rv = I()
     rv[0, 0], rv[1, 1], rv[2, 2] = float(x), float(y), float(z)
@@ -165,12 +213,17 @@ def scale(x=1, y=1, z=1):
 
 
 def lookat(eye, center, up):
-    """Create a viewing matrix
+    """
+    Create a viewing matrix.
 
-    :eye: 3D point where the viewer is located
-    :center: 3D point that the eye looks at
-    :up: 3D upward direction
-    :returns: view matrix
+    Arguments
+        eye: 3D point where the viewer is located
+        center: 3D point that the eye looks at
+        up: 3D upward direction
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates view matrix.
     """
     eye = np.array(eye, np.float32)
     center = np.array(center, np.float32)
@@ -188,9 +241,15 @@ def lookat(eye, center, up):
 
 
 def ortho(xyscale):
-    """Creates a simple orthographic projection matrix.
-    :xyscale: scaling factor for x and y
-    :returns: orthographic projection matrix
+    """
+    Create a simple orthographic projection matrix.
+
+    Arguments:
+        xyscale: scaling factor for x and y
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates orthographic projection matrix.
     """
     rv = I()
     rv[0, 0], rv[1, 1] = xyscale, xyscale
@@ -199,14 +258,19 @@ def ortho(xyscale):
 
 
 def perspective(fovy, width, height, near, far):
-    """Create a prespective projection matrix.
+    """
+    Create a prespective projection matrix.
 
-    :fovy: field of view in y direction, in degrees
-    :width: width of the viewport
-    :height: height of the viewport
-    :znear: near clipping plane (> 0)
-    :zfar: far clipping plane (> 0)
-    :returns: projection matrix
+    Arguments:
+        fovy: field of view in y direction, in degrees
+        width: width of the viewport
+        height: height of the viewport
+        znear: near clipping plane (> 0)
+        zfar: far clipping plane (> 0)
+
+    Returns:
+        A 4x4 numpy array of float32 representing a homogeneous
+        coordinates perspective projection matrix.
     """
     aspect = float(width)/float(height)
     f = 1/math.tan(math.radians(float(fovy))/2)

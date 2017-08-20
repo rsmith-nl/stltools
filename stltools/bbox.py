@@ -1,10 +1,9 @@
 # file: bbox.py
 # vim:fileencoding=utf-8
 #
-# Copyright © 2013,2014 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# $Date$
-# $Revision$
+# Last modified: 2017-06-04 16:31:28 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -26,19 +25,22 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """Operations on two or three dimensional bounding boxes."""
 
 import numpy as np
 
-__version__ = '3.3'
+__version__ = '4.0.0'
 
 
 def makebb(pnts):
-    """Find the bound for a list of points
+    """
+    Find the bounding box for a list of points.
 
-    :pnts: numpy array, shape (N,2) or (N,3)
-    :returns: an array [minx, maxx, miny, maxy[, minz, maxz]
+    Arguments:
+        pnts: Numpy array of shape (N, 2) or (N, 3).
+
+    Returns:
+        An array [minx, maxx, miny, maxy[, minz, maxz]].
     """
     if len(pnts.shape) != 2:
         raise ValueError('invalid shape')
@@ -51,13 +53,19 @@ def makebb(pnts):
 
 
 def inside(bb, v):
-    """Test if a point is inside a bounding box.
+    """
+    Test if a point is inside a bounding box.
 
-    :bb: bounding box numpy array
-    :v: point array
-    :returns: True if v is inside the bounding box, false otherwise.
-    :raises: ValueError if the number of dimensions of the point and bounding
-    box don't match.
+    Arguments:
+        bb: Bounding box numpy array [minx, maxx, miny, maxy[, minz, maxz]].
+        v: Numpy (3,) array.
+
+    Returns:
+        True if v is inside the bounding box, false otherwise.
+
+    Raises:
+        ValueError if the number of dimensions of the point and bounding box
+        don't match.
     """
     if len(bb.shape) != 1:
         raise ValueError('invalid shape')

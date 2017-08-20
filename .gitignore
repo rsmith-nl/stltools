@@ -1,5 +1,7 @@
 *.pyc
 *.pyo
+__pycache__/
+.cache/
 *~
 build
 dist
@@ -14,3 +16,4 @@ stl2ps
 stl2pdf
 stl2pov
 stlinfo
+*.inc
