@@ -42,7 +42,7 @@ import cairo
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-__version__ = '4-beta'
+__version__ = '4.0.0'
 
 
 def main(argv):

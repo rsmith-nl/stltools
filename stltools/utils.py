@@ -31,7 +31,7 @@ import argparse
 import os.path
 import re
 
-__version__ = '4-beta'
+__version__ = '4.0.0'
 
 
 class RotateAction(argparse.Action):

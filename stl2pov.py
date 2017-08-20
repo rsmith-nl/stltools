@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-06-04 16:27:53 +0200
+# Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2017-08-20 18:05:54 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@ import sys
 import time
 from stltools import stl, utils
 
-__version__ = '4-beta'
+__version__ = '4.0.0'
 
 
 def mesh1(name, vertices):

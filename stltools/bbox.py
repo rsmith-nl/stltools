@@ -29,7 +29,7 @@
 
 import numpy as np
 
-__version__ = '4-beta'
+__version__ = '4.0.0'
 
 
 def makebb(pnts):

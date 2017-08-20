@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-06-04 16:29:03 +0200
+# Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2017-08-20 18:06:10 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@ import time
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-__version__ = '4-beta'
+__version__ = '4.0.0'
 
 
 def main(argv):

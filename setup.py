@@ -23,7 +23,7 @@ if os.name is 'posix':
     _scripts = outnames
 
 setup(name='stltools',
-      version='4-beta',
+      version='4.0.0',
       license='BSD',
       description='Programs to read and convert STL files.',
       author='Roland Smith',
