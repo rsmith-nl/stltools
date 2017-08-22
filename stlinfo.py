@@ -37,7 +37,7 @@ import sys
 import time
 from stltools import stl, bbox, utils
 
-__version__ = '4.0.0'
+__version__ = '5.0.0'
 
 
 def main(argv):
