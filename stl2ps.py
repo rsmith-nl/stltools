@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-08-20 18:06:10 +0200
+# Last modified: 2017-08-22 17:38:53 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@ import time
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-__version__ = '4.0.0'
+__version__ = '5.0.0'
 
 
 def main(argv):
@@ -65,6 +65,20 @@ def main(argv):
         type=int,
         help="canvas size, defaults to 200 PostScript points",
         default=200)
+    parser.add_argument(
+        '-f',
+        '--foreground',
+        dest='fg',
+        type=str,
+        help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
+        default='E6E6E6')
+    parser.add_argument(
+        '-b',
+        '--background',
+        dest='bg',
+        type=str,
+        help="background color in 6-digit hexdecimal RGB (default white FFFFFF)",
+        default='FFFFFF')
     parser.add_argument(
         '-o',
         '--output',
@@ -94,6 +108,10 @@ def main(argv):
         level=getattr(logging, args.log.upper(), None),
         format='%(levelname)s: %(message)s')
     args.file = args.file[0]
+    args.fg = int(args.fg, 16)
+    f_red, f_green, f_blue = utils.num2rgb(args.fg)
+    args.bg = int(args.bg, 16)
+    b_red, b_green, b_blue = utils.num2rgb(args.bg)
     if 'rotations' not in args:
         logging.info('no rotations specified')
         tr = matrix.I()
@@ -172,16 +190,28 @@ def main(argv):
     ]
     # PostScript settings and macros.
     lines += [
-        "% Settings", ".5 setlinewidth", ".5 setlinewidth",
-        "% Defining drawing commands", "/g {setgray} def", "/f {moveto} def",
-        "/s {lineto} def",
+        "% Settings", ".5 setlinewidth", "1 setlinejoin",
+        "% Defining drawing commands", "/c {setrgbcolor} def",
+        "/f {moveto} def", "/s {lineto} def",
         "/t {lineto closepath gsave fill grestore stroke} def",
         "% Start drawing"
     ]
-    s3 = "{:4.2f} g {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t"
+    # Draw background.
+    if b_red < 1 or b_green < 1 or b_blue < 1:
+        lines += [
+            '% Fill background',
+            '{:4.2f} {:4.2f} {:4.2f} c'.format(b_red, b_green, b_blue),
+            '0 0 f',
+            '{:.0f} 0 s'.format(maxx),
+            '{:.0f} {:.0f} s'.format(maxx, maxy),
+            '0 {:.0f} t'.format(maxy)
+        ]
+    # Draw triangles.
+    lines += ['% Rendering triangles']
+    s3 = "{:4.2f} {:4.2f} {:4.2f} c {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t"
     logging.info('rendering triangles')
     lines += [
-        s3.format(i, a[0], a[1], b[0], b[1], c[0], c[1])
+        s3.format(f_red*i, f_green*i, f_blue*i, a[0], a[1], b[0], b[1], c[0], c[1])
         for (a, b, c), z, i in vf
     ]
     lines += ["showpage", '%%EOF']

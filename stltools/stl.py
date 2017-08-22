@@ -32,7 +32,7 @@ import mmap
 from . import vecops as vo
 import numpy as np
 
-__version__ = '4.0.0'
+__version__ = '5.0.0'
 
 
 def readstl(name):

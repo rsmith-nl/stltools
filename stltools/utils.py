@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2017-06-04 16:42:06 +0200
+# Last modified: 2017-08-22 17:02:04 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,7 +31,7 @@ import argparse
 import os.path
 import re
 
-__version__ = '4.0.0'
+__version__ = '5.0.0'
 
 
 class RotateAction(argparse.Action):
@@ -71,3 +71,25 @@ def outname(inname, extension, addenum=''):
     if not extension.startswith('.'):
         extension = '.' + extension
     return rv + addenum + extension
+
+
+def num2rgb(color):
+    """Convert a color value into r,b,g colors in the range 0−1.
+
+    The input is an integer that is clamped to the range 0−0xFFFFFF.
+    This is then separated in red, green and blue components.
+
+    Arguments:
+        color: integer color value.
+
+    Returns:
+        (r, g, b) tuple where each component is in the range 0−1.
+    """
+    if color > 0xFFFFFF:
+        color = 0xFFFFFF
+    elif color < 0:
+        color = 0
+    red = ((color & 0xFF0000) >> 16)/255
+    green = ((color & 0x00FF00) >> 8)/255
+    blue = (color & 0x0000FF)/255
+    return red, green, blue

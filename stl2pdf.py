@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-06-04 16:27:14 +0200
+# Last modified: 2017-08-22 17:02:28 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,13 +36,13 @@ picture.
 """
 
 import argparse
+import cairo
 import logging
 import sys
-import cairo
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-__version__ = '4.0.0'
+__version__ = '5.0.0'
 
 
 def main(argv):
@@ -65,6 +65,20 @@ def main(argv):
         type=int,
         help="canvas size, defaults to 200 PostScript points",
         default=200)
+    parser.add_argument(
+        '-f',
+        '--foreground',
+        dest='fg',
+        type=str,
+        help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
+        default='E6E6E6')
+    parser.add_argument(
+        '-b',
+        '--background',
+        dest='bg',
+        type=str,
+        help="background color in 6-digit hexdecimal RGB (default FFFFFF)",
+        default='FFFFFF')
     parser.add_argument(
         '-o',
         '--output',
@@ -94,6 +108,10 @@ def main(argv):
         level=getattr(logging, args.log.upper(), None),
         format='%(levelname)s: %(message)s')
     args.file = args.file[0]
+    args.fg = int(args.fg, 16)
+    f_red, f_green, f_blue = utils.num2rgb(args.fg)
+    args.bg = int(args.bg, 16)
+    b_red, b_green, b_blue = utils.num2rgb(args.bg)
     if 'rotations' not in args:
         logging.info('no rotations specified')
         tr = matrix.I()
@@ -154,7 +172,7 @@ def main(argv):
     out = cairo.PDFSurface(args.outfile, args.canvas_size, args.canvas_size)
     ctx = cairo.Context(out)
     ctx.set_source_rgb(b_red, b_green, b_blue)
-    ctx.rectangle(0,0,canvas_size,canvas_size)
+    ctx.rectangle(0, 0, args.canvas_size, args.canvas_size)
     ctx.fill()
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
@@ -166,7 +184,7 @@ def main(argv):
         ctx.line_to(b[0], b[1])
         ctx.line_to(c[0], c[1])
         ctx.close_path()
-        ctx.set_source_rgb(f_red, f_green, f_blue)
+        ctx.set_source_rgb(f_red*i, f_green*i, f_blue*i)
         ctx.fill_preserve()
         ctx.stroke()
     # Send output.
