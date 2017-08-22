@@ -3,7 +3,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-08-22 16:45:36 +0200
-# Last modified: 2016-06-11 00:44:07 +0200
+# Last modified: 2017-08-22 22:36:28 +0200
 
 """
 Tests for the stl module.
@@ -18,7 +18,7 @@ import stltools.stl as stl
 
 def test_read_bin():
     vertices, name = stl.readstl('data/cube-bin.stl')
-    assert name == 'cube-bin'
+    assert name == 'cube_bin'
     assert vertices.shape == (36, 3)
     _, pnts = stl.toindexed(vertices)
     assert pnts.shape == (8, 3)
@@ -26,7 +26,7 @@ def test_read_bin():
 
 def test_read_txt():
     vertices, name = stl.readstl('data/cube-txt.stl')
-    assert name == 'cube-txt'
+    assert name == 'cube_txt'
     assert vertices.shape == (36, 3)
     _, pnts = stl.toindexed(vertices)
     assert pnts.shape == (8, 3)
@@ -54,7 +54,7 @@ def test_text():
     vertices, name = stl.readstl('data/cube-txt.stl')
     facets, pnts = stl.toindexed(vertices)
     ni, nv = stl.normals(facets, pnts)
-    res = stl.text('cube-txt', facets, pnts, ni, nv)
+    res = stl.text('cube_txt', facets, pnts, ni, nv)
     res = [ln.strip() for ln in res.splitlines()]
     with open('data/cube-txt.stl') as inp:
         orig = [ln.strip() for ln in inp.readlines()]
