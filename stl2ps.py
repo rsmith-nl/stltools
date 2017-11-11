@@ -42,7 +42,7 @@ import time
 import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix
 
-__version__ = '5.0.0'
+__version__ = '5.0'
 
 
 def main(argv):

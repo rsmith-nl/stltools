@@ -31,7 +31,7 @@ import argparse
 import os.path
 import re
 
-__version__ = '5.0.0'
+__version__ = '5.0'
 
 
 class RotateAction(argparse.Action):

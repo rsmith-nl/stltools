@@ -36,7 +36,7 @@ import sys
 import time
 from stltools import stl, utils
 
-__version__ = '5.0.0'
+__version__ = '5.0'
 
 
 def valid_name(name):
