@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2018-04-02 10:24:52 +0200
+# Copyright © 2012-2018 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2018-04-02 10:54:49 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -78,6 +78,12 @@ def main(argv):
         help="background color in 6-digit hexdecimal RGB (default FFFFFF)",
         default='FFFFFF')
     parser.add_argument(
+        '-e',
+        '--encoding',
+        type=str,
+        help="encoding for the name of the STL object (default utf-8)",
+        default='utf-8')
+    parser.add_argument(
         '-o',
         '--output',
         dest='outfile',
@@ -128,7 +134,7 @@ def main(argv):
         logging.info(ofs.format(args.outfile))
     logging.info("reading STL file '{}'".format(args.file))
     try:
-        vertices, _ = stl.readstl(args.file)
+        vertices, _ = stl.readstl(args.file, args.encoding)
     except ValueError as e:
         logging.error('{}: {}'.format(args.file, e))
         sys.exit(1)

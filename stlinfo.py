@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2018-04-02 10:26:40 +0200
+# Copyright © 2012-2018 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2018-04-02 11:02:54 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -57,6 +57,12 @@ def main(argv):
         action='store_true',
         help='write binary representation of the file')
     parser.add_argument(
+        '-e',
+        '--encoding',
+        type=str,
+        help="encoding for the name of the STL object (default utf-8)",
+        default='utf-8')
+    parser.add_argument(
         '-v', '--version', action='version', version=__version__)
     parser.add_argument(
         '--log',
@@ -77,7 +83,7 @@ def main(argv):
             logging.warning(w.format(fn))
             continue
         try:
-            vertices, name = stl.readstl(fn)
+            vertices, name = stl.readstl(fn, args.encoding)
             if args.text or args.binary:
                 facets, points = stl.toindexed(vertices)
                 normals, vectors = stl.normals(facets, points)

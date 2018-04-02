@@ -1,9 +1,9 @@
 # file: stl.py
 # vim:fileencoding=utf-8
 #
-# Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013-2018 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2018-04-02 10:42:16 +0200
+# Last modified: 2018-04-02 11:03:13 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,7 +33,7 @@ from . import vecops as vo
 import numpy as np
 
 
-def readstl(name):
+def readstl(name, encoding='utf-8'):
     """
     Read an STL file, return the vertices and the name.
 
@@ -42,6 +42,7 @@ def readstl(name):
 
     Arguments:
         name: Path of the STL file to read.
+        encoding: Assume this encoding for the name of the file (defaults to UTF-8).
 
     Returns:
         A numpy array of the shape (N, 3) containing the vertices of the
@@ -49,10 +50,10 @@ def readstl(name):
     """
     with open(name, 'rb') as f:
         mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
-        vertices, name = _parsebinary(mm)
+        vertices, name = _parsebinary(mm, encoding)
         if vertices is None:
             mm.seek(0)
-            vertices, name = _parsetxt(mm)
+            vertices, name = _parsetxt(mm, encoding)
         mm.close()
     if vertices is None:
         raise ValueError('not a valid STL file.')
@@ -161,18 +162,19 @@ def _striplines(m):
             break
 
 
-def _parsetxt(m):
+def _parsetxt(m, encoding):
     """
     Parse a text STL file.
 
     Arguments:
         m: A memory mapped file.
+        encoding: For the name of the object.
 
     Returns:
         The vertices as a (?, 3) numpy array, and the name of the object from
         the file.
     """
-    first = m.readline().decode('utf-8')
+    first = m.readline().decode(encoding)
     name = None
     points = None
     if (first.startswith('solid') and b'facet normal' in m.readline()):
@@ -207,12 +209,13 @@ def _getbp(m):
         yield tuple(p[6:])
 
 
-def _parsebinary(m):
+def _parsebinary(m, encoding):
     """
     Parse a binary STL file.
 
     Arguments:
         m: A memory mapped file.
+        encoding: For the name of the object.
 
     Returns:
         The vertices as a list of 3-tuples, and the name of the object from
@@ -224,7 +227,7 @@ def _parsebinary(m):
     if b'facet normal' in data:
         return None, None
     name, _ = struct.unpack("<80sI", data[0:84])
-    name = name.decode('utf-8')
+    name = name.decode(encoding)
     name = name.replace("solid ", "")
     name = name.strip('\x00 \t\n\r')
     points = [p for p in _getbp(m)]
