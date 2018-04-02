@@ -1,9 +1,9 @@
 # file: stl.py
 # vim:fileencoding=utf-8
 #
-# Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2013-2018 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2018-04-02 10:42:16 +0200
+# Last modified: 2018-04-02 11:29:06 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -154,7 +154,7 @@ def _striplines(m):
         The stripped lines of the file as text.
     """
     while True:
-        v = m.readline().decode('utf-8')
+        v = m.readline().decode('utf-8', errors='ignore')
         if v:
             yield v.strip()
         else:
@@ -172,7 +172,7 @@ def _parsetxt(m):
         The vertices as a (?, 3) numpy array, and the name of the object from
         the file.
     """
-    first = m.readline().decode('utf-8')
+    first = m.readline().decode('utf-8', errors='replace')
     name = None
     points = None
     if (first.startswith('solid') and b'facet normal' in m.readline()):
@@ -224,7 +224,7 @@ def _parsebinary(m):
     if b'facet normal' in data:
         return None, None
     name, _ = struct.unpack("<80sI", data[0:84])
-    name = name.decode('utf-8')
+    name = name.decode('utf-8', errors='replace')
     name = name.replace("solid ", "")
     name = name.strip('\x00 \t\n\r')
     points = [p for p in _getbp(m)]
