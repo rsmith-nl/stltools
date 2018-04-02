@@ -2,10 +2,11 @@
 # Installation script for stltools
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Last modified: 2017-04-16 19:04:29 +0200
+# Last modified: 2018-04-02 10:31:28 +0200
 
 from setuptools import setup
 import os
+from stltools import __version__
 
 _scripts = ['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py']
 
@@ -23,12 +24,12 @@ if os.name is 'posix':
     _scripts = outnames
 
 setup(name='stltools',
-      version='5.0',
+      version=__version__,
       license='BSD',
       description='Programs to read and convert STL files.',
       author='Roland Smith',
       author_email='rsmith@xs4all.nl',
-      url='http://rsmith.home.xs4all.nl/software/py-stl-stl2pov.html',
+      url='https://rsmith.home.xs4all.nl/software/stltools.html',
       install_requires=['numpy>=1.7.0'],
       extras_require={
           'PDF':  ["pycairo>=1.10.0"],

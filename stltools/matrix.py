@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-28 02:07:00 +0200
-# Last modified: 2017-06-04 16:33:56 +0200
+# Last modified: 2018-04-02 10:28:58 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,8 +33,6 @@ For a right-handed coordinate system.
 
 import math
 import numpy as np
-
-__version__ = '5.0'
 
 
 def I():  # noqa

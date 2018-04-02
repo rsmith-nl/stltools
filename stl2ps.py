@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-08-22 17:38:53 +0200
+# Last modified: 2018-04-02 10:25:51 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -40,9 +40,7 @@ import logging
 import sys
 import time
 import numpy as np
-from stltools import stl, bbox, utils, vecops, matrix
-
-__version__ = '5.0'
+from stltools import stl, bbox, utils, vecops, matrix, __version__
 
 
 def main(argv):
@@ -101,6 +99,8 @@ def main(argv):
         type=float,
         action=utils.RotateAction,
         help="rotation around Z axis in degrees")
+    parser.add_argument(
+        '-v', '--version', action='version', version=__version__)
     parser.add_argument(
         'file', nargs=1, type=str, help='name of the file to process')
     args = parser.parse_args(argv)

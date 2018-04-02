@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2017-06-04 16:44:10 +0200
+# Last modified: 2018-04-02 10:29:33 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,8 +29,6 @@
 
 import numpy as np
 import math as m
-
-__version__ = '5.0'
 
 
 def length(v):

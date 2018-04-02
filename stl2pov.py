@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2017 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2017-08-22 10:39:02 +0200
+# Last modified: 2018-04-02 10:21:50 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -34,9 +34,7 @@ import os
 import re
 import sys
 import time
-from stltools import stl, utils
-
-__version__ = '5.0'
+from stltools import stl, utils, __version__
 
 
 def valid_name(name):

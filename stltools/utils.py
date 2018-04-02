@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2017-08-22 17:02:04 +0200
+# Last modified: 2018-04-02 10:29:13 +0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,8 +30,6 @@
 import argparse
 import os.path
 import re
-
-__version__ = '5.0'
 
 
 class RotateAction(argparse.Action):
