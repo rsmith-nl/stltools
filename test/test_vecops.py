@@ -4,7 +4,6 @@
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-04-06 23:26:45 +0200
 # Last modified: 2016-06-11 00:46:27 +0200
-
 """
 Tests for the vecops module.
 
@@ -40,26 +39,22 @@ def test_vo_normalize():
     assert nom - tol <= vo.length(r) <= nom + tol
     # The ratio of the components of the original and the normalized vector
     # should be the length of the original vector.
-    assert np.all(v/r == 21)
+    assert np.all(v / r == 21)
 
 
 def test_vo_normal():
     # The normal of a plane through the origin and two unit vectors should
     # be plus/minus other unit vector.
-    r = vo.normal(np.array([0, 0, 0]), np.array([1, 0, 0]),
-                  np.array([0, 1, 0]))
+    r = vo.normal(np.array([0, 0, 0]), np.array([1, 0, 0]), np.array([0, 1, 0]))
     assert np.all(r == np.array([0, 0, 1]))
-    r = vo.normal(np.array([0, 0, 0]), np.array([0, 0, 1]),
-                  np.array([1, 0, 0]))
+    r = vo.normal(np.array([0, 0, 0]), np.array([0, 0, 1]), np.array([1, 0, 0]))
     assert np.all(r == np.array([0, 1, 0]))
-    r = vo.normal(np.array([0, 0, 0]), np.array([0, 1, 0]),
-                  np.array([0, 0, 1]))
+    r = vo.normal(np.array([0, 0, 0]), np.array([0, 1, 0]), np.array([0, 0, 1]))
     assert np.all(r == np.array([1, 0, 0]))
     # The components of the normal of a plane through the three unit vectors
     # should all be 1/√3.
-    r = vo.normal(np.array([1, 0, 0]), np.array([0, 1, 0]),
-                  np.array([0, 0, 1]))
-    c = 1/(3**0.5)
+    r = vo.normal(np.array([1, 0, 0]), np.array([0, 1, 0]), np.array([0, 0, 1]))
+    c = 1 / (3**0.5)
     assert np.all(r == np.array([c, c, c]))
 
 

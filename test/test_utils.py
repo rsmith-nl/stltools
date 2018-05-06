@@ -4,7 +4,6 @@
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-08-22 20:18:04 +0200
 # Last modified: 2016-06-11 00:45:23 +0200
-
 """Tests for the utils module.
 
 Run this test only with py.test-3.5 -v test_utils.py

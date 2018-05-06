@@ -4,7 +4,6 @@
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-04-06 23:26:45 +0200
 # Last modified: 2016-06-11 00:43:29 +0200
-
 """
 Tests for the matrix module.
 
@@ -18,14 +17,14 @@ import stltools.matrix as ma
 
 
 def test_vo_xform_scale():
-    m = np.identity(4)*0.5
+    m = np.identity(4) * 0.5
     m[-1, -1] = 1.0
     pnts = np.arange(15).reshape((-1, 3))
     r = vo.xform(m, pnts)
-    assert np.all(r*2 == pnts)
+    assert np.all(r * 2 == pnts)
     p = ma.scale(0.5, 0.5, 0.5)
     r = vo.xform(p, pnts)
-    assert np.all(r*2 == pnts)
+    assert np.all(r * 2 == pnts)
 
 
 def test_vo_xform_trans():
@@ -33,7 +32,7 @@ def test_vo_xform_trans():
     m.T[-1] = np.array([2, 3, 4, 1.0])
     pnts = np.arange(15).reshape((-1, 3))
     r = vo.xform(m, pnts)
-    q = np.array([2, 3, 4]*5).reshape((-1, 3))
+    q = np.array([2, 3, 4] * 5).reshape((-1, 3))
     assert np.all(r - q == pnts)
     m = ma.trans(np.array([2, 3, 4]))
     r = vo.xform(m, pnts)

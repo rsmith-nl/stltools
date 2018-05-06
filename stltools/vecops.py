@@ -41,7 +41,7 @@ def length(v):
     Returns:
         The length of the vector.
     """
-    return m.sqrt(np.sum(v*v))
+    return m.sqrt(np.sum(v * v))
 
 
 def normalize(v):
@@ -55,7 +55,7 @@ def normalize(v):
         The scaled array.
     """
     ln = length(v)
-    return v/ln
+    return v / ln
 
 
 def normal(a, b, c):
@@ -73,7 +73,7 @@ def normal(a, b, c):
     n = np.cross(u, v)
     ln = length(n)
     if ln:
-        return n/ln
+        return n / ln
     return n
 
 
@@ -125,7 +125,7 @@ def to3(pnts):
         raise ValueError('invalid shape')
     d = pnts[:, 3]
     div = np.vstack((d, d, d)).T
-    return pnts[:, 0:3]/div
+    return pnts[:, 0:3] / div
 
 
 def xform(mat, pnts):

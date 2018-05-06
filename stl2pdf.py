@@ -55,64 +55,57 @@ def main(argv):
         '--log',
         default='warning',
         choices=['debug', 'info', 'warning', 'error'],
-        help="logging level (defaults to 'warning')")
+        help="logging level (defaults to 'warning')"
+    )
     parser.add_argument(
         '-c',
         '--canvas',
         dest='canvas_size',
         type=int,
         help="canvas size, defaults to 200 PostScript points",
-        default=200)
+        default=200
+    )
     parser.add_argument(
         '-f',
         '--foreground',
         dest='fg',
         type=str,
         help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
-        default='E6E6E6')
+        default='E6E6E6'
+    )
     parser.add_argument(
         '-b',
         '--background',
         dest='bg',
         type=str,
         help="background color in 6-digit hexdecimal RGB (default FFFFFF)",
-        default='FFFFFF')
+        default='FFFFFF'
+    )
     parser.add_argument(
         '-e',
         '--encoding',
         type=str,
         help="encoding for the name of the STL object (default utf-8)",
-        default='utf-8')
+        default='utf-8'
+    )
     parser.add_argument(
-        '-o',
-        '--output',
-        dest='outfile',
-        type=str,
-        help="output file name",
-        default="")
+        '-o', '--output', dest='outfile', type=str, help="output file name", default=""
+    )
     parser.add_argument(
-        '-x',
-        type=float,
-        action=utils.RotateAction,
-        help="rotation around X axis in degrees")
+        '-x', type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
+    )
     parser.add_argument(
-        '-y',
-        type=float,
-        action=utils.RotateAction,
-        help="rotation around Y axis in degrees")
+        '-y', type=float, action=utils.RotateAction, help="rotation around Y axis in degrees"
+    )
     parser.add_argument(
-        '-z',
-        type=float,
-        action=utils.RotateAction,
-        help="rotation around X axis in degrees")
-    parser.add_argument(
-        '-v', '--version', action='version', version=__version__)
-    parser.add_argument(
-        'file', nargs=1, type=str, help='name of the file to process')
+        '-z', type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
+    )
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument('file', nargs=1, type=str, help='name of the file to process')
     args = parser.parse_args(argv)
     logging.basicConfig(
-        level=getattr(logging, args.log.upper(), None),
-        format='%(levelname)s: %(message)s')
+        level=getattr(logging, args.log.upper(), None), format='%(levelname)s: %(message)s'
+    )
     args.file = args.file[0]
     args.fg = int(args.fg, 16)
     f_red, f_green, f_blue = utils.num2rgb(args.fg)
@@ -161,8 +154,7 @@ def main(argv):
     facets = vertices.reshape((-1, 3, 3))
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
     logging.info('Determining visible facets')
-    vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(facets, normals)
-          if n[2] > 0]
+    vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(facets, normals) if n[2] > 0]
     vfs = '{:.2f}% of facets is visible'
     logging.info(vfs.format(100 * len(vf) / len(facets)))
     # Next, depth-sort the facets using the largest z-value of the
@@ -190,7 +182,7 @@ def main(argv):
         ctx.line_to(b[0], b[1])
         ctx.line_to(c[0], c[1])
         ctx.close_path()
-        ctx.set_source_rgb(f_red*i, f_green*i, f_blue*i)
+        ctx.set_source_rgb(f_red * i, f_green * i, f_blue * i)
         ctx.fill_preserve()
         ctx.stroke()
     # Send output.

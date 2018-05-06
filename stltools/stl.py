@@ -137,9 +137,8 @@ def binary(name, ifacets, points, inormals, vectors):
     """
     rc = [struct.pack('<80sI', name.encode('utf-8'), len(ifacets))]
     for fi, ni in zip(ifacets, inormals):
-        data = list(
-            np.concatenate((vectors[ni], points[fi[0]], points[fi[1]],
-                            points[fi[2]]))) + [0]
+        data = list(np.concatenate((vectors[ni], points[fi[0]], points[fi[1]], points[fi[2]]))
+                    ) + [0]
         rc.append(struct.pack('<12fH', *data))
     return b''.join(rc)
 
@@ -183,8 +182,7 @@ def _parsetxt(m, encoding):
         except IndexError:
             name = ''
         vlines = [l.split() for l in _striplines(m) if l.startswith('vertex')]
-        points = np.array([tuple(float(k) for k in j[1:])
-                           for j in vlines], np.float32)
+        points = np.array([tuple(float(k) for k in j[1:]) for j in vlines], np.float32)
     m.seek(0)
     return points, name
 

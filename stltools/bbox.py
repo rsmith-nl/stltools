@@ -67,7 +67,7 @@ def inside(bb, v):
     """
     if len(bb.shape) != 1:
         raise ValueError('invalid shape')
-    if bb.shape[0] != 2*v.shape[0]:
+    if bb.shape[0] != 2 * v.shape[0]:
         raise ValueError('incompatible shape')
     mi, ma = bb.reshape((-1, 2)).T
     return np.all(v >= mi) and np.all(v <= ma)

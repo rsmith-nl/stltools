@@ -23,28 +23,27 @@ if os.name is 'posix':
         pass
     _scripts = outnames
 
-setup(name='stltools',
-      version=__version__,
-      license='BSD',
-      description='Programs to read and convert STL files.',
-      author='Roland Smith',
-      author_email='rsmith@xs4all.nl',
-      url='https://rsmith.home.xs4all.nl/software/stltools.html',
-      install_requires=['numpy>=1.7.0'],
-      extras_require={
-          'PDF':  ["pycairo>=1.10.0"],
-          'test': ["nose>=1.3.0"],
-      },
-      scripts=_scripts,
-      provides='stltools', packages=['stltools'],
-      classifiers=['Development Status :: 5 - Production/Stable',
-                   'Environment :: Console',
-                   'Intended Audience :: End Users/Desktop',
-                   'Intended Audience :: Manufacturing',
-                   'License :: OSI Approved :: BSD License',
-                   'Operating System :: OS Independent',
-                   'Programming Language :: Python :: 3',
-                   'Topic :: Scientific/Engineering'
-                   ],
-      long_description=ld
-      )
+setup(
+    name='stltools',
+    version=__version__,
+    license='BSD',
+    description='Programs to read and convert STL files.',
+    author='Roland Smith',
+    author_email='rsmith@xs4all.nl',
+    url='https://rsmith.home.xs4all.nl/software/stltools.html',
+    install_requires=['numpy>=1.7.0'],
+    extras_require={
+        'PDF': ["pycairo>=1.10.0"],
+        'test': ["nose>=1.3.0"],
+    },
+    scripts=_scripts,
+    provides='stltools',
+    packages=['stltools'],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable', 'Environment :: Console',
+        'Intended Audience :: End Users/Desktop', 'Intended Audience :: Manufacturing',
+        'License :: OSI Approved :: BSD License', 'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3', 'Topic :: Scientific/Engineering'
+    ],
+    long_description=ld
+)

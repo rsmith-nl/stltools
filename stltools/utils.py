@@ -39,8 +39,7 @@ class RotateAction(argparse.Action):
         """Create RotateAction object."""
         if nargs is not None:
             raise ValueError("nargs not allowed")
-        super(RotateAction, self).__init__(option_strings, dest,
-                                           **kwargs)
+        super(RotateAction, self).__init__(option_strings, dest, **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
         """Implement rotate option."""
@@ -87,7 +86,7 @@ def num2rgb(color):
         color = 0xFFFFFF
     elif color < 0:
         color = 0
-    red = ((color & 0xFF0000) >> 16)/255
-    green = ((color & 0x00FF00) >> 8)/255
-    blue = (color & 0x0000FF)/255
+    red = ((color & 0xFF0000) >> 16) / 255
+    green = ((color & 0x00FF00) >> 8) / 255
+    blue = (color & 0x0000FF) / 255
     return red, green, blue

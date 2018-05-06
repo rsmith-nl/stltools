@@ -112,10 +112,10 @@ def rotx(angle):
     rad = math.radians(angle)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array([[1.0, 0.0, 0.0, 0.0],
-                     [0.0,   c,  -s, 0.0],
-                     [0.0,   s,   c, 0.0],
-                     [0.0, 0.0, 0.0, 1.0]], np.float32)
+    return np.array(
+        [[1.0, 0.0, 0.0, 0.0], [0.0, c, -s, 0.0], [0.0, s, c, 0.0], [0.0, 0.0, 0.0, 1.0]],
+        np.float32
+    )
 
 
 def roty(ang):
@@ -132,10 +132,10 @@ def roty(ang):
     rad = math.radians(ang)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array([[c, 0.0,   s, 0.0],
-                     [0.0, 1.0, 0.0, 0.0],
-                     [-s, 0.0,   c, 0.0],
-                     [0.0, 0.0, 0.0, 1.0]], np.float32)
+    return np.array(
+        [[c, 0.0, s, 0.0], [0.0, 1.0, 0.0, 0.0], [-s, 0.0, c, 0.0], [0.0, 0.0, 0.0, 1.0]],
+        np.float32
+    )
 
 
 def rotz(ang):
@@ -152,10 +152,10 @@ def rotz(ang):
     rad = math.radians(ang)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array([[c,  -s, 0.0, 0.0],
-                     [s,   c, 0.0, 0.0],
-                     [0.0, 0.0, 1.0, 0.0],
-                     [0.0, 0.0, 0.0, 1.0]], np.float32)
+    return np.array(
+        [[c, -s, 0.0, 0.0], [s, c, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]],
+        np.float32
+    )
 
 
 def rot(axis, angle):
@@ -180,13 +180,12 @@ def rot(axis, angle):
     a = math.radians(angle)
     c = math.cos(a)
     s = math.sin(a)
-    uc = np.array([[0, -uz, uy],
-                   [uz, 0, -ux],
-                   [-uy, ux, 0]], np.float32)
-    ut = np.array([[ux*ux, ux*uy, ux*uz],
-                   [ux*uy, uy*uy, uy*uz],
-                   [ux*uz, uy*uz, uz*uz]], np.float32)
-    m = np.identity(3, np.float32)*c + uc*s + ut*(1.0 - c)
+    uc = np.array([[0, -uz, uy], [uz, 0, -ux], [-uy, ux, 0]], np.float32)
+    ut = np.array(
+        [[ux * ux, ux * uy, ux * uz], [ux * uy, uy * uy, uy * uz], [ux * uz, uy * uz, uz * uz]],
+        np.float32
+    )
+    m = np.identity(3, np.float32) * c + uc * s + ut * (1.0 - c)
     m = np.vstack((m, np.array([0, 0, 0], np.float32)))
     m = np.column_stack((m, np.array([0, 0, 0, 1], np.float32)))
     return m
@@ -227,14 +226,16 @@ def lookat(eye, center, up):
     center = np.array(center, np.float32)
     up = np.array(up, np.float32)
     F = center - eye
-    f = F/np.linalg.norm(F)
+    f = F / np.linalg.norm(F)
     S = np.cross(f, up)
-    s = S/np.linalg.norm(S)
+    s = S / np.linalg.norm(S)
     u = np.cross(s, f)
-    rv = np.array([[s[0],  s[1],  s[2], -eye[0]],
-                   [u[0],  u[1],  u[2], -eye[1]],
-                   [-f[0], -f[1], -f[2], -eye[2]],
-                   [0,     0,     0,       1]], np.float32)
+    rv = np.array(
+        [
+            [s[0], s[1], s[2], -eye[0]], [u[0], u[1], u[2], -eye[1]],
+            [-f[0], -f[1], -f[2], -eye[2]], [0, 0, 0, 1]
+        ], np.float32
+    )
     return rv
 
 
@@ -270,13 +271,15 @@ def perspective(fovy, width, height, near, far):
         A 4x4 numpy array of float32 representing a homogeneous
         coordinates perspective projection matrix.
     """
-    aspect = float(width)/float(height)
-    f = 1/math.tan(math.radians(float(fovy))/2)
+    aspect = float(width) / float(height)
+    f = 1 / math.tan(math.radians(float(fovy)) / 2)
     near = float(near)
     far = float(far)
     d = near - far
-    rv = np.array([[f/aspect, 0, 0, 0],
-                   [0, f, 0, 0],
-                   [0, 0, (far+near)/d, 2*far*near/d],
-                   [0, 0, -1, 0]], np.float32)
+    rv = np.array(
+        [
+            [f / aspect, 0, 0, 0], [0, f, 0, 0], [0, 0, (far + near) / d, 2 * far * near / d],
+            [0, 0, -1, 0]
+        ], np.float32
+    )
     return rv

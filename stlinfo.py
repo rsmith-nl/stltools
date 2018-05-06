@@ -47,33 +47,30 @@ def main(argv):
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        '-t',
-        '--text',
-        action='store_true',
-        help='print text representation of the file')
+        '-t', '--text', action='store_true', help='print text representation of the file'
+    )
     parser.add_argument(
-        '-b',
-        '--binary',
-        action='store_true',
-        help='write binary representation of the file')
+        '-b', '--binary', action='store_true', help='write binary representation of the file'
+    )
     parser.add_argument(
         '-e',
         '--encoding',
         type=str,
         help="encoding for the name of the STL object (default utf-8)",
-        default='utf-8')
-    parser.add_argument(
-        '-v', '--version', action='version', version=__version__)
+        default='utf-8'
+    )
+    parser.add_argument('-v', '--version', action='version', version=__version__)
     parser.add_argument(
         '--log',
         default='warning',
         choices=['debug', 'info', 'warning', 'error'],
-        help="logging level (defaults to 'warning')")
+        help="logging level (defaults to 'warning')"
+    )
     parser.add_argument('file', nargs='*', help='one or more file names')
     args = parser.parse_args(argv)
     logging.basicConfig(
-        level=getattr(logging, args.log.upper(), None),
-        format='%(levelname)s: %(message)s')
+        level=getattr(logging, args.log.upper(), None), format='%(levelname)s: %(message)s'
+    )
     if not args.file:
         parser.print_help()
         sys.exit(0)
