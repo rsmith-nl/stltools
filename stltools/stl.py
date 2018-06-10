@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2018 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2018-04-02 11:03:13 +0200
+# Last modified: 2018-06-10T15:39:06+0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -226,7 +226,7 @@ def _parsebinary(m, encoding):
     if b'facet normal' in data:
         return None, None
     name, _ = struct.unpack("<80sI", data[0:84])
-        if b'COLOR' in data:
+    if b'COLOR' in data:
         date = datetime.datetime.now()
         name = b' '.join(
             [b'Unknown Binary STL',
