@@ -2,9 +2,12 @@
 *.pyo
 __pycache__/
 .cache/
+.pytest_cache/
+.ropeproject/
+stltools.egg-info/
 *~
-build
-dist
+build/
+dist/
 backup-*.tar.gz
 stl2ps.1.pdf
 stl2pdf.1.pdf
