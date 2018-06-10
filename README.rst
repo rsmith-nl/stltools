@@ -3,7 +3,7 @@ STL file manipulation with stltools
 
 :author: Roland Smith
 
-.. Last modified: 2017-08-22 17:45:36 +0200
+.. Last modified: 2018-06-10T15:33:39+0200
 .. vim:fileencoding=utf-8:ft=rst
 
 The stltools module reads both text and binary STL files and creates STL
@@ -11,10 +11,6 @@ objects. It also handles coordinate transforms and projections.
 
 The scripts stl2pov, stl2ps and stl2pdf use this library to convert STL files
 to POV-ray meshes, PostScript and PDF files respectively.
-
-.. note::
-    The ``master`` branch is for releases. Development is done in the
-    ``develop`` branch.
 
 stl2pov
 -------
@@ -171,4 +167,4 @@ Run the following command to install the module and the scripts.
 
 .. code-block:: sh
 
-    # python setup.py install
+    # python3 setup.py install
