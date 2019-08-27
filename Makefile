@@ -21,4 +21,5 @@ dist::
 
 
 tests::
-	cd test; py.test-3.7 -v test*.py
+#	cd test; py.test-3.7 -v test*.py
+	py.test-3.7 -v test/test*.py

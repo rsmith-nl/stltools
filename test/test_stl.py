@@ -3,7 +3,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-08-22 16:45:36 +0200
-# Last modified: 2019-08-27T20:34:32+0200
+# Last modified: 2019-08-27T20:42:29+0200
 """
 Tests for the stl module.
 
@@ -16,7 +16,7 @@ import stltools.stl as stl
 
 
 def test_read_bin():
-    vertices, name = stl.readstl('data/cube-bin.stl')
+    vertices, name = stl.readstl('test/data/cube-bin.stl')
     assert name == 'cube_bin'
     assert vertices.shape == (36, 3)
     _, pnts = stl.toindexed(vertices)
@@ -24,7 +24,7 @@ def test_read_bin():
 
 
 def test_read_txt():
-    vertices, name = stl.readstl('data/cube-txt.stl')
+    vertices, name = stl.readstl('test/data/cube-txt.stl')
     assert name == 'cube_txt'
     assert vertices.shape == (36, 3)
     _, pnts = stl.toindexed(vertices)
@@ -40,7 +40,7 @@ def test_read_txt():
 
 
 def test_normals():
-    vertices, name = stl.readstl('data/cube-txt.stl')
+    vertices, name = stl.readstl('test/data/cube-txt.stl')
     facets, pnts = stl.toindexed(vertices)
     ni, nv = stl.normals(facets, pnts)
     assert len(ni) == 12  # 6 faces, 2 facets/face.
@@ -50,12 +50,13 @@ def test_normals():
 
 
 def test_text():
-    vertices, name = stl.readstl('data/cube-txt.stl')
+    origpath = 'test/data/cube-txt.stl'
+    vertices, name = stl.readstl(origpath)
     facets, pnts = stl.toindexed(vertices)
     ni, nv = stl.normals(facets, pnts)
     res = stl.text('cube_txt', facets, pnts, ni, nv)
     res = [' '.join(ln.strip().split()) for ln in res.splitlines()]
-    with open('data/cube-txt.stl') as inp:
+    with open(origpath) as inp:
         orig = [' '.join(ln.strip().split()) for ln in inp.readlines()]
     for a, b in zip(orig, res):
         assert a == b
