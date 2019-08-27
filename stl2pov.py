@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # vim:fileencoding=utf-8
 #
-# Copyright © 2012-2018 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2018-04-02 11:02:27 +0200
+# Copyright © 2012-2019 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Last modified: 2019-08-27T19:27:07+0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -94,10 +94,10 @@ def mesh1(name, vertices):
     """
     facets = vertices.reshape((-1, 9))
     lines = ["# declare m_{} = mesh {{".format(name.replace(' ', '_'))]
-    # The indices sequence 1, 0, 2 is used because of the difference between
+    # The indices sequence 0, 2, 1 is used because of the difference between
     # the STL coordinate system and that used in POV-ray.
-    fct = "  triangle {{\n    <{1}, {0}, {2}>,\n    <{4}, {3}, {5}>,\n" \
-          "    <{7}, {6}, {8}>\n  }}"
+    fct = "  triangle {{\n    <{0}, {2}, {1}>,\n    <{3}, {5}, {4}>,\n" \
+          "    <{6}, {8}, {7}>\n  }}"
     lines += [fct.format(*f) for f in facets]
     lines += ['}']
     return '\n'.join(lines)
@@ -119,9 +119,9 @@ def mesh2(name, vertices):
         "# declare m_{} = mesh2 {{".format(name), '  vertex_vectors {',
         '    {},'.format(len(points))
     ]
-    # The indices sequence 1, 0, 2 is used because of the difference between
+    # The indices sequence 0, 2, 1 is used because of the difference between
     # the STL coordinate system and that used in POV-ray
-    lines += ['    <{1}, {0}, {2}>,'.format(*p) for p in points]
+    lines += ['    <{0}, {2}, {1}>,'.format(*p) for p in points]
     lines[-1] = lines[-1][:-1]
     lines += ['  }\n  face_indices {', '    {},'.format(len(ifacets))]
     lines += ['    <{0}, {1}, {2}>,'.format(*f) for f in ifacets]
