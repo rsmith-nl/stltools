@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8
 #
 # Copyright © 2012-2019 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
-# Last modified: 2019-08-27T19:27:07+0200
+# Last modified: 2019-08-27T20:47:31+0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -139,7 +139,7 @@ def main(argv):
     """
     parser = argparse.ArgumentParser(description=__doc__)
     argtxt = 'generate a mesh2 object (slow on big files)'
-    parser.add_argument('-2,' '--mesh2', action='store_true', help=argtxt, dest='mesh2')
+    parser.add_argument('-2', '--mesh2', action='store_true', help=argtxt, dest='mesh2')
     parser.add_argument(
         '-e',
         '--encoding',
