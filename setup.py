@@ -2,7 +2,7 @@
 # Installation script for stltools
 #
 # R.F. Smith <rsmith@xs4all.nl>
-# Last modified: 2018-04-02 10:31:28 +0200
+# Last modified: 2019-08-27T20:14:18+0200
 
 from setuptools import setup
 import os
@@ -14,7 +14,7 @@ with open('README.rst', encoding='utf-8') as f:
     ld = f.read()
 
 # Remove the extensions from the scripts for UNIX-like systems.
-if os.name is 'posix':
+if os.name == 'posix':
     outnames = [s[:-3] for s in _scripts]
     try:
         for old, new in zip(_scripts, outnames):
@@ -34,7 +34,7 @@ setup(
     install_requires=['numpy>=1.7.0'],
     extras_require={
         'PDF': ["pycairo>=1.10.0"],
-        'test': ["nose>=1.3.0"],
+        'test': ["pytest>=4.5.0"],
     },
     scripts=_scripts,
     provides='stltools',
