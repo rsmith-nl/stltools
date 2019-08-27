@@ -3,7 +3,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2015-08-22 16:45:36 +0200
-# Last modified: 2017-08-22 22:36:28 +0200
+# Last modified: 2019-08-27T20:34:32+0200
 """
 Tests for the stl module.
 
@@ -54,8 +54,8 @@ def test_text():
     facets, pnts = stl.toindexed(vertices)
     ni, nv = stl.normals(facets, pnts)
     res = stl.text('cube_txt', facets, pnts, ni, nv)
-    res = [ln.strip() for ln in res.splitlines()]
+    res = [' '.join(ln.strip().split()) for ln in res.splitlines()]
     with open('data/cube-txt.stl') as inp:
-        orig = [ln.strip() for ln in inp.readlines()]
+        orig = [' '.join(ln.strip().split()) for ln in inp.readlines()]
     for a, b in zip(orig, res):
         assert a == b
