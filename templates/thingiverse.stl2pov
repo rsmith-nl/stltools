@@ -1,0 +1,100 @@
+
+#include "$incfn"
+
+#macro raster(rscale, rline)
+pigment{
+   gradient x scale rscale
+   color_map{
+     [0.00000 color rgb<1,1,1>]
+     [0+rline color rgb<1,1,1>]
+     [0+rline color rgbt<1,1,1,1>]
+     [1-rline color rgbt<1,1,1,1>]
+     [1-rline color rgb<1,1,1>]
+     [1.00000 color rgb<1,1,1>]
+   }
+}
+#end
+
+global_settings {
+  assumed_gamma 2.5
+  ambient_light rgb<1, 1, 1>
+}
+
+background {
+  color rgbt <1.0, 1.0, 1.0, 0.0>
+}
+
+plane {
+      <0,1,0>, $minz
+
+      texture{ pigment { color <0.80, 0.80, 0.80> } }
+      texture{ raster(10.00, 0.02) }
+      texture{ raster(10.00, 0.02) rotate<0,90,0> }
+
+  finish {
+    reflection 0.25
+    ambient 0.25
+    diffuse 0.25
+  }
+
+}
+
+fog {
+   color rgb<0.9, 0.9, 0.9>
+   distance 1000
+   fog_type 2
+   fog_alt 1000
+   up <0,0,-1>
+}
+
+
+light_source {
+    <$minx * 5, $maxz * 15, $miny * 5>
+    color rgb 0.3
+    area_light <25, 0, 0>, <0, 0, 25>, 25, 25
+    adaptive 1
+    jitter
+}
+
+light_source {
+    <$minx * -5, $maxz * 1.10, $miny * 15>
+    color rgb 0.9
+    area_light <25, 0, 0>, <0, 0, 25>, 25, 25
+    adaptive 1
+    jitter
+}
+
+light_source {
+    <$maxx * -5, $maxz * 0.90, $maxy * -5>
+    color rgb 0.7
+    area_light <25, 0, 0>, <0, 0, 25>, 25, 25
+    adaptive 1
+    jitter
+}
+
+camera {
+  perspective
+
+  angle 30
+
+  right x*image_width/image_height
+
+  location <(($maxx - $minx) / 2) - (($maxx - $minx) * 4), ($maxz - $minz) * 1.20, (($maxy - $miny) / 2) - (($maxx - $minx) * 4)>
+
+  look_at <($maxx - $minx) / 2, ($maxz - $minz) / 2 * 0.60, ($maxy - $miny) / 2> 
+}
+
+
+object {
+  m_$name
+  texture {
+    pigment {
+      color <0.15, 0.55, 0.95>
+    }
+    finish {
+      ambient 0.30
+      diffuse 0.45
+      phong 0.25
+    }
+  }
+}
