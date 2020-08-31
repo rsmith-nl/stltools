@@ -7,7 +7,6 @@ help::
 	@echo "You can use one of the following commands:"
 	@echo "  clean -- Remove generated files"
 	@echo "  dist --  Create distribution file"
-	@echo "  clean -- Update keywords in files."
 	@echo "  tests -- Run code tests using py.test."
 
 clean::
@@ -21,5 +20,4 @@ dist::
 
 
 tests::
-#	cd test; py.test-3.7 -v test*.py
-	py.test-3.7 -v test/test*.py
+	py.test -v test/test*.py
