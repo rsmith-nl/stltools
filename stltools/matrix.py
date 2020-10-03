@@ -3,7 +3,7 @@
 #
 # Copyright © 2013-2015 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-07-28 02:07:00 +0200
-# Last modified: 2018-04-02 10:28:58 +0200
+# Last modified: 2020-10-03T23:54:25+0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@ For a right-handed coordinate system.
 """
 
 import math
-import numpy as np
+import stltools.vecops as vo
 
 
 def I():  # noqa
@@ -40,9 +40,9 @@ def I():  # noqa
     Create identity matrix.
 
     Returns:
-        A 4x4 numpy array of float32 with main diagonal set to 1, rest 0.
+        A 4x4 row-major matrix.
     """
-    return np.identity(4, np.float32)
+    return [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
 
 def trans(vec):
@@ -50,16 +50,15 @@ def trans(vec):
     Create a transformation matrix for translation.
 
     Arguments:
-        vec: (3,) numpy array representing a 3D translation vector.
+        vec: 3-tuple representing a 3D translation vector.
 
     Returns:
-        A 4x4 numpy array of float32 representing a homogeneous coordinates
-        translation matrix along vec.
+        A 4x4 row-major matrix.
     """
     rv = I()
-    rv[0, 3] = vec[0]
-    rv[1, 3] = vec[1]
-    rv[2, 3] = vec[2]
+    rv[0][3] = vec[0]
+    rv[1][3] = vec[1]
+    rv[2][3] = vec[2]
     return rv
 
 
@@ -73,9 +72,31 @@ def mul(*args):
     Returns:
         A × B × C × ... × N
     """
-    rv = np.copy(args[0])
-    for r in args[1:]:
-        rv = np.dot(rv, r)
+
+
+def dot(a, b):
+    """Returns the product of the two row-major matrices a and b."""
+    rv = I()
+    # first row
+    rv[0][0] = a[0][0]*b[0][0] + a[0][1]*b[1][0] + a[0][2]*b[2][0] + a[0][3]*b[3][0]
+    rv[0][1] = a[0][0]*b[0][1] + a[0][1]*b[1][1] + a[0][2]*b[2][1] + a[0][3]*b[3][1]
+    rv[0][2] = a[0][0]*b[0][2] + a[0][1]*b[1][2] + a[0][2]*b[2][2] + a[0][3]*b[3][2]
+    rv[0][3] = a[0][0]*b[0][3] + a[0][1]*b[1][3] + a[0][2]*b[2][3] + a[0][3]*b[3][3]
+    # second row
+    rv[1][0] = a[1][0]*b[0][0] + a[1][1]*b[1][0] + a[1][2]*b[2][0] + a[1][3]*b[3][0]
+    rv[1][1] = a[1][0]*b[0][1] + a[1][1]*b[1][1] + a[1][2]*b[2][1] + a[1][3]*b[3][1]
+    rv[1][2] = a[1][0]*b[0][2] + a[1][1]*b[1][2] + a[1][2]*b[2][2] + a[1][3]*b[3][2]
+    rv[1][3] = a[1][0]*b[0][3] + a[1][1]*b[1][3] + a[1][2]*b[2][3] + a[1][3]*b[3][3]
+    # third row
+    rv[2][0] = a[2][0]*b[0][0] + a[2][1]*b[1][0] + a[2][2]*b[2][0] + a[2][3]*b[3][0]
+    rv[2][1] = a[2][0]*b[0][1] + a[2][1]*b[1][1] + a[2][2]*b[2][1] + a[2][3]*b[3][1]
+    rv[2][2] = a[2][0]*b[0][2] + a[2][1]*b[1][2] + a[2][2]*b[2][2] + a[2][3]*b[3][2]
+    rv[2][3] = a[2][0]*b[0][3] + a[2][1]*b[1][3] + a[2][2]*b[2][3] + a[2][3]*b[3][3]
+    # fourth row
+    rv[3][0] = a[3][0]*b[0][0] + a[3][1]*b[1][0] + a[3][2]*b[2][0] + a[3][3]*b[3][0]
+    rv[3][1] = a[3][0]*b[0][1] + a[3][1]*b[1][1] + a[3][2]*b[2][1] + a[3][3]*b[3][1]
+    rv[3][2] = a[3][0]*b[0][2] + a[3][1]*b[1][2] + a[3][2]*b[2][2] + a[3][3]*b[3][2]
+    rv[3][3] = a[3][0]*b[0][3] + a[3][1]*b[1][3] + a[3][2]*b[2][3] + a[3][3]*b[3][3]
     return rv
 
 
@@ -91,10 +112,10 @@ def concat(*args):
     Returns:
         N × ... × C × B × A
     """
-    rv = np.copy(args[-1])
+    rv = args[-1]
     rest = list(reversed(args[:-1]))
     for r in rest:
-        rv = np.dot(rv, r)
+        rv = dot(rv, r)
     return rv
 
 
@@ -106,16 +127,12 @@ def rotx(angle):
         angle: Rotation angle in degrees.
 
     Returns:
-        A 4x4 numpy array of float32 representing a homogeneous coordinates
-        matrix for rotation around the X axis.
+        A 4x4 matrix representing a homogeneous coordinates rotation around the X axis.
     """
     rad = math.radians(angle)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array(
-        [[1.0, 0.0, 0.0, 0.0], [0.0, c, -s, 0.0], [0.0, s, c, 0.0], [0.0, 0.0, 0.0, 1.0]],
-        np.float32
-    )
+    return [[1.0, 0.0, 0.0, 0.0], [0.0, c, -s, 0.0], [0.0, s, c, 0.0], [0.0, 0.0, 0.0, 1.0]]
 
 
 def roty(ang):
@@ -126,16 +143,12 @@ def roty(ang):
         angle: Rotation angle in degrees.
 
     Returns:
-        A 4x4 numpy array of float32 representing a homogeneous coordinates
-        matrix for rotation around the Y axis.
+        A 4x4 matrix representing a homogeneous coordinates rotation around the Y axis.
     """
     rad = math.radians(ang)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array(
-        [[c, 0.0, s, 0.0], [0.0, 1.0, 0.0, 0.0], [-s, 0.0, c, 0.0], [0.0, 0.0, 0.0, 1.0]],
-        np.float32
-    )
+    return [[c, 0.0, s, 0.0], [0.0, 1.0, 0.0, 0.0], [-s, 0.0, c, 0.0], [0.0, 0.0, 0.0, 1.0]]
 
 
 def rotz(ang):
@@ -152,43 +165,7 @@ def rotz(ang):
     rad = math.radians(ang)
     c = math.cos(rad)
     s = math.sin(rad)
-    return np.array(
-        [[c, -s, 0.0, 0.0], [s, c, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]],
-        np.float32
-    )
-
-
-def rot(axis, angle):
-    """
-    Calculate the transform for rotation around an arbitrary axis.
-
-    Arguments:
-        axis: (3,) array representing the rotation axis.
-        angle: Rotation angle in degrees.
-
-    Returns:
-        A 4x4 numpy array of float32 representing a homogeneous
-        coordinates matrix for rotation around the axis.
-    """
-    ax = np.require(axis[0:3], np.float32)
-    length = np.linalg.norm(ax)
-    if length == 0.0:
-        raise ValueError('axis cannot have length 0')
-    elif not length == 1.0:
-        ax /= length
-    ux, uy, uz = ax
-    a = math.radians(angle)
-    c = math.cos(a)
-    s = math.sin(a)
-    uc = np.array([[0, -uz, uy], [uz, 0, -ux], [-uy, ux, 0]], np.float32)
-    ut = np.array(
-        [[ux * ux, ux * uy, ux * uz], [ux * uy, uy * uy, uy * uz], [ux * uz, uy * uz, uz * uz]],
-        np.float32
-    )
-    m = np.identity(3, np.float32) * c + uc * s + ut * (1.0 - c)
-    m = np.vstack((m, np.array([0, 0, 0], np.float32)))
-    m = np.column_stack((m, np.array([0, 0, 0, 1], np.float32)))
-    return m
+    return [[c, -s, 0.0, 0.0], [s, c, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
 
 
 def scale(x=1, y=1, z=1):
@@ -205,7 +182,7 @@ def scale(x=1, y=1, z=1):
         coordinates scaling matrix.
     """
     rv = I()
-    rv[0, 0], rv[1, 1], rv[2, 2] = float(x), float(y), float(z)
+    rv[0][0], rv[1][1], rv[2][2] = float(x), float(y), float(z)
     return rv
 
 
@@ -222,20 +199,15 @@ def lookat(eye, center, up):
         A 4x4 numpy array of float32 representing a homogeneous
         coordinates view matrix.
     """
-    eye = np.array(eye, np.float32)
-    center = np.array(center, np.float32)
-    up = np.array(up, np.float32)
-    F = center - eye
-    f = F / np.linalg.norm(F)
-    S = np.cross(f, up)
-    s = S / np.linalg.norm(S)
-    u = np.cross(s, f)
-    rv = np.array(
-        [
-            [s[0], s[1], s[2], -eye[0]], [u[0], u[1], u[2], -eye[1]],
-            [-f[0], -f[1], -f[2], -eye[2]], [0, 0, 0, 1]
-        ], np.float32
-    )
+    f = vo.normalize([i-j for i, j in zip(center, eye)])
+    s = vo.normalize(vo.cross(f, up))
+    u = vo.cross(s, f)
+    rv = [
+        [s[0], s[1], s[2], -eye[0]],
+        [u[0], u[1], u[2], -eye[1]],
+        [-f[0], -f[1], -f[2], -eye[2]],
+        [0, 0, 0, 1]
+    ]
     return rv
 
 
@@ -276,10 +248,10 @@ def perspective(fovy, width, height, near, far):
     near = float(near)
     far = float(far)
     d = near - far
-    rv = np.array(
-        [
-            [f / aspect, 0, 0, 0], [0, f, 0, 0], [0, 0, (far + near) / d, 2 * far * near / d],
-            [0, 0, -1, 0]
-        ], np.float32
-    )
+    rv = [
+        [f / aspect, 0, 0, 0],
+        [0, f, 0, 0],
+        [0, 0, (far + near) / d, 2 * far * near / d],
+        [0, 0, -1, 0]
+    ]
     return rv

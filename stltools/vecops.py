@@ -3,7 +3,7 @@
 #
 # Copyright © 2013 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2020-10-03T22:38:06+0200
+# Last modified: 2020-10-03T23:51:51+0200
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -136,8 +136,12 @@ def xform(mat, pnts):
     Returns:
         The transformed list of tuples.
     """
+    mp = pnts
+    r = len(mat[0])
+    if r != len(pnts[0]):
+        mp = to4(pnts)
     rv = []
-    for p in pnts:
+    for p in mp:
         np = []
         for j in range(4):
             np.append(sum(i*k for i, k in zip(mat[j], p)))
