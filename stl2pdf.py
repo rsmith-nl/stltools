@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-10-02T18:07:38+02:00
-# Last modified: 2020-10-04T17:49:43+0200
+# Last modified: 2020-10-04T18:26:53+0200
 """
 Program for converting a view of an STL file into a PDF file.
 
@@ -33,92 +33,92 @@ def main(argv):
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        '--log',
-        default='warning',
-        choices=['debug', 'info', 'warning', 'error'],
+        "--log",
+        default="warning",
+        choices=["debug", "info", "warning", "error"],
         help="logging level (defaults to 'warning')"
     )
     parser.add_argument(
-        '-c',
-        '--canvas',
-        dest='canvas_size',
+        "-c",
+        "--canvas",
+        dest="canvas_size",
         type=int,
         help="canvas size, defaults to 200 PostScript points",
         default=200
     )
     parser.add_argument(
-        '-f',
-        '--foreground',
-        dest='fg',
+        "-f",
+        "--foreground",
+        dest="fg",
         type=str,
         help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
-        default='E6E6E6'
+        default="E6E6E6"
     )
     parser.add_argument(
-        '-b',
-        '--background',
-        dest='bg',
+        "-b",
+        "--background",
+        dest="bg",
         type=str,
         help="background color in 6-digit hexdecimal RGB (default FFFFFF)",
-        default='FFFFFF'
+        default="FFFFFF"
     )
     parser.add_argument(
-        '-e',
-        '--encoding',
+        "-e",
+        "--encoding",
         type=str,
         help="encoding for the name of the STL object (default utf-8)",
-        default='utf-8'
+        default="utf-8"
     )
     parser.add_argument(
-        '-o', '--output', dest='outfile', type=str, help="output file name", default=""
+        "-o", "--output", dest="outfile", type=str, help="output file name", default=""
     )
     parser.add_argument(
-        '-x', type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
+        "-x", type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
     )
     parser.add_argument(
-        '-y', type=float, action=utils.RotateAction, help="rotation around Y axis in degrees"
+        "-y", type=float, action=utils.RotateAction, help="rotation around Y axis in degrees"
     )
     parser.add_argument(
-        '-z', type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
+        "-z", type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
     )
-    parser.add_argument('-v', '--version', action='version', version=__version__)
-    parser.add_argument('file', nargs=1, type=str, help='name of the file to process')
+    parser.add_argument("-v", "--version", action="version", version=__version__)
+    parser.add_argument("file", nargs=1, type=str, help="name of the file to process")
     args = parser.parse_args(argv)
     logging.basicConfig(
-        level=getattr(logging, args.log.upper(), None), format='%(levelname)s: %(message)s'
+        level=getattr(logging, args.log.upper(), None), format="%(levelname)s: %(message)s"
     )
     args.file = args.file[0]
     args.fg = int(args.fg, 16)
     f_red, f_green, f_blue = utils.num2rgb(args.fg)
     args.bg = int(args.bg, 16)
     b_red, b_green, b_blue = utils.num2rgb(args.bg)
-    if 'rotations' not in args:
-        logging.info('no rotations specified')
+    if "rotations" not in args:
+        logging.info("no rotations specified")
         tr = matrix.I()
     else:
         tl = []
-        which = {'x': matrix.rotx, 'y': matrix.roty, 'z': matrix.rotz}
+        which = {"x": matrix.rotx, "y": matrix.roty, "z": matrix.rotz}
         for axis, rot in args.rotations:
             tl.append(which[axis](rot))
         tr = matrix.concat(*tl)
-        logging.info('rotation matrix:\n{}'.format(tr))
+        logging.info(f"rotation matrix:\n{tr}")
     if not args.outfile:
-        args.outfile = utils.outname(args.file, '.pdf')
-        ofs = "no output filename given, using '{}'"
-        logging.info(ofs.format(args.outfile))
-    logging.info("reading STL file '{}'".format(args.file))
+        args.outfile = utils.outname(args.file, ".pdf")
+        ofs = f'no output filename given, using "{args.outfile}"'
+        logging.info(ofs)
+    logging.info(f'reading STL file "{args.file}"')
     try:
         vertices, _ = stl.readstl(args.file, args.encoding)
     except ValueError as e:
-        logging.error('{}: {}'.format(args.file, e))
+        logging.error(f"{args.file}: {e}")
         sys.exit(1)
-    logging.info('calculating normal vectors')
+    logging.info("calculating normal vectors")
     facets = list(utils.chunked(vertices, 3))
     normals = [vecops.normal(a, b, c) for a, b, c in facets]
-    logging.info('applying transformations to world coordinates')
+    logging.info("applying transformations to world coordinates")
     vertices = vecops.xform(tr, vertices)
     normals = vecops.xform(tr, normals)
-    logging.info('making model-view matrix')
+    logging.info("making model-view matrix")
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     width = maxx - minx
     height = maxy - miny
@@ -130,24 +130,24 @@ def main(argv):
     v = matrix.scale(sf, -sf)
     v[0][3], v[1][3] = args.canvas_size / 2, args.canvas_size / 2
     mv = matrix.concat(m, v)
-    logging.info('transforming to view space')
+    logging.info("transforming to view space")
     vertices = vecops.xform(mv, vertices)
     facets = list(utils.chunked(vertices, 3))
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
-    logging.info('Determining visible facets')
+    logging.info("Determining visible facets")
     vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(facets, normals) if n[2] > 0]
-    vfs = '{:.2f}% of facets is visible'
+    vfs = "{:.2f}% of facets is visible"
     logging.info(vfs.format(100 * len(vf) / len(facets)))
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
-    logging.info('depth-sorting visible facets')
+    logging.info("depth-sorting visible facets")
 
     def fkey(t):
         (a, b, c), _, _ = t
         return max(a[2], b[2], c[2])
 
     vf.sort(key=fkey)
-    logging.info('initializing drawing surface')
+    logging.info("initializing drawing surface")
     out = cairo.PDFSurface(args.outfile, args.canvas_size, args.canvas_size)
     ctx = cairo.Context(out)
     ctx.set_source_rgb(b_red, b_green, b_blue)
@@ -156,7 +156,7 @@ def main(argv):
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
-    logging.info('drawing the triangles')
+    logging.info("drawing the triangles")
     for (a, b, c), _, i in vf:
         ctx.new_path()
         ctx.move_to(a[0], a[1])
@@ -169,8 +169,8 @@ def main(argv):
     # Send output.
     out.show_page()
     out.finish()
-    logging.info('done')
+    logging.info("done")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1:])
