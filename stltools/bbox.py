@@ -4,7 +4,7 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2020-10-04T12:14:22+0200
+# Last modified: 2020-10-04T12:55:49+0200
 """Operations on two or three dimensional bounding boxes."""
 
 
@@ -21,7 +21,7 @@ def makebb(pnts):
     x = [p[0] for p in pnts]
     y = [p[1] for p in pnts]
     rv = [min(x), max(x), min(y), max(y)]
-    if len(pnts[0] == 3):
+    if len(pnts[0]) == 3:
         z = [p[2] for p in pnts]
         rv += [min(z), max(z)]
     return rv
