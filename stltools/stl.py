@@ -4,13 +4,12 @@
 # Copyright © 2012-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2020-10-04T14:52:35+0200
+# Last modified: 2020-10-04T16:51:54+0200
 """Handling STL files and brep datasets."""
 
 from . import vecops as vo
+from .utils import chunked
 import datetime
-import functools as ft
-import itertools as it
 import mmap
 import struct
 
@@ -156,20 +155,8 @@ def toindexed(vertices):
         An (?, 3) array of facet indices and an (M, 3) array of unique points.
     """
     ix, points = vo.indexate(vertices)
-    facets = list(_chunked(ix, 3))
+    facets = list(chunked(ix, 3))
     return facets, points
-
-
-def _chunked(iterable, n):
-    """
-    Split an iterable up in chunks of length n.
-
-    The second argument to the outer ``iter()`` is crucial to the way this works.
-    See the documentation for ``iter()`` for details.
-    """
-    def take(n, iterable):
-        return list(it.islice(iterable, n))
-    return iter(ft.partial(take, n, iter(iterable)), [])
 
 
 def normals(facets, points):

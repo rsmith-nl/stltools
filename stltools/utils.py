@@ -4,10 +4,12 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2020-10-04T12:16:49+0200
+# Last modified: 2020-10-04T16:50:53+0200
 """Utilities for stltools."""
 
 import argparse
+import functools as ft
+import itertools as it
 import os.path
 import re
 
@@ -70,3 +72,15 @@ def num2rgb(color):
     green = ((color & 0x00FF00) >> 8) / 255
     blue = (color & 0x0000FF) / 255
     return red, green, blue
+
+
+def chunked(iterable, n):
+    """
+    Split an iterable up in chunks of length n.
+
+    The second argument to the outer ``iter()`` is crucial to the way this works.
+    See the documentation for ``iter()`` for details.
+    """
+    def take(n, iterable):
+        return list(it.islice(iterable, n))
+    return iter(ft.partial(take, n, iter(iterable)), [])
