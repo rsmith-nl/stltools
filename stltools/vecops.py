@@ -4,7 +4,7 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2020-10-04T12:17:29+0200
+# Last modified: 2020-10-04T17:41:39+0200
 """Operations on two or three dimensional vectors."""
 
 
@@ -126,4 +126,6 @@ def xform(mat, pnts):
         for j in range(4):
             newp.append(sum(i*k for i, k in zip(mat[j], p)))
         rv.append(tuple(newp))
+    if len(pnts[0]) != len(rv[0]):
+        return to3(rv)
     return rv

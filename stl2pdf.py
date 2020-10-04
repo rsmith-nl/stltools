@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-10-02T18:07:38+02:00
-# Last modified: 2020-10-04T12:20:27+0200
+# Last modified: 2020-10-04T17:49:43+0200
 """
 Program for converting a view of an STL file into a PDF file.
 
@@ -21,7 +21,6 @@ import argparse
 import cairo
 import logging
 import sys
-import numpy as np
 from stltools import stl, bbox, utils, vecops, matrix, __version__
 
 
@@ -114,11 +113,11 @@ def main(argv):
         logging.error('{}: {}'.format(args.file, e))
         sys.exit(1)
     logging.info('calculating normal vectors')
-    facets = vertices.reshape((-1, 3, 3))
-    normals = np.array([vecops.normal(a, b, c) for a, b, c in facets])
+    facets = list(utils.chunked(vertices, 3))
+    normals = [vecops.normal(a, b, c) for a, b, c in facets]
     logging.info('applying transformations to world coordinates')
     vertices = vecops.xform(tr, vertices)
-    normals = vecops.xform(tr[0:3, 0:3], normals)
+    normals = vecops.xform(tr, normals)
     logging.info('making model-view matrix')
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
     width = maxx - minx
@@ -129,11 +128,11 @@ def main(argv):
     m = matrix.trans([dx, dy, dz])
     sf = min(args.canvas_size / width, args.canvas_size / height)
     v = matrix.scale(sf, -sf)
-    v[0, 3], v[1, 3] = args.canvas_size / 2, args.canvas_size / 2
+    v[0][3], v[1][3] = args.canvas_size / 2, args.canvas_size / 2
     mv = matrix.concat(m, v)
     logging.info('transforming to view space')
     vertices = vecops.xform(mv, vertices)
-    facets = vertices.reshape((-1, 3, 3))
+    facets = list(utils.chunked(vertices, 3))
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
     logging.info('Determining visible facets')
     vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(facets, normals) if n[2] > 0]
