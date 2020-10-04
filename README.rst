@@ -3,7 +3,7 @@ STL file manipulation with stltools
 
 :author: Roland Smith
 
-.. Last modified: 2020-10-04T16:30:53+0200
+.. Last modified: 2020-10-04T19:17:02+0200
 .. vim:fileencoding=utf-8:ft=rst
 
 The stltools module reads both text and binary STL files and creates STL
@@ -15,7 +15,10 @@ to POV-ray meshes, PostScript and PDF files respectively.
 Requirments
 -----------
 
-These programs require Python 3.6 or later, on an equivalent pypy3.
+These programs require Python 3.6 or later.
+
+The releases from the “master” branch also require numpy.
+The code on the “pypy” branch does not use numpy.
 
 
 stl2pov
