@@ -18,7 +18,7 @@ def length(v):
     Returns:
         The length of the vector.
     """
-    return sum(j*j for j in v)**0.5
+    return sum(j * j for j in v) ** 0.5
 
 
 def normalize(v):
@@ -32,12 +32,18 @@ def normalize(v):
         The scaled array.
     """
     ln = length(v)
-    return tuple(j/ln for j in v)
+    return tuple(j / ln for j in v)
 
 
 def cross(u, v):
     """Create the cross-product of two 3-tuples u and v."""
-    return tuple([u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]])
+    return tuple(
+        [
+            u[1] * v[2] - u[2] * v[1],
+            u[2] * v[0] - u[0] * v[2],
+            u[0] * v[1] - u[1] * v[0],
+        ]
+    )
 
 
 def normal(a, b, c):
@@ -50,8 +56,8 @@ def normal(a, b, c):
     Returns:
         A 3-tuple normal to the plane formed by a, b and c.
     """
-    u = tuple(j-k for j, k in zip(b, a))
-    v = tuple(j-k for j, k in zip(c, b))
+    u = tuple(j - k for j, k in zip(b, a))
+    v = tuple(j - k for j, k in zip(c, b))
     # cross product
     n = cross(u, v)
     try:
@@ -102,7 +108,7 @@ def to3(pnts):
     Returns:
         A list of 3-tuples (x,y,z)
     """
-    return [(p[0]/p[3], p[1]/p[3], p[2]/p[3]) for p in pnts]
+    return [(p[0] / p[3], p[1] / p[3], p[2] / p[3]) for p in pnts]
 
 
 def xform(mat, pnts):
@@ -124,7 +130,7 @@ def xform(mat, pnts):
     for p in mp:
         newp = []
         for j in range(4):
-            newp.append(sum(i*k for i, k in zip(mat[j], p)))
+            newp.append(sum(i * k for i, k in zip(mat[j], p)))
         rv.append(tuple(newp))
     if len(pnts[0]) != len(rv[0]):
         return to3(rv)

@@ -48,4 +48,4 @@ def inside(bb, v):
     elif len(bb) == 4 and len(v) == 2:
         return rv
     else:
-        raise ValueError('bbox and v must both be 2D or 3D')
+        raise ValueError("bbox and v must both be 2D or 3D")

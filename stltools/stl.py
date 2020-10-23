@@ -14,7 +14,7 @@ import mmap
 import struct
 
 
-def readstl(name, encoding='utf-8'):
+def readstl(name, encoding="utf-8"):
     """
     Read an STL file, return the vertices and the name.
 
@@ -29,7 +29,7 @@ def readstl(name, encoding='utf-8'):
         A numpy array of the shape (N, 3) containing the vertices of the
         facets, and the name of the object as given in the STL file.
     """
-    with open(name, 'rb') as f:
+    with open(name, "rb") as f:
         mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         vertices, name = _parsebinary(mm, encoding)
         if vertices is None:
@@ -37,7 +37,7 @@ def readstl(name, encoding='utf-8'):
             vertices, name = _parsetxt(mm, encoding)
         mm.close()
     if vertices is None:
-        raise ValueError('not a valid STL file.')
+        raise ValueError("not a valid STL file.")
     return vertices, name
 
 
@@ -54,25 +54,27 @@ def _parsebinary(m, encoding):
         the file.
     """
     data = m.read(84)
-    name = ''
+    name = ""
     points = None
-    if b'facet normal' in data:
+    if b"facet normal" in data:
         return None, None
     name, _ = struct.unpack("<80sI", data[0:84])
-    if b'COLOR' in data:
+    if b"COLOR" in data:
         date = datetime.datetime.now()
-        name = b' '.join(
-            [b'Unknown Binary STL',
-             b'Processed: (',
-             bytes(date.month),
-             bytes(date.day),
-             bytes(date.year),
-             b')',
-             b'\n']
+        name = b" ".join(
+            [
+                b"Unknown Binary STL",
+                b"Processed: (",
+                bytes(date.month),
+                bytes(date.day),
+                bytes(date.year),
+                b")",
+                b"\n",
+            ]
         )
     name = name.decode(encoding)
     name = name.replace("solid ", "")
-    name = name.strip('\x00 \t\n\r')
+    name = name.strip("\x00 \t\n\r")
     points = [p for p in _getbp(m)]
     return points, name
 
@@ -91,7 +93,7 @@ def _getbp(m):
         v = m.read(50)
         if len(v) != 50:
             break
-        p = struct.unpack('<12x9f2x', v)
+        p = struct.unpack("<12x9f2x", v)
         yield tuple(p[0:3])
         yield tuple(p[3:6])
         yield tuple(p[6:])
@@ -112,12 +114,12 @@ def _parsetxt(m, encoding):
     first = m.readline().decode(encoding)
     name = None
     points = None
-    if (first.startswith('solid') and b'facet normal' in m.readline()):
+    if first.startswith("solid") and b"facet normal" in m.readline():
         try:
             name = first.strip().split(None, 1)[1]
         except IndexError:
-            name = ''
-        vlines = [ln.split() for ln in _striplines(m) if ln.startswith('vertex')]
+            name = ""
+        vlines = [ln.split() for ln in _striplines(m) if ln.startswith("vertex")]
         points = [tuple(float(k) for k in j[1:]) for j in vlines]
     m.seek(0)
     return points, name
@@ -134,7 +136,7 @@ def _striplines(m):
         The stripped lines of the file as text.
     """
     while True:
-        v = m.readline().decode('utf-8')
+        v = m.readline().decode("utf-8")
         if v:
             yield v.strip()
         else:
@@ -190,16 +192,20 @@ def text(name, ifacets, points, inormals, vectors):
         A string containing a text representation of the brep.
     """
     fcts = list(zip(ifacets, inormals))
-    ln = ['solid {}'.format(name)]
+    ln = ["solid {}".format(name)]
     for f, n in fcts:
-        ln.append(f'  facet normal {vectors[n][0]:.1f} {vectors[n][1]:.1f} {vectors[n][2]:.1f}')
-        ln.append('    outer loop')
+        ln.append(
+            f"  facet normal {vectors[n][0]:.1f} {vectors[n][1]:.1f} {vectors[n][2]:.1f}"
+        )
+        ln.append("    outer loop")
         for v in f:
-            ln.append(f'      vertex {points[v][0]:.1f} {points[v][1]:.1f} {points[v][2]:.1f}')
-        ln.append('    endloop')
-        ln.append('  endfacet')
-    ln.append('endsolid')
-    return '\n'.join(ln)
+            ln.append(
+                f"      vertex {points[v][0]:.1f} {points[v][1]:.1f} {points[v][2]:.1f}"
+            )
+        ln.append("    endloop")
+        ln.append("  endfacet")
+    ln.append("endsolid")
+    return "\n".join(ln)
 
 
 def binary(name, ifacets, points, inormals, vectors):
@@ -216,13 +222,13 @@ def binary(name, ifacets, points, inormals, vectors):
     Returns:
         A string containing a binary representation of the brep.
     """
-    rc = [struct.pack('<80sI', name.encode('utf-8'), len(ifacets))]
+    rc = [struct.pack("<80sI", name.encode("utf-8"), len(ifacets))]
     for fi, ni in zip(ifacets, inormals):
         # data = list(np.concatenate((vectors[ni], points[fi[0]], points[fi[1]], points[fi[2]]))
         #             ) + [0]
         data = list(vectors[ni] + points[fi[0]] + points[fi[1]] + points[fi[2]]) + [0]
-        rc.append(struct.pack('<12fH', *data))
-    return b''.join(rc)
+        rc.append(struct.pack("<12fH", *data))
+    return b"".join(rc)
 
 
 def _test(args):
@@ -233,20 +239,21 @@ def _test(args):
         args: filename arguments for the test function
     """
     if len(args) < 2:
-        print('usage: python stl.py filename')
+        print("usage: python stl.py filename")
         exit(1)
     v, nm = readstl(args[1])
     f, p = toindexed(v)
     n, nv = normals(f, p)
     print('Filename: "{}"'.format(args[1]))
     print('Object name: "{}"'.format(nm))
-    print('Number of facets:', len(f))
-    print('Facet data:')
+    print("Number of facets:", len(f))
+    print("Facet data:")
     for j, k in zip(f, n):
-        print(' vertices:', p[j[0]], p[j[1]], p[j[2]])
-        print(' normal:', nv[k])
+        print(" vertices:", p[j[0]], p[j[1]], p[j[2]])
+        print(" normal:", nv[k])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from sys import argv
+
     _test(argv)

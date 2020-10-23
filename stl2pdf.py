@@ -36,7 +36,7 @@ def main(argv):
         "--log",
         default="warning",
         choices=["debug", "info", "warning", "error"],
-        help="logging level (defaults to 'warning')"
+        help="logging level (defaults to 'warning')",
     )
     parser.add_argument(
         "-c",
@@ -44,7 +44,7 @@ def main(argv):
         dest="canvas_size",
         type=int,
         help="canvas size, defaults to 200 PostScript points",
-        default=200
+        default=200,
     )
     parser.add_argument(
         "-f",
@@ -52,7 +52,7 @@ def main(argv):
         dest="fg",
         type=str,
         help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
-        default="E6E6E6"
+        default="E6E6E6",
     )
     parser.add_argument(
         "-b",
@@ -60,32 +60,42 @@ def main(argv):
         dest="bg",
         type=str,
         help="background color in 6-digit hexdecimal RGB (default FFFFFF)",
-        default="FFFFFF"
+        default="FFFFFF",
     )
     parser.add_argument(
         "-e",
         "--encoding",
         type=str,
         help="encoding for the name of the STL object (default utf-8)",
-        default="utf-8"
+        default="utf-8",
     )
     parser.add_argument(
         "-o", "--output", dest="outfile", type=str, help="output file name", default=""
     )
     parser.add_argument(
-        "-x", type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
+        "-x",
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around X axis in degrees",
     )
     parser.add_argument(
-        "-y", type=float, action=utils.RotateAction, help="rotation around Y axis in degrees"
+        "-y",
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around Y axis in degrees",
     )
     parser.add_argument(
-        "-z", type=float, action=utils.RotateAction, help="rotation around X axis in degrees"
+        "-z",
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around X axis in degrees",
     )
     parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument("file", nargs=1, type=str, help="name of the file to process")
     args = parser.parse_args(argv)
     logging.basicConfig(
-        level=getattr(logging, args.log.upper(), None), format="%(levelname)s: %(message)s"
+        level=getattr(logging, args.log.upper(), None),
+        format="%(levelname)s: %(message)s",
     )
     args.file = args.file[0]
     args.fg = int(args.fg, 16)

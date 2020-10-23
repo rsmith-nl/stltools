@@ -8,13 +8,13 @@ from setuptools import setup
 import os
 from stltools import __version__
 
-_scripts = ['stl2pov.py', 'stl2ps.py', 'stl2pdf.py', 'stlinfo.py']
+_scripts = ["stl2pov.py", "stl2ps.py", "stl2pdf.py", "stlinfo.py"]
 
-with open('README.rst', encoding='utf-8') as f:
+with open("README.rst", encoding="utf-8") as f:
     ld = f.read()
 
 # Remove the extensions from the scripts for UNIX-like systems.
-if os.name == 'posix':
+if os.name == "posix":
     outnames = [s[:-3] for s in _scripts]
     try:
         for old, new in zip(_scripts, outnames):
@@ -24,26 +24,30 @@ if os.name == 'posix':
     _scripts = outnames
 
 setup(
-    name='stltools',
+    name="stltools",
     version=__version__,
-    license='BSD',
-    description='Programs to read and convert STL files.',
-    author='Roland Smith',
-    author_email='rsmith@xs4all.nl',
-    url='https://rsmith.home.xs4all.nl/software/stltools.html',
-    install_requires=['numpy>=1.7.0'],
+    license="BSD",
+    description="Programs to read and convert STL files.",
+    author="Roland Smith",
+    author_email="rsmith@xs4all.nl",
+    url="https://rsmith.home.xs4all.nl/software/stltools.html",
+    install_requires=["numpy>=1.7.0"],
     extras_require={
-        'PDF': ["pycairo>=1.10.0"],
-        'test': ["pytest>=4.5.0"],
+        "PDF": ["pycairo>=1.10.0"],
+        "test": ["pytest>=4.5.0"],
     },
     scripts=_scripts,
-    provides='stltools',
-    packages=['stltools'],
+    provides="stltools",
+    packages=["stltools"],
     classifiers=[
-        'Development Status :: 5 - Production/Stable', 'Environment :: Console',
-        'Intended Audience :: End Users/Desktop', 'Intended Audience :: Manufacturing',
-        'License :: OSI Approved :: BSD License', 'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3', 'Topic :: Scientific/Engineering'
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: End Users/Desktop",
+        "Intended Audience :: Manufacturing",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Topic :: Scientific/Engineering",
     ],
-    long_description=ld
+    long_description=ld,
 )

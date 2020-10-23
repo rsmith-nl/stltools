@@ -25,14 +25,14 @@ class RotateAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         """Implement rotate option."""
-        rotations = getattr(namespace, 'rotations', None)
+        rotations = getattr(namespace, "rotations", None)
         if not rotations:
             rotations = []
         rotations += [(option_string[1], values)]
-        setattr(namespace, 'rotations', rotations)
+        setattr(namespace, "rotations", rotations)
 
 
-def outname(inname, extension, addenum=''):
+def outname(inname, extension, addenum=""):
     """
     Create the name of the output filename based on the input filename.
 
@@ -45,10 +45,10 @@ def outname(inname, extension, addenum=''):
         Output file name.
     """
     rv = os.path.splitext(os.path.basename(inname))[0]
-    rv = re.sub('^[\s\.]+|\s+$', '', rv)
-    rv = re.sub('\s+', '_', rv)
-    if not extension.startswith('.'):
-        extension = '.' + extension
+    rv = re.sub("^[\s\.]+|\s+$", "", rv)
+    rv = re.sub("\s+", "_", rv)
+    if not extension.startswith("."):
+        extension = "." + extension
     return rv + addenum + extension
 
 
@@ -81,6 +81,8 @@ def chunked(iterable, n):
     The second argument to the outer ``iter()`` is crucial to the way this works.
     See the documentation for ``iter()`` for details.
     """
+
     def take(n, iterable):
         return list(it.islice(iterable, n))
+
     return iter(ft.partial(take, n, iter(iterable)), [])

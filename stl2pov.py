@@ -59,8 +59,11 @@ def generate_name(orig_name, path):
     base = orig_name
     if len(orig_name) == 0:
         base = os.path.basename(path)
-    return base64.b32encode(hashlib.sha1(base.encode("utf-8")).digest()
-                            )[8:16].decode("ascii").lower()
+    return (
+        base64.b32encode(hashlib.sha1(base.encode("utf-8")).digest())[8:16]
+        .decode("ascii")
+        .lower()
+    )
 
 
 def mesh1(name, vertices):
@@ -76,15 +79,17 @@ def mesh1(name, vertices):
     """
     numbers = [n for p in vertices for n in p]
     facets = utils.chunked(numbers, 9)
-    uname = name.replace(' ', '_')
+    uname = name.replace(" ", "_")
     lines = [f"# declare m_{uname} = mesh {{"]
     # The indices sequence 0, 2, 1 is used because of the difference between
     # the STL coordinate system and that used in POV-ray.
-    fct = "  triangle {{\n    <{0}, {2}, {1}>,\n    <{3}, {5}, {4}>,\n" \
-          "    <{6}, {8}, {7}>\n  }}"
+    fct = (
+        "  triangle {{\n    <{0}, {2}, {1}>,\n    <{3}, {5}, {4}>,\n"
+        "    <{6}, {8}, {7}>\n  }}"
+    )
     lines += [fct.format(*f) for f in facets]
-    lines += ['}']
-    return '\n'.join(lines)
+    lines += ["}"]
+    return "\n".join(lines)
 
 
 def mesh2(name, vertices):
@@ -102,7 +107,7 @@ def mesh2(name, vertices):
     lines = [
         f"# declare m_{name} = mesh2 {{",
         "  vertex_vectors {",
-        f"    {len(points)},"
+        f"    {len(points)},",
     ]
     # The indices sequence 0, 2, 1 is used because of the difference between
     # the STL coordinate system and that used in POV-ray
@@ -111,8 +116,8 @@ def mesh2(name, vertices):
     lines += ["  }\n  face_indices {", f"    {len(ifacets)},"]
     lines += [f"    <{f[0]}, {f[1]}, {f[2]}>," for f in ifacets]
     lines[-1] = lines[-1][:-1]
-    lines += ['  }', '}']
-    return '\n'.join(lines)
+    lines += ["  }", "}"]
+    return "\n".join(lines)
 
 
 def main(argv):
@@ -123,40 +128,41 @@ def main(argv):
         argv: List of command line arguments (without program name!)
     """
     parser = argparse.ArgumentParser(description=__doc__)
-    argtxt = 'generate a mesh2 object (slow on big files)'
-    parser.add_argument('-2', '--mesh2', action='store_true', help=argtxt, dest='mesh2')
+    argtxt = "generate a mesh2 object (slow on big files)"
+    parser.add_argument("-2", "--mesh2", action="store_true", help=argtxt, dest="mesh2")
     parser.add_argument(
-        '-e',
-        '--encoding',
+        "-e",
+        "--encoding",
         type=str,
         help="encoding for the name of the STL object (default utf-8)",
-        default='utf-8'
+        default="utf-8",
     )
-    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument(
-        '--log',
-        default='warning',
-        choices=['debug', 'info', 'warning', 'error'],
-        help="logging level (defaults to 'warning')"
+        "--log",
+        default="warning",
+        choices=["debug", "info", "warning", "error"],
+        help="logging level (defaults to 'warning')",
     )
-    parser.add_argument('file', nargs='*', help='one or more file names')
+    parser.add_argument("file", nargs="*", help="one or more file names")
     args = parser.parse_args(argv)
     logging.basicConfig(
-        level=getattr(logging, args.log.upper(), None), format='%(levelname)s: %(message)s'
+        level=getattr(logging, args.log.upper(), None),
+        format="%(levelname)s: %(message)s",
     )
     if not args.file:
         parser.print_help()
         sys.exit(0)
     for fn in args.file:
         logging.info(f'Starting file "{fn}"')
-        if not fn.lower().endswith('.stl'):
+        if not fn.lower().endswith(".stl"):
             w = f'the file "{fn}" is probably not an STL file, skipping'
             logging.warning(w)
             continue
         try:
             logging.info("Reading facets")
             vertices, name = stl.readstl(fn, args.encoding)
-            outfn = utils.outname(fn, '.inc')
+            outfn = utils.outname(fn, ".inc")
         except Exception as e:  # pylint: disable=W0703
             logging.error(f"{fn}: {e}")
             continue
@@ -169,13 +175,13 @@ def main(argv):
         outs += f"// on {time.asctime()}.\n"
         outs += f'// Source file name: "{fn}"\n'
         if args.mesh2:
-            logging.info('generating mesh2 data.')
+            logging.info("generating mesh2 data.")
             outs += mesh2(name, vertices)
         else:
-            logging.info('generating mesh data.')
+            logging.info("generating mesh data.")
             outs += mesh1(name, vertices)
         try:
-            with open(outfn, 'w+') as of:
+            with open(outfn, "w+") as of:
                 logging.info(f"writing output file '{outfn}'.")
                 of.write(outs)
         except Exception:
@@ -184,5 +190,5 @@ def main(argv):
         logging.info(f"done with file '{fn}'.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1:])
