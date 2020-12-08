@@ -1,53 +1,62 @@
-# -*- coding: utf-8 -*-
-# Installation script for stltools
+#!/usr/bin/env python
+# file: setup.py
+# vim:fileencoding=utf-8:fdm=marker:ft=python
 #
-# R.F. Smith <rsmith@xs4all.nl>
-# Last modified: 2019-08-27T20:14:18+0200
+# Copyright © 2020 R.F. Smith <rsmith@xs4all.nl>
+# Created: 2020-10-25T12:18:04+0100
+# Last modified: 2020-12-08T20:55:06+0100
+"""Script to install scripts for the local user."""
 
-from setuptools import setup
 import os
-from stltools import __version__
+import shutil
+import sys
+import sysconfig
 
-_scripts = ["stl2pov.py", "stl2ps.py", "stl2pdf.py", "stlinfo.py"]
+# What to install
+scripts = [
+    ("stl2pdf.py", ".py"),
+    ("stl2pov.py", ".py"),
+    ("stl2ps.py", ".py"),
+    ("stlinfo.py", ".py"),
+]
 
-with open("README.rst", encoding="utf-8") as f:
-    ld = f.read()
-
-# Remove the extensions from the scripts for UNIX-like systems.
+# Preparation
 if os.name == "posix":
-    outnames = [s[:-3] for s in _scripts]
-    try:
-        for old, new in zip(_scripts, outnames):
-            os.link(old, new)
-    except OSError:
-        pass
-    _scripts = outnames
-
-setup(
-    name="stltools",
-    version=__version__,
-    license="BSD",
-    description="Programs to read and convert STL files.",
-    author="Roland Smith",
-    author_email="rsmith@xs4all.nl",
-    url="https://rsmith.home.xs4all.nl/software/stltools.html",
-    install_requires=["numpy>=1.7.0"],
-    extras_require={
-        "PDF": ["pycairo>=1.10.0"],
-        "test": ["pytest>=4.5.0"],
-    },
-    scripts=_scripts,
-    provides="stltools",
-    packages=["stltools"],
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Environment :: Console",
-        "Intended Audience :: End Users/Desktop",
-        "Intended Audience :: Manufacturing",
-        "License :: OSI Approved :: BSD License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3",
-        "Topic :: Scientific/Engineering",
-    ],
-    long_description=ld,
-)
+    destdir = sysconfig.get_path("scripts", "posix_user")
+    destdir2 = ""
+elif os.name == "nt":
+    destdir = sysconfig.get_path("scripts", os.name)
+    destdir2 = sysconfig.get_path("scripts", os.name + "_user")
+else:
+    print(f"The system '{os.name}' is not recognized. Exiting")
+    sys.exit(1)
+install = "install" in [a.lower() for a in sys.argv]
+if install:
+    if not os.path.exists(destdir):
+        os.mkdir(destdir)
+else:
+    print("(Use the 'install' argument to actually install scripts.)")
+# Actual installation.
+for script, nt_ext in scripts:
+    base = os.path.splitext(script)[0]
+    if os.name == "posix":
+        destname = destdir + os.sep + base
+        destname2 = ""
+    elif os.name == "nt":
+        destname = destdir + os.sep + base + nt_ext
+        destname2 = destdir2 + os.sep + base + nt_ext
+    if install:
+        for d in (destname, destname2):
+            try:
+                shutil.copyfile(script, d)
+                print(f"* installed '{script}' as '{destname}'.")
+                os.chmod(d, 0o700)
+                break
+            except (OSError, PermissionError, FileNotFoundError):
+                pass  # Can't write to destination
+        else:
+            print(f"! installation of '{script}' has failed.")
+    else:
+        print(f"* '{script}' would be installed as '{destname}'")
+        if destname2:
+            print(f"  or '{destname2}'")
