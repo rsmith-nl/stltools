@@ -20,3 +20,6 @@ stl2pdf
 stl2pov
 stlinfo
 *.inc
+
+# for pycharm IDE
+.idea/
