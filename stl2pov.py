@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 # file: stl2pov.py
 # vim:fileencoding=utf-8:fdm=marker:ft=python
 #
