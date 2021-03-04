@@ -177,6 +177,30 @@ def normals(facets, points):
     return vo.indexate(nv)
 
 
+def corner_normals(vertices):
+    """
+    Calculate corner normals for each shared vertex.
+
+    Arguments:
+        vertices: An (?,3) array containing the vertex data.
+
+    Returns:
+        a (?,3) array containing the corner normals
+    """
+    facets, points = toindexed(vertices)
+    facet_normal_indices, facet_normal_vectors = normals(facets, points)
+
+    # array of empty normal vectors at each vertex
+    corner_normal_sum = [[0 for i in range(len(points[0]))] for j in range(len(points))]
+    for facet in range(len(facets)):
+        for i in range(3):
+            vertex = facets[facet][i]
+            facet_normal_index = facet_normal_indices[facet]
+            for j in range(3):
+                corner_normal_sum[vertex][j] += facet_normal_vectors[facet_normal_index][j]
+    return [vo.normalize(v) for v in corner_normal_sum]
+
+
 def text(name, ifacets, points, inormals, vectors):
     """
     Make an STL text representation of a brep.
