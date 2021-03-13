@@ -3,7 +3,7 @@ STL file manipulation with stltools
 
 :author: Roland Smith
 
-.. Last modified: 2020-10-04T19:17:02+0200
+.. Last modified: 2021-03-13T14:08:51+0100
 .. vim:fileencoding=utf-8:ft=rst
 
 The stltools module reads both text and binary STL files and creates STL
@@ -17,8 +17,13 @@ Requirments
 
 These programs require Python 3.6 or later.
 
-The releases from the “master” branch also require numpy.
+The releases from the “master” branch required numpy up to commit
+93db6bd57c34c3c7cfb9456f1f88306fa3204f13.
 The code on the “pypy” branch does not use numpy.
+This was merged into “master” on 2021-03-13.
+
+Apart from ``stl2pdf``, which uses cairo, the other scripts have no
+dependencies outside the standard library.
 
 
 stl2pov
@@ -51,7 +56,7 @@ Among other things, the logging module is now used.
 
 Up to version 5, stl2pov had used the object name in the STL file as the
 identifier for the mesh. But it was pointed out to me that often the object
-name often isn't a valid identifier.  So in version 5, the oject name is
+name often isn't a valid identifier.  So in version 5, the object name is
 checked if it would be a valid identifier.  If not, a valid identifier is
 generated based on the object name. If the object name is empty, the
 identifier is based on the filename.
