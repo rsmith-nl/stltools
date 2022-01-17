@@ -4,17 +4,12 @@ __pycache__/
 .cache/
 .pytest_cache/
 .ropeproject/
-stltools.egg-info/
 *~
-build/
-dist/
 backup-*.tar.gz
 stl2ps.1.pdf
 stl2pdf.1.pdf
 stl2pov.1.pdf
 stlinfo.1.pdf
-MANIFEST
-Makefile.orig
 stl2ps
 stl2pdf
 stl2pov

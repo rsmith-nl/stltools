@@ -3,7 +3,7 @@ STL file manipulation with stltools
 
 :author: Roland Smith
 
-.. Last modified: 2021-03-13T14:08:51+0100
+.. Last modified: 2022-01-18T00:23:14+0100
 .. vim:fileencoding=utf-8:ft=rst
 
 The stltools module reads both text and binary STL files and creates STL
@@ -177,8 +177,13 @@ You should be able to run the scripts from the ``stltools`` directory.
 Installation
 ============
 
-Run the following command to install the module and the scripts.
+Run the following command to install the scripts.
 
 .. code-block:: sh
 
-    # python3 setup.py install
+    > python3 setup.py install
+
+The scripts are install as a normal user, root or administrator privileges are
+not required.
+
+The scripts are installed as self-contained executable Python zip archives.
