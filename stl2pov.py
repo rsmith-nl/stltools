@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-04-10T18:33:02+02:00
-# Last modified: 2020-10-04T16:59:23+0200
+# Last modified: 2022-01-18T23:16:28+0100
 """Program for converting an STL file into a POV-ray mesh or mesh2."""
 
 import argparse
@@ -84,8 +84,8 @@ def mesh1(name, vertices):
     # The indices sequence 0, 2, 1 is used because of the difference between
     # the STL coordinate system and that used in POV-ray.
     fct = (
-        "  triangle {{\n    <{0}, {2}, {1}>,\n    <{3}, {5}, {4}>,\n"
-        "    <{6}, {8}, {7}>\n  }}"
+        "  triangle {{\n    <{0:e}, {2:e}, {1:e}>,\n    <{3:e}, {5:e}, {4:e}>,\n"
+        "    <{6:e}, {8:e}, {7:e}>\n  }}"
     )
     lines += [fct.format(*f) for f in facets]
     lines += ["}"]
