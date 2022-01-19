@@ -4,7 +4,7 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2020-10-04T17:41:39+0200
+# Last modified: 2022-01-19T21:45:11+0100
 """Operations on two or three dimensional vectors."""
 
 
@@ -70,6 +70,43 @@ def indexate(points):
     """
     Create an array of unique points and indexes into this array.
 
+    Here is an illustration of how it works;
+
+    In [14]: points
+    Out[14]:
+    [(139.3592529296875, 97.01824951171875, 69.91365814208984),
+    (138.14346313476562, 97.50768280029297, 70.0313949584961),
+    (138.79571533203125, 97.875244140625, 69.03594970703125),
+    (138.14346313476562, 97.50768280029297, 70.0313949584961),
+    (139.3592529296875, 97.01824951171875, 69.91365814208984),
+    (138.76876831054688, 96.6264419555664, 70.94448852539062),
+    (138.79571533203125, 97.875244140625, 69.03594970703125),
+    (138.14346313476562, 97.50768280029297, 70.0313949584961),
+    (137.59768676757812, 98.35258483886719, 69.14176177978516),
+    (139.3592529296875, 97.01824951171875, 69.91365814208984)]
+
+    In [15]: pd = {}
+    Out[15]: {}
+
+    In [16]: indices = tuple(pd.setdefault(p, len(pd)) for p in points)
+    Out[16]: (0, 1, 2, 1, 0, 3, 2, 1, 4, 0)
+
+    In [17]: pd
+    Out[17]:
+    {(139.3592529296875, 97.01824951171875, 69.91365814208984): 0,
+    (138.14346313476562, 97.50768280029297, 70.0313949584961): 1,
+    (138.79571533203125, 97.875244140625, 69.03594970703125): 2,
+    (138.76876831054688, 96.6264419555664, 70.94448852539062): 3,
+    (137.59768676757812, 98.35258483886719, 69.14176177978516): 4}
+
+    In [18]: tuple(pd.keys())
+    Out[18]:
+    ((139.3592529296875, 97.01824951171875, 69.91365814208984),
+    (138.14346313476562, 97.50768280029297, 70.0313949584961),
+    (138.79571533203125, 97.875244140625, 69.03594970703125),
+    (138.76876831054688, 96.6264419555664, 70.94448852539062),
+    (137.59768676757812, 98.35258483886719, 69.14176177978516))
+
     Arguments:
         points: A sequence of 3-tuples
 
@@ -77,10 +114,11 @@ def indexate(points):
         An array of indices and a sequence of unique 3-tuples.
     """
     pd = {}
-    indices = tuple(pd.setdefault(tuple(p), len(pd)) for p in points)
-    pt = sorted([(v, k) for k, v in pd.items()], key=lambda x: x[0])
-    unique = tuple(i[1] for i in pt)
-    return indices, unique
+    # Not only does this create a list of indices, but it also fills
+    # the pd dict. And since dicts keep insertion order, pd.keys()
+    # is a list of unique points
+    indices = tuple(pd.setdefault(p, len(pd)) for p in points)
+    return indices, tuple(pd.keys())
 
 
 def to4(pnts):
