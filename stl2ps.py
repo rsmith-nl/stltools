@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2011-04-11T01:41:59+02:00
-# Last modified: 2020-10-04T17:42:36+0200
+# Last modified: 2022-01-19T22:32:01+0100
 """
 Program for converting a view of an STL file into a PostScript file.
 
@@ -122,16 +122,19 @@ def main(argv):
     except ValueError as e:
         logging.error("{}: {}".format(args.file, e))
         sys.exit(1)
-    origbb = bbox.makebb(vertices)
+    indices, uvertices = vecops.indexate(vertices)
+    del vertices
+    origbb = bbox.makebb(uvertices)
     logging.info("calculating normal vectors")
-    facets = list(utils.chunked(vertices, 3))
-    # facets = list(utils.chunked(utils.chunked(vertices, 3), 3))
-    normals = [vecops.normal(a, b, c) for a, b, c in facets]
+    ifacets = list(utils.chunked(indices, 3))
+    normals = [
+        vecops.normal(uvertices[a], uvertices[b], uvertices[c]) for a, b, c in ifacets
+    ]
     logging.info("applying transformations to world coordinates")
-    vertices = vecops.xform(tr, vertices)
+    uvertices = vecops.xform(tr, uvertices)
     normals = vecops.xform(tr, normals)
     logging.info("making model-view matrix")
-    minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
+    minx, maxx, miny, maxy, _, maxz = bbox.makebb(uvertices)
     width = maxx - minx
     height = maxy - miny
     dx = -(minx + maxx) / 2
@@ -143,23 +146,22 @@ def main(argv):
     v[0][3], v[1][3] = args.canvas_size / 2, args.canvas_size / 2
     mv = matrix.concat(m, v)
     logging.info("transforming to view space")
-    vertices = vecops.xform(mv, vertices)
-    facets = list(utils.chunked(vertices, 3))
+    uvertices = vecops.xform(mv, uvertices)
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
     logging.info("determine visible facets")
-    vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(facets, normals) if n[2] > 0]
+    vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(ifacets, normals) if n[2] > 0]
     fvs = "{:.2f}% of facets is visible"
-    logging.info(fvs.format(100 * len(vf) / len(facets)))
+    logging.info(fvs.format(100 * len(vf) / len(ifacets)))
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
     logging.info("depth-sorting visible facets")
 
     def fkey(t):
         (a, b, c), _, _ = t
-        return max(a[2], b[2], c[2])
+        return max(uvertices[a][2], uvertices[b][2], uvertices[c][2])
 
     vf.sort(key=fkey)
-    minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
+    minx, maxx, miny, maxy, _, maxz = bbox.makebb(uvertices)
     logging.info("creating PostScript header")
     s1 = "% The scale factor used is: {:.2f} PostScript points/STL-unit"
     s2 = (
@@ -179,7 +181,7 @@ def main(argv):
         cs.format(origbb[4], "z", origbb[5]),
         s1.format(sf),
         s2.format(maxx, maxy, maxx / 72 * 25.4, maxy / 72 * 25.4),
-        "% {} of {} facets are visible.".format(len(vf), len(facets)),
+        "% {} of {} facets are visible.".format(len(vf), len(ifacets)),
     ]
     # PostScript settings and macros.
     lines += [
@@ -209,7 +211,13 @@ def main(argv):
     logging.info("rendering triangles")
     lines += [
         s3.format(
-            f_red * i, f_green * i, f_blue * i, a[0], a[1], b[0], b[1], c[0], c[1]
+            f_red * i, f_green * i, f_blue * i,
+            uvertices[a][0],
+            uvertices[a][1],
+            uvertices[b][0],
+            uvertices[b][1],
+            uvertices[c][0],
+            uvertices[c][1]
         )
         for (a, b, c), z, i in vf
     ]
