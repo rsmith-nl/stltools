@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-10-02T18:07:38+02:00
-# Last modified: 2020-10-04T18:26:53+0200
+# Last modified: 2022-01-20T00:51:23+0100
 """
 Program for converting a view of an STL file into a PDF file.
 
@@ -122,14 +122,18 @@ def main(argv):
     except ValueError as e:
         logging.error(f"{args.file}: {e}")
         sys.exit(1)
+    indices, uvertices = vecops.indexate(vertices)
+    del vertices
     logging.info("calculating normal vectors")
-    facets = list(utils.chunked(vertices, 3))
-    normals = [vecops.normal(a, b, c) for a, b, c in facets]
+    ifacets = list(utils.chunked(indices, 3))
+    normals = [
+        vecops.normal(uvertices[a], uvertices[b], uvertices[c]) for a, b, c in ifacets
+    ]
     logging.info("applying transformations to world coordinates")
-    vertices = vecops.xform(tr, vertices)
+    uvertices = vecops.xform(tr, uvertices)
     normals = vecops.xform(tr, normals)
     logging.info("making model-view matrix")
-    minx, maxx, miny, maxy, _, maxz = bbox.makebb(vertices)
+    minx, maxx, miny, maxy, _, maxz = bbox.makebb(uvertices)
     width = maxx - minx
     height = maxy - miny
     dx = -(minx + maxx) / 2
@@ -141,20 +145,19 @@ def main(argv):
     v[0][3], v[1][3] = args.canvas_size / 2, args.canvas_size / 2
     mv = matrix.concat(m, v)
     logging.info("transforming to view space")
-    vertices = vecops.xform(mv, vertices)
-    facets = list(utils.chunked(vertices, 3))
+    uvertices = vecops.xform(mv, uvertices)
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
     logging.info("Determining visible facets")
-    vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(facets, normals) if n[2] > 0]
+    vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(ifacets, normals) if n[2] > 0]
     vfs = "{:.2f}% of facets is visible"
-    logging.info(vfs.format(100 * len(vf) / len(facets)))
+    logging.info(vfs.format(100 * len(vf) / len(ifacets)))
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
     logging.info("depth-sorting visible facets")
 
     def fkey(t):
         (a, b, c), _, _ = t
-        return max(a[2], b[2], c[2])
+        return max(uvertices[a][2], uvertices[b][2], uvertices[c][2])
 
     vf.sort(key=fkey)
     logging.info("initializing drawing surface")
@@ -169,9 +172,9 @@ def main(argv):
     logging.info("drawing the triangles")
     for (a, b, c), _, i in vf:
         ctx.new_path()
-        ctx.move_to(a[0], a[1])
-        ctx.line_to(b[0], b[1])
-        ctx.line_to(c[0], c[1])
+        ctx.move_to(uvertices[a][0], uvertices[a][1])
+        ctx.line_to(uvertices[b][0], uvertices[b][1])
+        ctx.line_to(uvertices[c][0], uvertices[c][1])
         ctx.close_path()
         ctx.set_source_rgb(f_red * i, f_green * i, f_blue * i)
         ctx.fill_preserve()
