@@ -4,7 +4,7 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-07-07 21:01:52  +0200
-# Last modified: 2020-10-04T16:50:53+0200
+# Last modified: 2022-01-20T09:48:22+0100
 """Utilities for stltools."""
 
 import argparse
@@ -45,8 +45,8 @@ def outname(inname, extension, addenum=""):
         Output file name.
     """
     rv = os.path.splitext(os.path.basename(inname))[0]
-    rv = re.sub("^[\s\.]+|\s+$", "", rv)
-    rv = re.sub("\s+", "_", rv)
+    rv = re.sub(r"^[\s\.]+|\s+$", "", rv)
+    rv = re.sub(r"\s+", "_", rv)
     if not extension.startswith("."):
         extension = "." + extension
     return rv + addenum + extension
