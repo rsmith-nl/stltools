@@ -4,7 +4,7 @@
 # Copyright © 2012-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2022-01-19T14:22:07+0100
+# Last modified: 2022-01-20T01:50:47+0100
 """Handling STL files and brep datasets."""
 
 from . import vecops as vo
@@ -89,7 +89,12 @@ def _getbp(m):
     Yields:
         The vertices as 3-tuple of floats.
     """
-    for p in struct.iter_unpack("<12x9f2x", m.read()):
+    fmt = "<12x9f2x"
+    sz = struct.calcsize(fmt)
+    buffer = m.read()
+    count = len(buffer) // sz * sz
+    buffer = buffer[:count]
+    for p in struct.iter_unpack(fmt, buffer):
         yield tuple(p[0:3])
         yield tuple(p[3:6])
         yield tuple(p[6:])
