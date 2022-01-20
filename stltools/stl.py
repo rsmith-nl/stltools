@@ -4,11 +4,11 @@
 # Copyright © 2012-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2012-11-10 07:55:54 +0100
-# Last modified: 2022-01-20T01:50:47+0100
+# Last modified: 2022-01-20T09:36:51+0100
 """Handling STL files and brep datasets."""
 
 from . import vecops as vo
-from .utils import chunked
+from . import utils
 import datetime
 import mmap
 import struct
@@ -26,7 +26,7 @@ def readstl(name, encoding="utf-8"):
         encoding: Assume this encoding for the name of the file (defaults to UTF-8).
 
     Returns:
-        A numpy array of the shape (N, 3) containing the vertices of the
+        A list of 3-tuples of float containing the vertices of the
         facets, and the name of the object as given in the STL file.
     """
     with open(name, "rb") as f:
@@ -50,8 +50,8 @@ def _parsebinary(m, encoding):
         encoding: For the name of the object.
 
     Returns:
-        The vertices as a list of 3-tuples, and the name of the object from
-        the file.
+        The vertices as a list of 3-tuples of floats, and the name of the object
+        from the file.
     """
     data = m.read(84)
     name = ""
@@ -109,7 +109,7 @@ def _parsetxt(m, encoding):
         encoding: For the name of the object.
 
     Returns:
-        The vertices as a (?, 3) numpy array, and the name of the object from
+        The vertices as a list of 3-tuples of floats, and the name of the object from
         the file.
     """
     first = m.readline().decode(encoding)
@@ -152,13 +152,13 @@ def toindexed(vertices):
     vertax array that matches the original array.
 
     Arguments:
-        vertices: (?, 3) array of vertex coordinates.
+        vertices: iterable of 3-tuples of float as vertex coordinates.
 
     Returns:
-        An (?, 3) array of facet indices and an (M, 3) array of unique points.
+        A list of facet indices lists and a tuple of unique vertex 3-tuples.
     """
     ix, points = vo.indexate(vertices)
-    facets = list(chunked(ix, 3))
+    facets = tuple(tuple(j) for j in utils.chunked(ix, 3))
     return facets, points
 
 
@@ -167,12 +167,11 @@ def normals(facets, points):
     Calculate normal vectors of facets.
 
     Arguments:
-        facets: An (?, 3) array of facet indices into points.
-        points: An (?, 3) array of unique points.
+        facets: An iterable of 3-tuples facet indices into points.
+        points: A tuple of 3-tuples of unique points.
 
     Returns:
-        an array of normal vector indices for each facet and an array of
-        unique normals.
+         An tuple of indices and a tuple of unique 3-tuples representing uniqe normals.
     """
     nv = [vo.normal(points[i], points[j], points[k]) for i, j, k in facets]
     return vo.indexate(nv)
@@ -184,10 +183,10 @@ def text(name, ifacets, points, inormals, vectors):
 
     Arguments:
         name: The name of the object.
-        ifacets: A (?, 3) array of indices into the points.
-        points: An (?, 3) array of vertex coordinates.
-        inormals: An array of indices into the vectors list.
-        vectors: An (?, 3) array of normal vectors.
+        ifacets: A tuple of indices into the points.
+        points: A tuple of 3-tuples of vertex coordinates.
+        inormals: A tuple of indices into the vectors list.
+        vectors: A tuple of 3-tuples of normal vectors.
 
     Returns:
         A string containing a text representation of the brep.
@@ -215,46 +214,16 @@ def binary(name, ifacets, points, inormals, vectors):
 
     Arguments:
         name: The name of the object.
-        ifacets: A (?, 3) array of indices into the points.
-        points: An (?, 3) array of vertex coordinates.
-        inormals: An array of indices into the vectors list.
-        vectors: An (?, 3) array of normal vectors.
+        ifacets: A tuple of indices into the points.
+        points: A tuple of 3-tuples of vertex coordinates.
+        inormals: A tuple of indices into the vectors list.
+        vectors: A tuple of 3-tuples of normal vectors.
 
     Returns:
         A string containing a binary representation of the brep.
     """
     rc = [struct.pack("<80sI", name.encode("utf-8"), len(ifacets))]
     for fi, ni in zip(ifacets, inormals):
-        # data = list(np.concatenate((vectors[ni], points[fi[0]], points[fi[1]], points[fi[2]]))
-        #             ) + [0]
         data = list(vectors[ni] + points[fi[0]] + points[fi[1]] + points[fi[2]]) + [0]
         rc.append(struct.pack("<12fH", *data))
     return b"".join(rc)
-
-
-def _test(args):
-    """
-    Test function.
-
-    Arguments:
-        args: filename arguments for the test function
-    """
-    if len(args) < 2:
-        print("usage: python stl.py filename")
-        exit(1)
-    v, nm = readstl(args[1])
-    f, p = toindexed(v)
-    n, nv = normals(f, p)
-    print('Filename: "{}"'.format(args[1]))
-    print('Object name: "{}"'.format(nm))
-    print("Number of facets:", len(f))
-    print("Facet data:")
-    for j, k in zip(f, n):
-        print(" vertices:", p[j[0]], p[j[1]], p[j[2]])
-        print(" normal:", nv[k])
-
-
-if __name__ == "__main__":
-    from sys import argv
-
-    _test(argv)
