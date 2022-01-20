@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-04-10T18:33:02+02:00
-# Last modified: 2022-01-18T23:16:28+0100
+# Last modified: 2022-01-20T12:57:18+0100
 """Program for converting an STL file into a POV-ray mesh or mesh2."""
 
 import argparse
@@ -111,7 +111,7 @@ def mesh2(name, vertices):
     ]
     # The indices sequence 0, 2, 1 is used because of the difference between
     # the STL coordinate system and that used in POV-ray
-    lines += [f"    <{p[0]}, {p[2]}, {p[1]}>," for p in points]
+    lines += [f"    <{p[0]:e}, {p[2]:e}, {p[1]:e}>," for p in points]
     lines[-1] = lines[-1][:-1]
     lines += ["  }\n  face_indices {", f"    {len(ifacets)},"]
     lines += [f"    <{f[0]}, {f[1]}, {f[2]}>," for f in ifacets]
