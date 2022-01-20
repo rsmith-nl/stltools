@@ -3,7 +3,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2012-01-01 13:12:08 +0100
-# Last modified: 2015-05-06 21:48:01 +0200
+# Last modified: 2022-01-20T09:12:55+0100
 
 import logging
 import sys
@@ -11,42 +11,35 @@ import sys
 sys.path.insert(0, "..")
 sys.path.insert(0, ".")
 
-import numpy as np
 from stltools import matrix as mx
 from stltools import stl
 from stltools import vecops as vo
 
 logging.basicConfig(level="INFO", format="%(levelname)s: %(message)s")
 logging.info("creating facet data")
-vertices = np.array(
-    [
-        [0, 0, 1],
-        [1, 0, 1],
-        [1, 0, 0],
-        [0, 0, 0],
-        [0, 1, 1],
-        [1, 1, 1],
-        [1, 1, 0],
-        [0, 1, 0],
-    ],
-    np.float32,
+vertices = (
+    (0.0, 0.0, 1.0),
+    (1.0, 0.0, 1.0),
+    (1.0, 0.0, 0.0),
+    (0.0, 0.0, 0.0),
+    (0.0, 1.0, 1.0),
+    (1.0, 1.0, 1.0),
+    (1.0, 1.0, 0.0),
+    (0.0, 1.0, 0.0),
 )
-facets = np.array(
-    [
-        [0, 1, 4],
-        [1, 5, 4],
-        [0, 2, 1],
-        [0, 3, 2],
-        [4, 5, 6],
-        [4, 6, 7],
-        [3, 7, 2],
-        [7, 6, 2],
-        [1, 2, 5],
-        [5, 2, 6],
-        [0, 4, 3],
-        [3, 4, 7],
-    ],
-    np.uint16,
+facets = (
+    (0, 1, 4),
+    (1, 5, 4),
+    (0, 2, 1),
+    (0, 3, 2),
+    (4, 5, 6),
+    (4, 6, 7),
+    (3, 7, 2),
+    (7, 6, 2),
+    (1, 2, 5),
+    (5, 2, 6),
+    (0, 4, 3),
+    (3, 4, 7),
 )
 logging.info("calculating normals")
 ni, normals = stl.normals(facets, vertices)
