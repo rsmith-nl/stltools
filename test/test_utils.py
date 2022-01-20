@@ -14,9 +14,9 @@ import stltools.utils as utils
 
 
 def test_outnames():
-    assert utils.outname('foo', 'bar') == 'foo.bar'
-    assert utils.outname('../foo', 'bar') == 'foo.bar'
-    assert utils.outname('/../foo', 'bar', addenum='1') == 'foo1.bar'
-    assert utils.outname('.foo', 'bar') == 'foo.bar'
-    assert utils.outname('foo ', 'bar') == 'foo.bar'
-    assert utils.outname('/home/bla/foo ', 'bar') == 'foo.bar'
+    assert utils.outname("foo", "bar") == "foo.bar"
+    assert utils.outname("../foo", "bar") == "foo.bar"
+    assert utils.outname("/../foo", "bar", addenum="1") == "foo1.bar"
+    assert utils.outname(".foo", "bar") == "foo.bar"
+    assert utils.outname("foo ", "bar") == "foo.bar"
+    assert utils.outname("/home/bla/foo ", "bar") == "foo.bar"

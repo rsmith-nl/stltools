@@ -38,7 +38,7 @@ def test_vo_normalize():
     assert nom - tol <= vo.length(r) <= nom + tol
     # The ratio of the components of the original and the normalized vector
     # should be the length of the original vector.
-    assert all(i/j == 21 for i, j in zip(v, r))
+    assert all(i / j == 21 for i, j in zip(v, r))
 
 
 def test_vo_normal():
@@ -53,7 +53,7 @@ def test_vo_normal():
     # The components of the normal of a plane through the three unit vectors
     # should all be 1/√3.
     r = vo.normal([1, 0, 0], [0, 1, 0], [0, 0, 1])
-    c = 1 / (3**0.5)
+    c = 1 / (3 ** 0.5)
     assert all(i == j for i, j in zip(r, [c, c, c]))
 
 
@@ -61,9 +61,9 @@ def test_vo_indexate():
     # Create 5 unique points and then make a list of 10 point by concatenating
     # that twice. Indexing that should give the indexes 0, 1, 2, 3, 4 twice,
     # and the five unique points.
-    c = ((0,  1,  2), (3,  4,  5), (6,  7,  8), (9, 10, 11), (12, 13, 14))
-    pnts = 2*c
-    q = list(range(5))*2
+    c = ((0, 1, 2), (3, 4, 5), (6, 7, 8), (9, 10, 11), (12, 13, 14))
+    pnts = 2 * c
+    q = list(range(5)) * 2
     indices, unique = vo.indexate(pnts)
     assert indices == tuple(q)
     assert unique == c
@@ -71,8 +71,11 @@ def test_vo_indexate():
 
 def test_vo_to():
     pnts = [
-        [0.0,  1.0,  2.0], [3.0,  4.0,  5.0], [6.0,  7.0,  8.0], [9.0, 10.0, 11.0],
-        [12.0, 13.0, 14.0]
+        [0.0, 1.0, 2.0],
+        [3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0],
+        [9.0, 10.0, 11.0],
+        [12.0, 13.0, 14.0],
     ]
     p4 = vo.to4(pnts)
     # The last component of all homogeneous vectors should be 1.

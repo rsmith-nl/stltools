@@ -211,13 +211,15 @@ def main(argv):
     logging.info("rendering triangles")
     lines += [
         s3.format(
-            f_red * i, f_green * i, f_blue * i,
+            f_red * i,
+            f_green * i,
+            f_blue * i,
             uvertices[a][0],
             uvertices[a][1],
             uvertices[b][0],
             uvertices[b][1],
             uvertices[c][0],
-            uvertices[c][1]
+            uvertices[c][1],
         )
         for (a, b, c), z, i in vf
     ]

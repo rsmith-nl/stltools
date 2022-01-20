@@ -97,7 +97,9 @@ def mkarchive(name, modules, main="__main__.py"):
     # Forcibly compile __main__.py lest we use an old version!
     py_compile.compile(std, optimize=lvl)
     with tempfile.TemporaryFile() as tmpf:
-        with z.PyZipFile(tmpf, mode="w", compression=z.ZIP_DEFLATED, optimize=lvl) as zf:
+        with z.PyZipFile(
+            tmpf, mode="w", compression=z.ZIP_DEFLATED, optimize=lvl
+        ) as zf:
             zf.writepy(std)
             for m in modules:
                 zf.writepy(m)

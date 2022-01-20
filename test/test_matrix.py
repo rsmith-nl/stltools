@@ -20,14 +20,17 @@ def test_vo_xform_scale():
     for j in range(3):
         m[j][j] = 0.5
     pnts = [
-        [0.0,  1.0,  2.0], [3.0,  4.0,  5.0], [6.0,  7.0,  8.0], [9.0, 10.0, 11.0],
-        [12.0, 13.0, 14.0]
+        [0.0, 1.0, 2.0],
+        [3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0],
+        [9.0, 10.0, 11.0],
+        [12.0, 13.0, 14.0],
     ]
     r = vo.xform(m, pnts)
-    assert all(all(2*p == q for p, q in zip(i, j)) for i, j in zip(r, pnts))
+    assert all(all(2 * p == q for p, q in zip(i, j)) for i, j in zip(r, pnts))
     p = ma.scale(0.5, 0.5, 0.5)
     r = vo.xform(p, pnts)
-    assert all(all(2*p == q for p, q in zip(i, j)) for i, j in zip(r, pnts))
+    assert all(all(2 * p == q for p, q in zip(i, j)) for i, j in zip(r, pnts))
 
 
 def test_vo_xform_trans():
@@ -36,22 +39,32 @@ def test_vo_xform_trans():
     m[1][3] = 3
     m[2][3] = 4
     pnts = [
-        [0.0,  1.0,  2.0], [3.0,  4.0,  5.0], [6.0,  7.0,  8.0], [9.0, 10.0, 11.0],
-        [12.0, 13.0, 14.0]
+        [0.0, 1.0, 2.0],
+        [3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0],
+        [9.0, 10.0, 11.0],
+        [12.0, 13.0, 14.0],
     ]
     r = vo.xform(m, pnts)
     q = [[2, 3, 4]] * 5
-    assert all(all(a - b == c for a, b, c in zip(i, j, k)) for i, j, k in zip(r, q, pnts))
+    assert all(
+        all(a - b == c for a, b, c in zip(i, j, k)) for i, j, k in zip(r, q, pnts)
+    )
     m = ma.trans([2, 3, 4])
     r = vo.xform(m, pnts)
-    assert all(all(a - b == c for a, b, c in zip(i, j, k)) for i, j, k in zip(r, q, pnts))
+    assert all(
+        all(a - b == c for a, b, c in zip(i, j, k)) for i, j, k in zip(r, q, pnts)
+    )
 
 
 def test_xform_rotx():
     m = ma.rotx(120)
     pnts = [
-        [0.0,  1.0,  2.0], [3.0,  4.0,  5.0], [6.0,  7.0,  8.0], [9.0, 10.0, 11.0],
-        [12.0, 13.0, 14.0]
+        [0.0, 1.0, 2.0],
+        [3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0],
+        [9.0, 10.0, 11.0],
+        [12.0, 13.0, 14.0],
     ]
     r = vo.xform(m, pnts)
     s = vo.xform(m, r)
@@ -64,8 +77,11 @@ def test_xform_rotx():
 def test_xform_roty():
     m = ma.roty(120)
     pnts = [
-        [0.0,  1.0,  2.0], [3.0,  4.0,  5.0], [6.0,  7.0,  8.0], [9.0, 10.0, 11.0],
-        [12.0, 13.0, 14.0]
+        [0.0, 1.0, 2.0],
+        [3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0],
+        [9.0, 10.0, 11.0],
+        [12.0, 13.0, 14.0],
     ]
     r = vo.xform(m, pnts)
     s = vo.xform(m, r)
@@ -76,8 +92,11 @@ def test_xform_roty():
 def test_xform_rotz():
     m = ma.rotz(120)
     pnts = [
-        [0.0,  1.0,  2.0], [3.0,  4.0,  5.0], [6.0,  7.0,  8.0], [9.0, 10.0, 11.0],
-        [12.0, 13.0, 14.0]
+        [0.0, 1.0, 2.0],
+        [3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0],
+        [9.0, 10.0, 11.0],
+        [12.0, 13.0, 14.0],
     ]
     print(pnts)
     r = vo.xform(m, pnts)
