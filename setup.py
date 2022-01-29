@@ -19,10 +19,10 @@ import zipfile as z
 
 # What to install; (installed name, module, script, nt-extension)
 SCRIPTS = (
-        ("stl2pov", "stltools", "stl2pov.py", ".py"),
-        ("stl2ps", "stltools", "stl2ps.py", ".py"),
-        ("stl2pdf", "stltools", "stl2pdf.py", ".py"),
-        ("stlinfo", "stltools", "stlinfo.py", ".py"),
+    ("stl2pov", "stltools", "stl2pov.py", ".py"),
+    ("stl2ps", "stltools", "stl2ps.py", ".py"),
+    ("stl2pdf", "stltools", "stl2pdf.py", ".py"),
+    ("stlinfo", "stltools", "stlinfo.py", ".py"),
 )
 
 

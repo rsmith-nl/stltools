@@ -1,9 +1,12 @@
 STL file manipulation with stltools
 ###################################
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
 :author: Roland Smith
 
-.. Last modified: 2022-01-18T00:23:14+0100
+.. Last modified: 2022-01-29T22:29:20+0100
 .. vim:fileencoding=utf-8:ft=rst
 
 The stltools module reads both text and binary STL files and creates STL
