@@ -2,10 +2,10 @@
 # file: stl2pdf.py
 # vim:fileencoding=utf-8:fdm=marker:ft=python
 #
-# Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
+# Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-10-02T18:07:38+02:00
-# Last modified: 2022-01-20T00:51:23+0100
+# Last modified: 2022-12-07T00:58:51+0100
 """
 Program for converting a view of an STL file into a PDF file.
 
@@ -61,6 +61,14 @@ def main(argv):
         type=str,
         help="background color in 6-digit hexdecimal RGB (default FFFFFF)",
         default="FFFFFF",
+    )
+    parser.add_argument(
+        "-c",
+        "--coordsys",
+        dest="cs",
+        type="store_true",
+        help="Add coordinate system in left bottom of image",
+        default=False,
     )
     parser.add_argument(
         "-e",
