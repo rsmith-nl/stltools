@@ -5,7 +5,7 @@
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-10-02T18:07:38+02:00
-# Last modified: 2022-12-07T23:14:46+0100
+# Last modified: 2022-12-07T23:37:08+0100
 """
 Program for converting a view of an STL file into a PDF file.
 
@@ -112,22 +112,23 @@ def main(argv):
         ctx.set_source_rgb(f_red * i, f_green * i, f_blue * i)
         ctx.fill_preserve()
         ctx.stroke()
-    logging.info("drawing the axes")
-    ctx.new_path()
-    ctx.move_to(csys[0][0], csys[0][1])
-    ctx.line_to(csys[1][0], csys[1][1])
-    ctx.set_source_rgb(1, 0, 0)
-    ctx.stroke()
-    ctx.new_path()
-    ctx.move_to(csys[0][0], csys[0][1])
-    ctx.line_to(csys[2][0], csys[2][1])
-    ctx.set_source_rgb(0, 1, 0)
-    ctx.stroke()
-    ctx.new_path()
-    ctx.move_to(csys[0][0], csys[0][1])
-    ctx.line_to(csys[3][0], csys[3][1])
-    ctx.set_source_rgb(0, 0, 1)
-    ctx.stroke()
+    if args.axes:
+        logging.info("drawing the axes")
+        ctx.new_path()
+        ctx.move_to(csys[0][0], csys[0][1])
+        ctx.line_to(csys[1][0], csys[1][1])
+        ctx.set_source_rgb(1, 0, 0)
+        ctx.stroke()
+        ctx.new_path()
+        ctx.move_to(csys[0][0], csys[0][1])
+        ctx.line_to(csys[2][0], csys[2][1])
+        ctx.set_source_rgb(0, 1, 0)
+        ctx.stroke()
+        ctx.new_path()
+        ctx.move_to(csys[0][0], csys[0][1])
+        ctx.line_to(csys[3][0], csys[3][1])
+        ctx.set_source_rgb(0, 0, 1)
+        ctx.stroke()
     logging.info("sending output")
     out.show_page()
     out.finish()
@@ -146,7 +147,7 @@ def setup(argv):
         "-a",
         "--axes",
         action="store_true",
-        help="Add coordinate system in left bottom of image",
+        help="Add coordinate system (x,y,z = red, green, blue)",
     )
     parser.add_argument(
         "-c",
