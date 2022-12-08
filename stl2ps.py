@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2011-04-11T01:41:59+02:00
-# Last modified: 2022-01-19T22:32:01+0100
+# Last modified: 2022-12-08T20:04:24+0100
 """
 Program for converting a view of an STL file into a PostScript file.
 
@@ -31,77 +31,8 @@ def main(argv):
     Arguments:
         argv: Command line arguments (without program name!)
     """
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--log",
-        default="warning",
-        choices=["debug", "info", "warning", "error"],
-        help="logging level (defaults to 'warning')",
-    )
-    parser.add_argument(
-        "-c",
-        "--canvas",
-        dest="canvas_size",
-        type=int,
-        help="canvas size, defaults to 200 PostScript points",
-        default=200,
-    )
-    parser.add_argument(
-        "-f",
-        "--foreground",
-        dest="fg",
-        type=str,
-        help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
-        default="E6E6E6",
-    )
-    parser.add_argument(
-        "-b",
-        "--background",
-        dest="bg",
-        type=str,
-        help="background color in 6-digit hexdecimal RGB (default white FFFFFF)",
-        default="FFFFFF",
-    )
-    parser.add_argument(
-        "-e",
-        "--encoding",
-        type=str,
-        help="encoding for the name of the STL object (default utf-8)",
-        default="utf-8",
-    )
-    parser.add_argument(
-        "-o", "--output", dest="outfile", type=str, help="output file name", default=""
-    )
-    parser.add_argument(
-        "-x",
-        type=float,
-        action=utils.RotateAction,
-        help="rotation around X axis in degrees",
-    )
-    parser.add_argument(
-        "-y",
-        type=float,
-        action=utils.RotateAction,
-        help="rotation around Y axis in degrees",
-    )
-    parser.add_argument(
-        "-z",
-        type=float,
-        action=utils.RotateAction,
-        help="rotation around Z axis in degrees",
-    )
-    parser.add_argument("-v", "--version", action="version", version=__version__)
-    parser.add_argument("file", nargs=1, type=str, help="name of the file to process")
-    args = parser.parse_args(argv)
-    logging.basicConfig(
-        level=getattr(logging, args.log.upper(), None),
-        format="%(levelname)s: %(message)s",
-    )
-    args.file = args.file[0]
-    args.fg = int(args.fg, 16)
+    args = setup(argv)
     f_red, f_green, f_blue = utils.num2rgb(args.fg)
-    args.bg = int(args.bg, 16)
-    b_red, b_green, b_blue = utils.num2rgb(args.bg)
     if "rotations" not in args:
         logging.info("no rotations specified")
         tr = matrix.I()
@@ -130,9 +61,12 @@ def main(argv):
     normals = [
         vecops.normal(uvertices[a], uvertices[b], uvertices[c]) for a, b, c in ifacets
     ]
+    cscale = args.canvas_size / 10
+    csys = [(0, 0, 0), (cscale, 0, 0), (0, cscale, 0), (0, 0, cscale)]
     logging.info("applying transformations to world coordinates")
     uvertices = vecops.xform(tr, uvertices)
     normals = vecops.xform(tr, normals)
+    csys = vecops.xform(tr, csys)
     logging.info("making model-view matrix")
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(uvertices)
     width = maxx - minx
@@ -147,6 +81,7 @@ def main(argv):
     mv = matrix.concat(m, v)
     logging.info("transforming to view space")
     uvertices = vecops.xform(mv, uvertices)
+    csys = vecops.xform(mv, csys)
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
     logging.info("determine visible facets")
     vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(ifacets, normals) if n[2] > 0]
@@ -195,16 +130,6 @@ def main(argv):
         "/t {lineto closepath gsave fill grestore stroke} def",
         "% Start drawing",
     ]
-    # Draw background.
-    if b_red < 1 or b_green < 1 or b_blue < 1:
-        lines += [
-            "% Fill background",
-            "{:4.2f} {:4.2f} {:4.2f} c".format(b_red, b_green, b_blue),
-            "0 0 f",
-            "{:.0f} 0 s".format(maxx),
-            "{:.0f} {:.0f} s".format(maxx, maxy),
-            "0 {:.0f} t".format(maxy),
-        ]
     # Draw triangles.
     lines += ["% Rendering triangles"]
     s3 = "{:4.2f} {:4.2f} {:4.2f} c {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t"
@@ -223,6 +148,20 @@ def main(argv):
         )
         for (a, b, c), z, i in vf
     ]
+    if args.axes:
+        logging.info("drawing the axes")
+        lines += [
+            "1 0 0 c",
+            f"{csys[0][0]} {csys[0][1]} f",
+            f"{csys[1][0]} {csys[1][1]} lineto closepath stroke",
+            "0 1 0 c",
+            f"{csys[0][0]} {csys[0][1]} f",
+            f"{csys[2][0]} {csys[2][1]} lineto closepath stroke",
+            "0 0 1 c",
+            f"{csys[0][0]} {csys[0][1]} f",
+            f"{csys[3][0]} {csys[3][1]} lineto closepath stroke",
+        ]
+        pass
     lines += ["showpage", "%%EOF"]
     outs = "\n".join(lines)
     try:
@@ -232,6 +171,76 @@ def main(argv):
             logging.info("done")
     except Exception:
         logging.error('cannot write output file "{}"'.format(args.outfile))
+
+
+def setup(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--log",
+        default="warning",
+        choices=["debug", "info", "warning", "error"],
+        help="logging level (defaults to 'warning')",
+    )
+    parser.add_argument(
+        "-a",
+        "--axes",
+        action="store_true",
+        help="Add coordinate system (x,y,z = red, green, blue)",
+    )
+    parser.add_argument(
+        "-c",
+        "--canvas",
+        dest="canvas_size",
+        type=int,
+        help="canvas size, defaults to 200 PostScript points",
+        default=200,
+    )
+    parser.add_argument(
+        "-f",
+        "--foreground",
+        dest="fg",
+        type=str,
+        help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
+        default="E6E6E6",
+    )
+    parser.add_argument(
+        "-e",
+        "--encoding",
+        type=str,
+        help="encoding for the name of the STL object (default utf-8)",
+        default="utf-8",
+    )
+    parser.add_argument(
+        "-o", "--output", dest="outfile", type=str, help="output file name", default=""
+    )
+    parser.add_argument(
+        "-x",
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around X axis in degrees",
+    )
+    parser.add_argument(
+        "-y",
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around Y axis in degrees",
+    )
+    parser.add_argument(
+        "-z",
+        type=float,
+        action=utils.RotateAction,
+        help="rotation around Z axis in degrees",
+    )
+    parser.add_argument("-v", "--version", action="version", version=__version__)
+    parser.add_argument("file", nargs=1, type=str, help="name of the file to process")
+    args = parser.parse_args(argv)
+    logging.basicConfig(
+        level=getattr(logging, args.log.upper(), None),
+        format="%(levelname)s: %(message)s",
+    )
+    args.file = args.file[0]
+    args.fg = int(args.fg, 16)
+    return args
 
 
 if __name__ == "__main__":
