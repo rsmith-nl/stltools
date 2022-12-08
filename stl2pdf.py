@@ -5,7 +5,7 @@
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-10-02T18:07:38+02:00
-# Last modified: 2022-12-07T23:37:08+0100
+# Last modified: 2022-12-08T19:46:29+0100
 """
 Program for converting a view of an STL file into a PDF file.
 
@@ -165,14 +165,6 @@ def setup(argv):
         help="foreground color in 6-digit hexdecimal RGB (default E6E6E6)",
         default="E6E6E6",
     )
-#    parser.add_argument(
-#        "-b",
-#        "--background",
-#        dest="bg",
-#        type=str,
-#        help="background color in 6-digit hexdecimal RGB (default FFFFFF)",
-#        default="FFFFFF",
-#    )
     parser.add_argument(
         "-e",
         "--encoding",
