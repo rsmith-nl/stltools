@@ -5,7 +5,7 @@
 # Copyright © 2011-2020 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2011-04-11T01:41:59+02:00
-# Last modified: 2022-12-08T20:04:24+0100
+# Last modified: 2022-12-20T00:01:23+0100
 """
 Program for converting a view of an STL file into a PostScript file.
 
@@ -49,25 +49,35 @@ def main(argv):
         logging.info(ofs.format(args.outfile))
     logging.info("reading STL file '{}'".format(args.file))
     try:
+        start = time.monotonic()
         vertices, _ = stl.readstl(args.file, args.encoding)
+        dt = time.monotonic() - start
+        logging.info(f"reading the STL file took {dt:.3f} s")
     except ValueError as e:
-        logging.error("{}: {}".format(args.file, e))
+        logging.error(f"{args.file}: {e}")
         sys.exit(1)
+    start = time.monotonic()
     indices, uvertices = vecops.indexate(vertices)
+    dt = time.monotonic() - start
+    logging.info(f"indexing the vertices took {dt:.3f} s")
     del vertices
     origbb = bbox.makebb(uvertices)
     logging.info("calculating normal vectors")
+    start = time.monotonic()
     ifacets = list(utils.chunked(indices, 3))
     normals = [
         vecops.normal(uvertices[a], uvertices[b], uvertices[c]) for a, b, c in ifacets
     ]
+    dt = time.monotonic() - start
+    logging.info(f"calculating the normal vectors took {dt:.3f} s")
     cscale = args.canvas_size / 10
     csys = [(0, 0, 0), (cscale, 0, 0), (0, cscale, 0), (0, 0, cscale)]
-    logging.info("applying transformations to world coordinates")
+    start = time.monotonic()
     uvertices = vecops.xform(tr, uvertices)
     normals = vecops.xform(tr, normals)
     csys = vecops.xform(tr, csys)
-    logging.info("making model-view matrix")
+    dt = time.monotonic() - start
+    logging.info(f"applying transformations to world coordinates took {dt:.3f} s")
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(uvertices)
     width = maxx - minx
     height = maxy - miny
@@ -79,25 +89,33 @@ def main(argv):
     v = matrix.scale(sf, sf)
     v[0][3], v[1][3] = args.canvas_size / 2, args.canvas_size / 2
     mv = matrix.concat(m, v)
-    logging.info("transforming to view space")
+    start = time.monotonic()
     uvertices = vecops.xform(mv, uvertices)
     csys = vecops.xform(mv, csys)
+    dt = time.monotonic() - start
+    logging.info(f"transforming to view space took {dt:.3f} s")
+
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
-    logging.info("determine visible facets")
+    start = time.monotonic()
     vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(ifacets, normals) if n[2] > 0]
+    dt = time.monotonic() - start
     fvs = "{:.2f}% of facets is visible"
     logging.info(fvs.format(100 * len(vf) / len(ifacets)))
+    logging.info(f"determining visible facets took {dt:.3f} s")
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
-    logging.info("depth-sorting visible facets")
 
     def fkey(t):
         (a, b, c), _, _ = t
         return max(uvertices[a][2], uvertices[b][2], uvertices[c][2])
 
+    start = time.monotonic()
     vf.sort(key=fkey)
+    dt = time.monotonic() - start
+    logging.info(f"depth-sorting visible facets took {dt:.3f} s")
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(uvertices)
-    logging.info("creating PostScript header")
+    start = time.monotonic()
+    # logging.info("creating PostScript header")
     s1 = "% The scale factor used is: {:.2f} PostScript points/STL-unit"
     s2 = (
         "% This becomes a picture of {:.0f}×{:.0f} PostScript points;"
@@ -133,7 +151,6 @@ def main(argv):
     # Draw triangles.
     lines += ["% Rendering triangles"]
     s3 = "{:4.2f} {:4.2f} {:4.2f} c {:.3f} {:.3f} f {:.3f} {:.3f} s {:.3f} {:.3f} t"
-    logging.info("rendering triangles")
     lines += [
         s3.format(
             f_red * i,
@@ -149,7 +166,6 @@ def main(argv):
         for (a, b, c), z, i in vf
     ]
     if args.axes:
-        logging.info("drawing the axes")
         lines += [
             "1 0 0 c",
             f"{csys[0][0]} {csys[0][1]} f",
@@ -171,6 +187,8 @@ def main(argv):
             logging.info("done")
     except Exception:
         logging.error('cannot write output file "{}"'.format(args.outfile))
+    dt = time.monotonic() - start
+    logging.info(f"generating PostScript file took {dt:.3f} s")
 
 
 def setup(argv):
