@@ -6,12 +6,11 @@ __pycache__/
 .ropeproject/
 *~
 backup-*.tar.gz
-stl2ps.1.pdf
-stl2pdf.1.pdf
-stl2pov.1.pdf
-stlinfo.1.pdf
 stl2ps
 stl2pdf
 stl2pov
 stlinfo
 *.inc
+*.ps
+*.pov
+*.pdf
