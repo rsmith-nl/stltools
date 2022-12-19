@@ -4,7 +4,7 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2022-12-19T23:41:32+0100
+# Last modified: 2022-12-19T23:48:08+0100
 """Operations on two or three dimensional vectors."""
 
 
@@ -54,10 +54,15 @@ def normal(a, b, c):
     Returns:
         A 3-tuple normal to the plane formed by a, b and c.
     """
-    u = tuple(j - k for j, k in zip(b, a))
-    v = tuple(j - k for j, k in zip(c, b))
-    # cross product
-    n = cross(u, v)
+    # Loops unrolled to improve speed.
+    u = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+    v = (c[0] - b[0], c[1] - b[1], c[2] - b[2])
+    # inline the cross product
+    n = (
+        u[1] * v[2] - u[2] * v[1],
+        u[2] * v[0] - u[0] * v[2],
+        u[0] * v[1] - u[1] * v[0],
+    )
     try:
         return normalize(n)
     except ZeroDivisionError:
