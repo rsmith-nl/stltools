@@ -5,7 +5,7 @@
 # Copyright © 2011 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2011-10-02T18:07:38+02:00
-# Last modified: 2022-12-08T19:46:29+0100
+# Last modified: 2022-12-19T01:26:19+0100
 """
 Program for converting a view of an STL file into a PDF file.
 
@@ -21,6 +21,7 @@ import argparse
 import cairo
 import logging
 import sys
+import time
 from stltools import stl, bbox, utils, vecops, matrix, __version__
 
 
@@ -49,24 +50,33 @@ def main(argv):
         logging.info(ofs)
     logging.info(f'reading STL file "{args.file}"')
     try:
+        start = time.monotonic()
         vertices, _ = stl.readstl(args.file, args.encoding)
+        dt = time.monotonic() - start
+        logging.info(f"reading the STL file took {dt:.3f} s")
     except ValueError as e:
         logging.error(f"{args.file}: {e}")
         sys.exit(1)
+    start = time.monotonic()
     indices, uvertices = vecops.indexate(vertices)
+    dt = time.monotonic() - start
+    logging.info(f"indexing the vertices took {dt:.3f} s")
     del vertices
-    logging.info("calculating normal vectors")
+    start = time.monotonic()
     ifacets = list(utils.chunked(indices, 3))
     normals = [
         vecops.normal(uvertices[a], uvertices[b], uvertices[c]) for a, b, c in ifacets
     ]
+    dt = time.monotonic() - start
+    logging.info(f"calculating the normal vectors took {dt:.3f} s")
     cscale = args.canvas_size / 10
     csys = [(0, 0, 0), (cscale, 0, 0), (0, cscale, 0), (0, 0, cscale)]
-    logging.info("applying transformations to world coordinates")
+    start = time.monotonic()
     uvertices = vecops.xform(tr, uvertices)
     normals = vecops.xform(tr, normals)
     csys = vecops.xform(tr, csys)
-    logging.info("making model-view matrix")
+    dt = time.monotonic() - start
+    logging.info(f"applying transformations to world coordinates took {dt:.3f} s")
     minx, maxx, miny, maxy, _, maxz = bbox.makebb(uvertices)
     width = maxx - minx
     height = maxy - miny
@@ -78,31 +88,37 @@ def main(argv):
     v = matrix.scale(sf, -sf)
     v[0][3], v[1][3] = args.canvas_size / 2, args.canvas_size / 2
     mv = matrix.concat(m, v)
-    logging.info("transforming to view space")
+    start = time.monotonic()
     uvertices = vecops.xform(mv, uvertices)
     csys = vecops.xform(mv, csys)
+    dt = time.monotonic() - start
+    logging.info(f"transforming to view space took {dt:.3f} s")
 
     # In the ortho projection on the z=0 plane, z+ is _towards_ the viewer
-    logging.info("Determining visible facets")
+    #logging.info("Determining visible facets")
+    start = time.monotonic()
     vf = [(f, n, 0.4 * n[2] + 0.5) for f, n in zip(ifacets, normals) if n[2] > 0]
+    dt = time.monotonic() - start
     vfs = "{:.2f}% of facets is visible"
     logging.info(vfs.format(100 * len(vf) / len(ifacets)))
+    logging.info(f"determining visible facets took {dt:.3f} s")
     # Next, depth-sort the facets using the largest z-value of the
     # three vertices.
-    logging.info("depth-sorting visible facets")
 
     def fkey(t):
         (a, b, c), _, _ = t
         return max(uvertices[a][2], uvertices[b][2], uvertices[c][2])
 
+    start = time.monotonic()
     vf.sort(key=fkey)
-    logging.info("initializing drawing surface")
+    dt = time.monotonic() - start
+    logging.info(f"depth-sorting visible facets took {dt:.3f} s")
+    start = time.monotonic()
     out = cairo.PDFSurface(args.outfile, args.canvas_size, args.canvas_size)
     ctx = cairo.Context(out)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_line_width(0.25)
-    logging.info("drawing the triangles")
     for (a, b, c), _, i in vf:
         ctx.new_path()
         ctx.move_to(uvertices[a][0], uvertices[a][1])
@@ -113,7 +129,6 @@ def main(argv):
         ctx.fill_preserve()
         ctx.stroke()
     if args.axes:
-        logging.info("drawing the axes")
         ctx.new_path()
         ctx.move_to(csys[0][0], csys[0][1])
         ctx.line_to(csys[1][0], csys[1][1])
@@ -129,9 +144,10 @@ def main(argv):
         ctx.line_to(csys[3][0], csys[3][1])
         ctx.set_source_rgb(0, 0, 1)
         ctx.stroke()
-    logging.info("sending output")
     out.show_page()
     out.finish()
+    dt = time.monotonic() - start
+    logging.info(f"generating PDF took {dt:.3f} s")
     logging.info("done")
 
 
