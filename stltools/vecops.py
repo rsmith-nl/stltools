@@ -4,7 +4,7 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2022-01-19T21:45:11+0100
+# Last modified: 2022-12-19T23:41:32+0100
 """Operations on two or three dimensional vectors."""
 
 
@@ -37,12 +37,10 @@ def normalize(v):
 
 def cross(u, v):
     """Create the cross-product of two 3-tuples u and v."""
-    return tuple(
-        [
+    return (
             u[1] * v[2] - u[2] * v[1],
             u[2] * v[0] - u[0] * v[2],
             u[0] * v[1] - u[1] * v[0],
-        ]
     )
 
 
@@ -166,10 +164,14 @@ def xform(mat, pnts):
         mp = to4(pnts)
     rv = []
     for p in mp:
-        newp = []
-        for j in range(4):
-            newp.append(sum(i * k for i, k in zip(mat[j], p)))
-        rv.append(tuple(newp))
+        # Loops have been unrolled here to increase speed.
+        newp = (
+            mat[0][0] * p[0] + mat[0][1] * p[1] + mat[0][2] * p[2] + mat[0][3] * p[3],
+            mat[1][0] * p[0] + mat[1][1] * p[1] + mat[1][2] * p[2] + mat[1][3] * p[3],
+            mat[2][0] * p[0] + mat[2][1] * p[1] + mat[2][2] * p[2] + mat[2][3] * p[3],
+            mat[3][0] * p[0] + mat[3][1] * p[1] + mat[3][2] * p[2] + mat[3][3] * p[3],
+        )
+        rv.append(newp)
     if len(pnts[0]) != len(rv[0]):
         return to3(rv)
     return rv
