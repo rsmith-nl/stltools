@@ -4,7 +4,7 @@
 # Copyright © 2013-2020 R.F. Smith <rsmith@xs4all.nl>. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 # Created: 2013-06-10 22:41:00 +0200
-# Last modified: 2022-12-19T23:48:08+0100
+# Last modified: 2024-01-19T22:20:47+0100
 """Operations on two or three dimensional vectors."""
 
 
@@ -124,34 +124,6 @@ def indexate(points):
     return indices, tuple(pd.keys())
 
 
-def to4(pnts):
-    """
-    Convert 3D coordinates to homogeneous coordinates.
-
-    Arguments:
-        pnts: A sequnce array of 3-tuples (x,y,z)
-
-    Returns:
-        A list of 4-tuples (x,y,z,1)
-    """
-    return tuple((p[0], p[1], p[2], 1) for p in pnts)
-
-
-def to3(pnts):
-    """
-    Convert homogeneous coordinates to plain 3D coordinates.
-
-    It scales the x, y and z values by the w value.
-
-    Aruments:
-        pnts: A sequence of 4-tuples (x,y,z,w)
-
-    Returns:
-        A list of 3-tuples (x,y,z)
-    """
-    return [(p[0] / p[3], p[1] / p[3], p[2] / p[3]) for p in pnts]
-
-
 def xform(mat, pnts):
     """
     Apply a transformation matrix to a sequence of tuples.
@@ -166,17 +138,17 @@ def xform(mat, pnts):
     mp = pnts
     r = len(mat[0])
     if r != len(pnts[0]):
-        mp = to4(pnts)
-    rv = []
-    for p in mp:
+        mp = tuple((p[0], p[1], p[2], 1) for p in pnts)
+    rv = [
         # Loops have been unrolled here to increase speed.
-        newp = (
+        (
             mat[0][0] * p[0] + mat[0][1] * p[1] + mat[0][2] * p[2] + mat[0][3] * p[3],
             mat[1][0] * p[0] + mat[1][1] * p[1] + mat[1][2] * p[2] + mat[1][3] * p[3],
             mat[2][0] * p[0] + mat[2][1] * p[1] + mat[2][2] * p[2] + mat[2][3] * p[3],
             mat[3][0] * p[0] + mat[3][1] * p[1] + mat[3][2] * p[2] + mat[3][3] * p[3],
         )
-        rv.append(newp)
+        for p in mp
+    ]
     if len(pnts[0]) != len(rv[0]):
-        return to3(rv)
+        return [(p[0] / p[3], p[1] / p[3], p[2] / p[3]) for p in rv]
     return rv
